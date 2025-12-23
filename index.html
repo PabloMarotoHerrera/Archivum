@@ -1339,6 +1339,37 @@ width: 100%;
 /* Modo jugador: ocultar controles de música */
 body.player-mode #globalMusicToggleContainer,
 body.player-mode #roomMusicToggleContainer{ display:none !important; }
+
+/* --- Respuesta final (campaña) --- */
+.answer-bar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:10px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,0.10);
+}
+.answer-bar input{
+  flex:1 1 220px;
+  min-width:200px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(0,0,0,0.25);
+  color:inherit;
+  outline:none;
+}
+.answer-bar input::placeholder{ opacity:0.7; }
+.answer-feedback{
+  width:100%;
+  margin-top:6px;
+  font-size:0.95rem;
+  opacity:0.95;
+}
+.answer-feedback.ok{ color:#bfffc1; }
+.answer-feedback.bad{ color:#ffbfbf; }
+
 </style>
 </head>
 <body>
@@ -1658,12 +1689,19 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 		</li>
 		<li>
 		  <strong>Dar la respuesta</strong><br />
-		  Cuando creáis tener la solución, la decís en voz alta y la comprobáis en la app.
-		  <ul>
-			<li>
-			  Si es correcta, marcad <strong>“Marcar como resuelto”</strong>, sumad 1 al contador de
-			  ese jugador y de esa sala y aplicad posibles efectos de mandamientos y pecados.
-			</li>
+		  Cuando creáis tener la solución, el <strong>Host</strong> escribe una <strong>Respuesta final</strong> y pulsa <strong>“Verificar”</strong>.
+<ul>
+  <li>
+    Si es <strong>correcta</strong>, el acertijo se marca como resuelto automáticamente, se actualiza el progreso y se vuelve al tablero.
+  </li>
+  <li>
+    Si es <strong>incorrecta</strong>, consume <strong>–1 intento</strong> y aplica la penalización de tiempo del modo campaña.
+  </li>
+  <li>
+    Si un acertijo no tiene verificación automática (o la respuesta es equivalente), podéis usar <strong>“Marcar correcto”</strong> / <strong>“Marcar como resuelto”</strong> manualmente.
+  </li>
+</ul>
+</li>
 			<li>
 			  Si es incorrecta, podéis volver a intentarlo, usar pistas o dejar el acertijo “sin
 			  resolver” por el momento.
@@ -2120,6 +2158,15 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 
           <button id="failAttemptBtn" class="btn ghost">Fallo (-1 intento)</button>
 <button id="skipPuzzleBtn" class="btn ghost">Saltar acertijo</button>
+
+          <div id="answerBar" class="answer-bar">
+            <input id="answerInput" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+                   placeholder="Respuesta final (solo host)…" />
+            <button id="verifyAnswerBtn" class="action primary">Verificar</button>
+            <button id="manualCorrectBtn" class="action secondary" title="Si no hay verificación automática, marca como resuelto manualmente.">Marcar correcto</button>
+            <div id="answerFeedback" class="answer-feedback" aria-live="polite"></div>
+          </div>
+
 		</div>
 
         <div id="hint1" class="reveal"></div>
@@ -3039,7 +3086,7 @@ function hideView(el) {
           playerSinImg.alt = sinInfo.key;
           playerSinDesc.innerHTML = `<strong>${sinInfo.short}</strong><br>${sinInfo.effect}` + (sinInfo.temptation ? `<br><em>${sinInfo.temptation.title}:</em> ${sinInfo.temptation.text}` : "");
         }
-        playerSinHint.style.display = "";
+        playerSinHint.style.display = "none";
         playerOpenSinPickerBtn.style.display = "none";
       } else {
         playerSinName.textContent = "Aún sin elegir";
@@ -4070,6 +4117,10 @@ function updateTimerUI() {
 		multiplayer.roomRef.update({ currentPuzzleCode: null, currentRoomKey: null, hint2Unlocked: false, turnTokenUsed: false }).catch(()=>{});
 	  }
 	  campaignState.timerRemaining = campaignState.timeLimitSec;
+      // Reset UI de respuesta
+      if (answerInput) answerInput.value = "";
+      setAnswerFeedback("", null);
+
 
 	  campaignState.attemptsRemaining = campaignState.attemptsMax || 2;
 	  campaignState.hint2Unlocked = false;
@@ -4303,6 +4354,10 @@ function showRoomSection() {
       if (nextBtn) nextBtn.disabled = true;
 
       if (puzzleCounterEl) puzzleCounterEl.textContent = "0 acertijos";
+      // Reset UI de respuesta (vacío)
+      if (answerInput) answerInput.value = "";
+      setAnswerFeedback("", null);
+
       if (progressFillEl) progressFillEl.style.width = "0%";
 
 		updateSolvedUIForCurrentPuzzle();
@@ -4542,7 +4597,183 @@ function showRoomSection() {
 	  });
 	}
 
-	if (sinCarousel) {
+	
+// --- Respuesta final (verificación en host) ---
+const answerBar = document.getElementById("answerBar");
+const answerInput = document.getElementById("answerInput");
+const verifyAnswerBtn = document.getElementById("verifyAnswerBtn");
+const manualCorrectBtn = document.getElementById("manualCorrectBtn");
+const answerFeedback = document.getElementById("answerFeedback");
+
+function normalizeAnswer(raw) {
+  if (raw == null) return "";
+  let s = String(raw).trim().toLowerCase();
+  // quitar tildes/diacríticos
+  try { s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (_) {}
+  // quitar puntuación común
+  s = s.replace(/[\.;:¡!¿\?\(\)\[\]\{\}"]/g, " ");
+  s = s.replace(/\s+/g, " ").trim();
+  return s;
+}
+
+function normalizeNumeric(raw) {
+  let s = normalizeAnswer(raw);
+  // para números con coma decimal
+  s = s.replace(/,/g, ".");
+  // deja solo números, signo y punto
+  s = s.replace(/[^0-9\-\.]/g, "");
+  // quitar ceros a la izquierda (manteniendo "0" si aplica)
+  if (/^-?\d+(?:\.\d+)?$/.test(s)) {
+    const num = Number(s);
+    if (!Number.isNaN(num)) return String(num);
+  }
+  return s;
+}
+
+function extractFinalAnswerFromSolutionText(solutionText) {
+  if (!solutionText) return null;
+  const t = String(solutionText);
+
+  // 1) Línea con "Código final"
+  const m = t.match(/c[oó]digo\s*final\s*[:=]\s*([^\n\r]+)/i);
+  const line = m ? m[1] : null;
+
+  const pickFrom = (str) => {
+    if (!str) return null;
+    // Preferir último número (incluye coma decimal)
+    const nums = str.match(/-?\d+(?:[\.,]\d+)?/g);
+    if (nums && nums.length) return nums[nums.length - 1];
+    // Si no hay números, intentar última palabra "fuerte"
+    const words = str.match(/[A-ZÁÉÍÓÚÜÑ]{3,}|[a-záéíóúüñ]{3,}/g);
+    if (words && words.length) return words[words.length - 1];
+    return null;
+  };
+
+  const candidate = pickFrom(line) || pickFrom(t.split(/\r?\n/).slice(-2).join(" "));
+  return candidate ? String(candidate).trim() : null;
+}
+
+function getAcceptedAnswersForPuzzle(puzzle) {
+  if (!puzzle) return [];
+  if (Array.isArray(puzzle.acceptedAnswers) && puzzle.acceptedAnswers.length) return puzzle.acceptedAnswers;
+  if (typeof puzzle.answer === "string" && puzzle.answer.trim()) return [puzzle.answer.trim()];
+  // fallback: intentar extraer del texto de solución
+  const extracted = extractFinalAnswerFromSolutionText(puzzle.solution);
+  return extracted ? [extracted] : [];
+}
+
+function setAnswerFeedback(msg, kind) {
+  if (!answerFeedback) return;
+  answerFeedback.textContent = msg || "";
+  answerFeedback.classList.remove("ok", "bad");
+  if (kind === "ok") answerFeedback.classList.add("ok");
+  if (kind === "bad") answerFeedback.classList.add("bad");
+}
+
+function getCurrentPuzzleSafe() {
+  const room = rooms[currentRoomKey];
+  const puzzles = room ? (room.puzzles || []) : [];
+  if (!puzzles.length) return null;
+  return puzzles[currentPuzzleIndex] || null;
+}
+
+function applyWrongAnswerPenalty() {
+  if (gameMode !== "campaign-room" || !campaignState) return;
+  campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) - 1);
+  updateAttemptsUI();
+
+  const penalty = (GAME_RULES && GAME_RULES.wrongAttemptTimePenaltySec) ? GAME_RULES.wrongAttemptTimePenaltySec : 30;
+  if (campaignState.ignoreNextTimePenaltyOnce) {
+    campaignState.ignoreNextTimePenaltyOnce = false;
+  } else {
+    campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - penalty);
+  }
+  updateTimerUI();
+
+  if (campaignState.attemptsRemaining <= 0 || campaignState.timerRemaining <= 0) {
+    failOrSkipCurrentPuzzle(campaignState.attemptsRemaining <= 0 ? "attempts" : "timeout");
+  }
+}
+
+function verifyCurrentAnswer() {
+  if (appMode === "player") return;
+  if (gameMode !== "campaign-room") {
+    setAnswerFeedback("La verificación solo está disponible durante la campaña.", "bad");
+    return;
+  }
+  const puzzle = getCurrentPuzzleSafe();
+  if (!puzzle || !puzzle.id) return;
+
+  const raw = answerInput ? answerInput.value : "";
+  const entered = String(raw || "").trim();
+  if (!entered) {
+    setAnswerFeedback("Escribe una respuesta antes de verificar.", "bad");
+    return;
+  }
+
+  const accepted = getAcceptedAnswersForPuzzle(puzzle);
+  if (!accepted.length) {
+    setAnswerFeedback("Este acertijo no tiene respuesta automática. Usa 'Marcar correcto' o 'Ver solución'.", "bad");
+    return;
+  }
+
+  // comparar (texto normalizado + numérico normalizado)
+  const enteredNorm = normalizeAnswer(entered);
+  const enteredNum = normalizeNumeric(entered);
+
+  let ok = false;
+  for (const a of accepted) {
+    const aNorm = normalizeAnswer(a);
+    const aNum = normalizeNumeric(a);
+    if (enteredNorm && aNorm && enteredNorm === aNorm) { ok = true; break; }
+    if (enteredNum && aNum && enteredNum === aNum) { ok = true; break; }
+  }
+
+  if (ok) {
+    setAnswerFeedback("✅ Correcto. Acertijo resuelto.", "ok");
+    // si ya estaba resuelto, no togglear
+    const id = String(puzzle.id || "").toUpperCase();
+    if (solvedMap && solvedMap[id]) return;
+    // esto gestiona campaña: progreso + volver a tablero + pasar turno
+    toggleSolvedCurrentPuzzle();
+  } else {
+    setAnswerFeedback("❌ Incorrecto. Se consume 1 intento y se aplica penalización.", "bad");
+    applyWrongAnswerPenalty();
+    if (answerInput) answerInput.select();
+  }
+}
+
+if (answerBar && appMode === "player") {
+  answerBar.style.display = "none";
+}
+
+if (verifyAnswerBtn) verifyAnswerBtn.addEventListener("click", verifyCurrentAnswer);
+if (answerInput) {
+  answerInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      verifyCurrentAnswer();
+    }
+  });
+}
+if (manualCorrectBtn) {
+  manualCorrectBtn.addEventListener("click", () => {
+    if (appMode === "player") return;
+    // Marca como resuelto usando el flujo existente
+    const puzzle = getCurrentPuzzleSafe();
+    if (!puzzle || !puzzle.id) return;
+    const id = String(puzzle.id || "").toUpperCase();
+    if (solvedMap && solvedMap[id]) {
+      setAnswerFeedback("Ya estaba resuelto.", "ok");
+      return;
+    }
+    setAnswerFeedback("✅ Marcado correcto (manual).", "ok");
+    toggleSolvedCurrentPuzzle();
+  });
+}
+
+
+if (sinCarousel) {
 	  sinCarousel.addEventListener("click", (ev) => {
 		const card = ev.target.closest(".sin-card");
 		if (!card || !sinSelectionPlayerId) return;
