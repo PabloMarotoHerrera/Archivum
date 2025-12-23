@@ -26,7 +26,10 @@ const ROOMS_DATA = {
 "Son 3 días de preparación y 3 de llenado. Multiplica 3 × 3.",
         solution:
 "Días de preparación: 1, 2 y 3. Días de llenado: 4, 5 y 6.\n"
-+ "Código final = 3 × 3 = 9."
++ "Código final = 3 × 3 = 9.",
+        answer: "9",
+        acceptedAnswers: ["9"]
+
       },
       {
         id: "OR-02",
@@ -49,7 +52,10 @@ const ROOMS_DATA = {
         solution:
 "El versículo es Génesis 4,10 → C = 4 y V = 10.\n"
 + "Aplicando el cifrado se obtiene una palabra codificada; "
-+ "lo importante es seguir bien los pasos del cifrado."
++ "lo importante es seguir bien los pasos del cifrado.",
+        answer: "WUCH",
+        acceptedAnswers: ["WUCH"]
+
       },
     {
       id: "OR-03",
@@ -77,7 +83,10 @@ const ROOMS_DATA = {
 + "A + R = 2 + 4 = 6.\n"
 + "6 × 6 = 36.\n"
 + "36 − 1 = 35.\n\n"
-+ "Código final: 35."
++ "Código final: 35.",
+        answer: "35",
+        acceptedAnswers: ["35"]
+
     },
     {
       id: "OR-04",
@@ -103,7 +112,10 @@ const ROOMS_DATA = {
 "Un ciclo día+noche: 3 + 2 = 5 unidades.\n"
 + "En 40 días y 40 noches:\n"
 + "40 × 5 = 200 unidades.\n\n"
-+ "Código final: 200."
++ "Código final: 200.",
+        answer: "200",
+        acceptedAnswers: ["200"]
+
     },
     {
       id: "OR-05",
@@ -136,7 +148,10 @@ const ROOMS_DATA = {
 + "Suma = (nº de términos) × (primer + último) ÷ 2.\n"
 + "Hay 7 términos: (3 + 15) = 18.\n"
 + "Total = 7 × 18 ÷ 2 = 7 × 9 = 63.\n\n"
-+ "Código final = 15 + 63 = 78."
++ "Código final = 15 + 63 = 78.",
+        answer: "78",
+        acceptedAnswers: ["78"]
+
     },
     {
       id: "OR-06",
@@ -166,7 +181,10 @@ const ROOMS_DATA = {
       solution:
 "Suma:\n"
 + "3 − 2 − 1 + 2 = 3 − 3 + 2 = 2.\n\n"
-+ "Código final: 2."
++ "Código final: 2.",
+        answer: "2",
+        acceptedAnswers: ["2"]
+
     },
     {
       id: "OR-07",
@@ -198,7 +216,10 @@ const ROOMS_DATA = {
 + "Gen 4: 27×3 = 81\n\n"
 + "En la línea principal hay 1 persona por generación, así que en la generación 4\n"
 + "hay 1 descendiente principal.\n\n"
-+ "Código final = 81 − 1 = 80."
++ "Código final = 81 − 1 = 80.",
+        answer: "80",
+        acceptedAnswers: ["80"]
+
     },
     {
       id: "OR-08",
@@ -231,7 +252,10 @@ const ROOMS_DATA = {
 + "Ofrecer lo mejor (+4) + escuchar (+2) + paz (+1) = 7.\n\n"
 + "Código real (si hace lo contrario en cada paso):\n"
 + "Guardarse lo mejor (−3) + ignorar y envidia (−5) + ruptura de paz (−1) = −9.\n\n"
-+ "Código final = 7 − (−9) = 7 + 9 = 16."
++ "Código final = 7 − (−9) = 7 + 9 = 16.",
+        answer: "16",
+        acceptedAnswers: ["16"]
+
     },
     {
       id: "OR-09",
@@ -260,7 +284,10 @@ const ROOMS_DATA = {
       solution:
 "Código de separaciones: 3 (día 1) + 3 (día 2) = 6.\n"
 + "Código de llenado: 2 (día 3) + 2 (día 4) = 4.\n\n"
-+ "Código final = 6 × 4 = 24."
++ "Código final = 6 × 4 = 24.",
+        answer: "24",
+        acceptedAnswers: ["24"]
+
     },
     {
       id: "OR-10",
@@ -286,7 +313,10 @@ const ROOMS_DATA = {
 "En 8 semanas:\n"
 + "Días de trabajo: 8 × 6 = 48.\n"
 + "Días de descanso: 8 × 1 = 8.\n\n"
-+ "Código final = 48 − 8 = 40."
++ "Código final = 48 − 8 = 40.",
+        answer: "40",
+        acceptedAnswers: ["40"]
+
     }
     ]
   },
@@ -314,7 +344,10 @@ const ROOMS_DATA = {
         hint2:
 "Noche 5: 112. Suma 7 + 14 + 28 + 56 + 112.",
         solution:
-"Noche 5: 112 estrellas.\nTotal: 7 + 14 + 28 + 56 + 112 = 217."
+"Noche 5: 112 estrellas.\nTotal: 7 + 14 + 28 + 56 + 112 = 217.",
+        answer: "217",
+        acceptedAnswers: ["217"]
+
       },
         {
         id: "PR-02",
@@ -343,7 +376,10 @@ const ROOMS_DATA = {
         "Es rectángulo porque 3² + 4² = 9 + 16 = 25 = 5².\n\n"
         + "Perímetro simbólico: 3 + 4 + 5 = 12.\n"
         + "Área: (3×4) ÷ 2 = 12 ÷ 2 = 6.\n\n"
-        + "Código final = perímetro + área = 12 + 6 = 18."
+        + "Código final = perímetro + área = 12 + 6 = 18.",
+        answer: "18",
+        acceptedAnswers: ["18"]
+
         },
         {
         id: "PR-03",
@@ -371,7 +407,10 @@ const ROOMS_DATA = {
         + "Gen 1: 2, Gen 2: 4, Gen 3: 8, Gen 4: 16.\n"
         + "Hijos totales = 2 + 4 + 8 + 16 = 30.\n"
         + "Hijos de la promesa: 1 por generación → 4.\n\n"
-        + "Código final = 30 − 4 = 26."
+        + "Código final = 30 − 4 = 26.",
+        answer: "26",
+        acceptedAnswers: ["26"]
+
         },
         {
         id: "PR-04",
@@ -401,7 +440,10 @@ const ROOMS_DATA = {
         + "1, 3, 5, 7, 9, 11, 13.\n"
         + "Suma = 1 + 3 + 5 + 7 + 9 + 11 + 13 = 49.\n\n"
         + "Además, 49 = 7², patrón clásico de los números impares.\n\n"
-        + "Código final: 49."
+        + "Código final: 49.",
+        answer: "49",
+        acceptedAnswers: ["49"]
+
         },
         {
         id: "PR-05",
@@ -433,7 +475,10 @@ const ROOMS_DATA = {
         + "4 − 3 + 3 + 5 = (4 − 3) + 3 + 5 = 1 + 3 + 5 = 9.\n\n"
         + "Recorrido ideal:\n"
         + "4 + 3 + 5 = 12.\n\n"
-        + "Código final = ideal − real = 12 − 9 = 3."
+        + "Código final = ideal − real = 12 − 9 = 3.",
+        answer: "3",
+        acceptedAnswers: ["3"]
+
         },
         {
         id: "PR-06",
@@ -465,7 +510,10 @@ const ROOMS_DATA = {
         + "No coinciden exactamente en un peldaño entero, pero entre el segundo 3 y 4\n"
         + "se cruzan alrededor del peldaño 8–9.\n"
         + "Para este acertijo, toma como peldaño simbólico de encuentro el 8.\n\n"
-        + "Código final: 8."
+        + "Código final: 8.",
+        answer: "8",
+        acceptedAnswers: ["8"]
+
         },
         {
         id: "PR-07",
@@ -494,7 +542,10 @@ const ROOMS_DATA = {
         + "A(1) + B(2) + R(18) + A(1) + M(13) = 1 + 2 + 18 + 1 + 13 = 35.\n\n"
         + "ABRAHAM:\n"
         + "ABRAM + H(8) + A(1) = 35 + 8 + 1 = 44.\n\n"
-        + "Código final = 44 − 35 = 9."
+        + "Código final = 44 − 35 = 9.",
+        answer: "9",
+        acceptedAnswers: ["9"]
+
         },
         {
         id: "PR-08",
@@ -529,7 +580,10 @@ const ROOMS_DATA = {
         + "Altar 4: P+M+F+H = 10.\n\n"
         + "SumaTotal = 10 + 3 + 6 + 10 = 29.\n"
         + "Ciclo incompleto más corto: altar 2 = 3.\n\n"
-        + "Código final = 29 − 3 = 26."
+        + "Código final = 29 − 3 = 26.",
+        answer: "26",
+        acceptedAnswers: ["26"]
+
         },
         {
         id: "PR-09",
@@ -562,7 +616,10 @@ const ROOMS_DATA = {
         "Total de figuras:\n"
         + "2 + 11 + 4 + 3 + 2 = 22.\n"
         + "Escenas con exactamente 2 figuras: escena 1 y escena 5 → 2 escenas.\n\n"
-        + "Código final = 22 × 2 = 44."
+        + "Código final = 22 × 2 = 44.",
+        answer: "44",
+        acceptedAnswers: ["44"]
+
         },
         {
         id: "PR-10",
@@ -599,7 +656,10 @@ const ROOMS_DATA = {
         + "Probabilidad de confiar plenamente en los tres momentos:\n"
         + "(4/6) × (3/6) × (5/6) = (4×3×5) / 6³ = 60 / 216.\n"
         + "6³ = 216, por lo que el numerador es 60.\n\n"
-        + "Código final: 60."
+        + "Código final: 60.",
+        answer: "60",
+        acceptedAnswers: ["60"]
+
         }
 
 
@@ -640,7 +700,10 @@ libertad: {
 + "Día 6 (doble): 16 medidas.\n"
 + "Día 7: no se recoge nada.\n"
 + "Total semanal = 40 + 16 = 56 medidas.\n"
-+ "Código final = 56."
++ "Código final = 56.",
+        answer: "56",
+        acceptedAnswers: ["56"]
+
     },
 
     {
@@ -666,7 +729,10 @@ libertad: {
       solution:
 "Distancia recorrida: 5 km + 12 km = 17 km.\n"
 + "Distancia directa: √(5² + 12²) = √(25 + 144) = √169 = 13 km.\n"
-+ "Código final = 17 − 13 = 4."
++ "Código final = 17 − 13 = 4.",
+        answer: "4",
+        acceptedAnswers: ["4"]
+
     },
 
     {
@@ -696,7 +762,10 @@ libertad: {
       solution:
 "Corona: 7 km; Bastón: 5 km; Escalera: 9 km cada vez.\n"
 + "Total = 7 + 5 + 9 + 9 = 30 km.\n"
-+ "Código final = 30."
++ "Código final = 30.",
+        answer: "30",
+        acceptedAnswers: ["30"]
+
     },
 
     {
@@ -730,7 +799,10 @@ libertad: {
 + "Valor = 2×1 + 5×2 + 3×3\n"
 + "      = 2 + 10 + 9\n"
 + "      = 21.\n"
-+ "Código final = 21."
++ "Código final = 21.",
+        answer: "21",
+        acceptedAnswers: ["21"]
+
     },
 
     {
@@ -755,7 +827,10 @@ libertad: {
 "Nube: 12 h/día × 7 días = 84 h.\n"
 + "Fuego: 12 h/día × 7 días = 84 h.\n"
 + "Total visible = 84 + 84 = 168 h.\n"
-+ "Código final = 168."
++ "Código final = 168.",
+        answer: "168",
+        acceptedAnswers: ["168"]
+
     },
 
     {
@@ -781,7 +856,10 @@ libertad: {
       solution:
 "Un lado: 3 tribus × 4 grupos × 5 personas = 3×4×5 = 60 personas.\n"
 + "Cuatro lados: 4×60 = 240 personas.\n"
-+ "Código final = 240."
++ "Código final = 240.",
+        answer: "240",
+        acceptedAnswers: ["240"]
+
     },
 
     {
@@ -808,7 +886,10 @@ libertad: {
       solution:
 "Hay 11 personas que miran y 4 que no miran.\n"
 + "S = 2×11 − 4 = 22 − 4 = 18.\n"
-+ "Código final = 18."
++ "Código final = 18.",
+        answer: "18",
+        acceptedAnswers: ["18"]
+
     },
 
     {
@@ -841,7 +922,10 @@ libertad: {
 "Valores por escena: +3, −2, −3, +2, +3.\n"
 + "Suma: 3 − 2 = 1; 1 − 3 = −2; −2 + 2 = 0; 0 + 3 = 3.\n"
 + "Marcador final = 3.\n"
-+ "Código final = 3."
++ "Código final = 3.",
+        answer: "3",
+        acceptedAnswers: ["3"]
+
     },
 
     {
@@ -875,7 +959,10 @@ libertad: {
 + "– Si fuera oscuridad: Aarón y el mago dirían la verdad (2 frases verdaderas) ⇒ imposible.\n"
 + "– Si fuera langostas: solo Moisés diría la verdad ⇒ se cumple la condición.\n\n"
 + "Por tanto la plaga es la de las langostas, 8ª plaga.\n"
-+ "Código final = 8."
++ "Código final = 8.",
+        answer: "8",
+        acceptedAnswers: ["8"]
+
     },
 
     {
@@ -898,7 +985,10 @@ libertad: {
 "3 + 7 = 10; 10 + 40 = 50.",
       solution:
 "Total de días = 3 + 7 + 40 = 50.\n"
-+ "Código final = 50."
++ "Código final = 50.",
+        answer: "50",
+        acceptedAnswers: ["50"]
+
     }
   ]
 },  
@@ -934,7 +1024,10 @@ sabiduria: {
 "Año 1: 1 árbol da 9 frutos; cada fruto tiene 3 semillas.\n"
 + "Semillas: 9 × 3 = 27.\n\n"
 + "Todas se plantan; año 2: 27 semillas → 27 árboles.\n\n"
-+ "Código final = 27 (semillas) + 27 (árboles) = 54."
++ "Código final = 27 (semillas) + 27 (árboles) = 54.",
+        answer: "54",
+        acceptedAnswers: ["54"]
+
     },
 
     {
@@ -963,7 +1056,10 @@ sabiduria: {
 + "Al final: el primero tiene 10 talentos, el segundo 4, el tercero 1 → 15 talentos.\n"
 + "15 × 10 = 150 unidades.\n\n"
 + "El incremento real es 150 − 80 = 70.\n\n"
-+ "Código final: 70."
++ "Código final: 70.",
+        answer: "70",
+        acceptedAnswers: ["70"]
+
     },
 
     {
@@ -992,7 +1088,10 @@ sabiduria: {
 "Probando madre 1: A y C dirían la verdad ⇒ 2 verdaderas ⇒ no puede ser.\n"
 + "Probando madre 2: solo B diría la verdad.\n\n"
 + "Por tanto, la madre verdadera es la mujer 2.\n"
-+ "Código final = 2."
++ "Código final = 2.",
+        answer: "2",
+        acceptedAnswers: ["2"]
+
     },
 
     {
@@ -1020,7 +1119,10 @@ sabiduria: {
       solution:
 "Versos: 2 + 4 + 6 + 8 = 20.\n"
 + "Palabras clave: 20 × 3 = 60.\n\n"
-+ "Código final = 60."
++ "Código final = 60.",
+        answer: "60",
+        acceptedAnswers: ["60"]
+
     },
 
     {
@@ -1046,7 +1148,10 @@ sabiduria: {
 "Casa sobre roca: 6×8 = 48 m².\n"
 + "Casa sobre arena: 5×7 = 35 m².\n\n"
 + "Diferencia = 48 − 35 = 13.\n"
-+ "Código final = 13."
++ "Código final = 13.",
+        answer: "13",
+        acceptedAnswers: ["13"]
+
     },
 
     {
@@ -1082,7 +1187,10 @@ sabiduria: {
 + "0 + 4 = 4.\n"
 + "4 − 2 = 2.\n\n"
 + "Marcador final = 2.\n"
-+ "Código final = 2."
++ "Código final = 2.",
+        answer: "2",
+        acceptedAnswers: ["2"]
+
     },
 
     {
@@ -1114,7 +1222,10 @@ sabiduria: {
 + "\"B dice la verdad\", también tendría razón ⇒ habría dos verdaderos.\n"
 + "Si C fuera el único verdadero, su frase \"B dice la verdad\" haría verdadero también a B.\n\n"
 + "La única posibilidad coherente es que A diga la verdad.\n"
-+ "Código final = 1."
++ "Código final = 1.",
+        answer: "1",
+        acceptedAnswers: ["1"]
+
     },
 
     {
@@ -1141,7 +1252,10 @@ sabiduria: {
 "Palabras en versos A: 2×5 = 10.\n"
 + "Palabras en versos B: 2×7 = 14.\n\n"
 + "Total de palabras = 10 + 14 = 24.\n"
-+ "Código final = 24."
++ "Código final = 24.",
+        answer: "24",
+        acceptedAnswers: ["24"]
+
     },
 
     {
@@ -1166,7 +1280,10 @@ sabiduria: {
 + "19 + 1 + 12 + 15 + 13 + 15 + 14 = 89.\n\n"
 + "SABIO:\n"
 + "19 + 1 + 2 + 9 + 15 = 46.\n\n"
-+ "Código final = 89 − 46 = 43."
++ "Código final = 89 − 46 = 43.",
+        answer: "43",
+        acceptedAnswers: ["43"]
+
     },
 
     {
@@ -1195,7 +1312,10 @@ sabiduria: {
 + "10 × 3 = 30 unidades de aceite.\n\n"
 + "Necias: 5 vírgenes × 1 dosis = 5 dosis.\n"
 + "5 × 3 = 15 unidades.\n\n"
-+ "Código final = 30 − 15 = 15."
++ "Código final = 30 − 15 = 15.",
+        answer: "15",
+        acceptedAnswers: ["15"]
+
     }
   ]
 },
@@ -1228,7 +1348,10 @@ sabiduria: {
 "Los 12 apóstoles valen 12 × 5 = 60 puntos de amistad.\n"
 + "La traición vale 30 monedas.\n\n"
 + "60 − 30 = 30.\n\n"
-+ "Código final: 30."
++ "Código final: 30.",
+        answer: "30",
+        acceptedAnswers: ["30"]
+
       },
       {
         id: "PA-02",
@@ -1254,7 +1377,10 @@ sabiduria: {
 + "Tres negaciones: restamos 3 × 7 = 21 → 40 − 21 = 19.\n\n"
 + "El gallo canta y la clave se multiplica por 2:\n"
 + "19 × 2 = 38.\n\n"
-+ "Código final: 38."
++ "Código final: 38.",
+        answer: "38",
+        acceptedAnswers: ["38"]
+
       },
     {
       id: "PA-03",
@@ -1284,7 +1410,10 @@ sabiduria: {
 "De 22:00 a 1:00 pasan 3 horas.\n"
 + "De 1:00 a 5:00 pasan 4 horas.\n\n"
 + "Total: 3 + 4 = 7 horas.\n"
-+ "Código final: 7."
++ "Código final: 7.",
+        answer: "7",
+        acceptedAnswers: ["7"]
+
     },
     {
       id: "PA-04",
@@ -1314,7 +1443,10 @@ sabiduria: {
 + "Primera mitad del camino: 20 kg a solas.\n"
 + "Segunda mitad: 20 kg entre dos → 10 kg Jesús.\n\n"
 + "Kilos equivalentes totales: 20 + 10 = 30.\n"
-+ "Código final: 30."
++ "Código final: 30.",
+        answer: "30",
+        acceptedAnswers: ["30"]
+
     },
     {
       id: "PA-05",
@@ -1342,7 +1474,10 @@ sabiduria: {
 + "Jesús: +5; buen ladrón: +2; mal ladrón: −2.\n"
 + "Suma: 5 + 2 − 2 = 5.\n\n"
 + "Corrección: el buen ladrón \"levanta\" 1 punto → 5 + 1 = 6.\n"
-+ "Código final: 6."
++ "Código final: 6.",
+        answer: "6",
+        acceptedAnswers: ["6"]
+
     },
     {
       id: "PA-06",
@@ -1377,7 +1512,10 @@ sabiduria: {
 + "1 − 6 (tres negaciones) = −5.\n"
 + "−5 + 5 (arrepentimiento) = 0.\n\n"
 + "El corazón queda en un punto cero: ni perdido ni completo, listo para ser restaurado.\n"
-+ "Código final: 0."
++ "Código final: 0.",
+        answer: "0",
+        acceptedAnswers: ["0"]
+
     },
     {
       id: "PA-07",
@@ -1404,7 +1542,10 @@ sabiduria: {
 "Velando: 40 + 20 + 10 = 70 minutos.\n"
 + "Durmiendo: 20 + 40 + 50 = 110 minutos.\n\n"
 + "Diferencia = 70 − 110 = −40.\n"
-+ "Código final: −40."
++ "Código final: −40.",
+        answer: "-40",
+        acceptedAnswers: ["-40"]
+
     },
     {
       id: "PA-08",
@@ -1426,7 +1567,10 @@ sabiduria: {
       solution:
 "CENA: C(3) + E(5) + N(14) + A(1) = 23.\n"
 + "PAN: P(16) + A(1) + N(14) = 31.\n\n"
-+ "Código final = 23 − 31 = −8."
++ "Código final = 23 − 31 = −8.",
+        answer: "-8",
+        acceptedAnswers: ["-8"]
+
     },
     {
       id: "PA-09",
@@ -1457,7 +1601,10 @@ sabiduria: {
 "Total de figuras:\n"
 + "1 + 2 + 3 + 4 + 3 + 2 + 4 + 5 = 24.\n"
 + "La estación con más figuras es la 8.\n\n"
-+ "Código final = 24 + 8 = 32."
++ "Código final = 24 + 8 = 32.",
+        answer: "32",
+        acceptedAnswers: ["32"]
+
     },
     {
       id: "PA-10",
@@ -1492,7 +1639,10 @@ sabiduria: {
 + "Marcador por palabras: −12.\n"
 + "Marcador por el grito final: +7.\n\n"
 + "Marcador total = 15 −12 +7 = 10.\n"
-+ "Código final: 10."
++ "Código final: 10.",
+        answer: "10",
+        acceptedAnswers: ["10"]
+
     }
     ]
   },
@@ -1527,7 +1677,10 @@ sabiduria: {
 + "Sábado: 2 frascos.\n"
 + "Domingo: 4 frascos.\n\n"
 + "Total: 1 + 2 + 4 = 7.\n\n"
-+ "Código final: 7."
++ "Código final: 7.",
+        answer: "7",
+        acceptedAnswers: ["7"]
+
       },
       {
         id: "RS-02",
@@ -1553,7 +1706,10 @@ sabiduria: {
 "Primer tramo: 4 km a 3 km/h → 4/3 h ≈ 1,3 h.\n"
 + "Segundo tramo: 7 km a 5 km/h → 7/5 h = 1,4 h.\n\n"
 + "Tiempo total ≈ 1,3 + 1,4 = 2,7 horas.\n\n"
-+ "Código final: 2,7."
++ "Código final: 2,7.",
+        answer: "2,7",
+        acceptedAnswers: ["2,7", "2.7"]
+
       },
     {
       id: "RS-03",
@@ -1579,7 +1735,10 @@ sabiduria: {
 "Tiempo total de iluminación: 40 minutos.\n"
 + "1/5 de 40 = 8 minutos.\n"
 + "Eso significa que faltan 40 − 8 = 32 minutos.\n\n"
-+ "Código final = 8 + 32 = 40."
++ "Código final = 8 + 32 = 40.",
+        answer: "40",
+        acceptedAnswers: ["40"]
+
     },
     {
       id: "RS-04",
@@ -1603,7 +1762,10 @@ sabiduria: {
 "VIDA: 22 + 9 + 4 + 1 = 36.\n"
 + "CRUZ: 3 + 18 + 21 + 26 = 68.\n\n"
 + "CÓDIGO = 2×36 − 68 = 72 − 68 = 4.\n"
-+ "Código final: 4."
++ "Código final: 4.",
+        answer: "4",
+        acceptedAnswers: ["4"]
+
     },
     {
       id: "RS-05",
@@ -1629,7 +1791,10 @@ sabiduria: {
 + "Área de la piedra: πr² ≈ 3,14×1² = 3,14 m².\n\n"
 + "Diferencia: 6 − 3,14 = 2,86 m².\n"
 + "Redondeando al entero más cercano: 3.\n\n"
-+ "Código final: 3."
++ "Código final: 3.",
+        answer: "3",
+        acceptedAnswers: ["3"]
+
     },
     {
       id: "RS-06",
@@ -1665,7 +1830,10 @@ sabiduria: {
 + "−2 + 4 = 2.\n"
 + "2 + 2 = 4.\n\n"
 + "Marcador final = 4.\n"
-+ "Código final: 4."
++ "Código final: 4.",
+        answer: "4",
+        acceptedAnswers: ["4"]
+
     },
     {
       id: "RS-07",
@@ -1696,7 +1864,10 @@ sabiduria: {
 + "Día 2:\n"
 + "La mitad de 48 (24 personas) traen a 1 cada una → 24 nuevos.\n"
 + "Total al final del día 2: 48 + 24 = 72.\n\n"
-+ "Código final: 72."
++ "Código final: 72.",
+        answer: "72",
+        acceptedAnswers: ["72"]
+
     },
     {
       id: "RS-08",
@@ -1732,7 +1903,10 @@ sabiduria: {
 + "Dividimos 117 entre 9:\n"
 + "9×13 = 117, resto 0.\n"
 + "Por la regla del acertijo, si el resto es 0, tomamos 9.\n\n"
-+ "Código final: 9."
++ "Código final: 9.",
+        answer: "9",
+        acceptedAnswers: ["9"]
+
     },
     {
       id: "RS-09",
@@ -1766,7 +1940,10 @@ sabiduria: {
 + "Probabilidad conjunta = (4/6)×(3/6)×(5/6)\n"
 + "= (4×3×5) / 6³ = 60 / 216.\n\n"
 + "El numerador es 60.\n"
-+ "Código final: 60."
++ "Código final: 60.",
+        answer: "60",
+        acceptedAnswers: ["60"]
+
     },
     {
       id: "RS-10",
@@ -1802,7 +1979,10 @@ sabiduria: {
 + "Total = 8 + 16 = 24.\n"
 + "24 + 32 = 56.\n"
 + "56 + 64 = 120.\n\n"
-+ "Código final: 120."
++ "Código final: 120.",
+        answer: "120",
+        acceptedAnswers: ["120"]
+
     }
     ]
   }
