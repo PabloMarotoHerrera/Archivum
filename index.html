@@ -3093,14 +3093,22 @@ function hideView(el) {
       if (multiplayer.player.sinKey) {
         const sinInfo = SIN_META[multiplayer.player.sinKey] || null;
         playerSinName.textContent = sinInfo ? sinInfo.key : multiplayer.player.sinKey;
+
+        // Mostrar siempre que ya hay pecado elegido (aunque falte metadata).
+        playerSinBody.style.display = "flex";
         if (sinInfo) {
-          playerSinBody.style.display = "flex";
+          playerSinImg.style.display = "";
           playerSinImg.src = sinInfo.img;
           playerSinImg.alt = sinInfo.key;
           playerSinDesc.innerHTML =
             `${sinInfo.advantage ? `<strong>Ventaja:</strong> ${sinInfo.advantage}<br>` : ""}` +
             `${sinInfo.cost ? `<strong>Coste:</strong> ${sinInfo.cost}<br>` : ""}` +
             `${sinInfo.temptation ? `<strong>${sinInfo.temptation.title}:</strong> ${sinInfo.temptation.text}` : ""}`;
+        } else {
+          playerSinImg.style.display = "none";
+          playerSinDesc.textContent = "—";
+        }
+
         playerSinHint.style.display = "none";
         playerOpenSinPickerBtn.style.display = "none";
       } else {
@@ -3108,7 +3116,7 @@ function hideView(el) {
         playerSinBody.style.display = "none";
         playerSinHint.style.display = "";
       }
-    }});
+    });
 
     // Room doc listener (para saber si es tu turno)
     roomRef.onSnapshot((snap) => {
