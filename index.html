@@ -1,0 +1,4956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Archivo de las Salas – Prototipo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --bg-elevated: #181b22;
+      --accent: #e0b66b;
+      --accent-soft: rgba(224, 182, 107, 0.15);
+      --text: #f5f5f5;
+      --muted: #a0a4b3;
+      --danger: #ff6b6b;
+      --radius-lg: 18px;
+      --radius-xl: 26px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+	.home {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 10px;
+	  align-items: flex-start;
+	  justify-content: center;
+	  min-height: 260px;
+	  padding: 10px 4px 6px;
+	}
+
+	.home-title {
+	  font-size: 2rem;
+	  letter-spacing: 0.18em;
+	  text-transform: uppercase;
+	  color: var(--accent);
+	}
+
+	.home-subtitle {
+	  font-size: 0.95rem;
+	  color: var(--muted);
+	}
+
+	.home-text {
+	  font-size: 0.9rem;
+	  color: #e4e7f2;
+	  max-width: 520px;
+	}
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top,
+              #4b3a26 0,
+              #2b2117 45%,
+              #120d08 100%);
+      color: #f5f0e6;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .app {
+      display: flex;
+      
+      position: relative;
+width: 100%;
+      max-width: 1200px;
+      margin: 16px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.8));
+      border-radius: 32px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow:
+        0 24px 80px rgba(0,0,0,0.8),
+        0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 260px;
+      background: rgba(0,0,0,0.85);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .logo-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .room-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .room-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .room-btn {
+      width: 100%;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease-out;
+    }
+
+    .room-btn span.icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, var(--accent), transparent 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .room-btn small {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .room-btn strong {
+      display: block;
+    }
+
+    .room-btn:hover {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.08);
+      transform: translateY(-1px);
+    }
+
+    .room-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.6);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 10px;
+    }
+
+    /* MAIN */
+
+    .main {
+      flex: 1;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .room-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .room-header-left h2 {
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .room-header-left p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .progress {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      min-width: 120px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #ffffff);
+      transition: width 0.25s ease-out;
+    }
+
+	.image-section {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 8px;
+	}
+
+	.image-frame {
+	  width: 100%;
+	  aspect-ratio: 16 / 10.5;
+	  max-height: none;
+	  border-radius: var(--radius-xl);
+	  overflow: hidden;
+	  background: radial-gradient(circle at top, rgba(255,255,255,0.06), rgba(0,0,0,0.9));
+	  border: 1px solid rgba(255,255,255,0.06);
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	}
+
+	.image-frame img {
+	  width: 100%;
+	  height: 100%;
+	  object-fit: cover;   /* importante cuando todas tengan 16:9 */
+	  display: block;
+	}
+
+    .tagline {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .audio-box {
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.8rem;
+    }
+
+    .audio-box audio {
+		display: none; /* el reproductor no se ve, solo suena */
+    }
+
+	.puzzle-card {
+	  background: rgba(27, 20, 12, 0.95);
+	  border-color: rgba(255, 240, 200, 0.18);
+	}
+
+
+    .puzzle-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .puzzle-meta-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    #puzzleTitle {
+      font-size: 1.1rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted);
+    }
+
+    .pill span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .puzzle-body {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #e4e7f2;
+      white-space: pre-line;
+    }
+
+    .badge-bible {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(102, 187, 106, 0.12);
+      border: 1px solid rgba(102, 187, 106, 0.6);
+      color: #d0ffd5;
+    }
+
+    .badge-bible svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    button.action {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.5);
+      color: var(--text);
+      font-size: 0.85rem;
+      padding: 7px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease-out;
+    }
+
+    button.action.primary {
+      background: linear-gradient(135deg, var(--accent), #ffffff);
+      color: #161616;
+      font-weight: 600;
+      border-color: transparent;
+    }
+
+    button.action:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    button.action:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.6);
+    }
+
+    .reveal {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.55);
+      border: 1px dashed rgba(255,255,255,0.18);
+      margin-top: 4px;
+      display: none;
+      white-space: pre-line;
+    }
+
+    .reveal.visible {
+      display: block;
+    }
+
+    @media (max-width: 950px) {
+      .app {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+
+      .room-list {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 6px;
+        margin-left: auto;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .media {
+        grid-template-columns: 1fr;
+      }
+
+      .image-frame {
+        min-height: 180px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .puzzle-card {
+        padding: 14px;
+      }
+
+      .room-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+	/* Modo portada: sin menú lateral */
+	.app
+  /* --- Layout tweaks: centrar campaña/QR y justificar texto --- */
+  .booting .main > section,
+  .booting .main > .room-view { display: none !important; }
+
+  /* Centrado de pantallas "sin tablero" (campaña setup + QR) */
+  .campaign-setup,
+  #campaignJoinSection,
+  #playerSection {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .campaign-form,
+  #campaignJoinSection .roles-grid,
+  #playerSection .roles-grid {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Texto justificado (portada + reglas + textos auxiliares) */
+  .home-text,
+  .rules-text {
+    text-align: justify;
+    hyphens: auto;
+  }
+
+
+.rules p, .rules li {
+  text-align: justify;
+  hyphens: auto;
+}
+.home-mode .sidebar {
+	  display: none;
+	}
+
+	.app.home-mode .main {
+	  margin: 0 auto;
+	  max-width: 900px;
+	}
+
+	/* Portada más “épica manuscrito” */
+	.home {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 14px;
+	  align-items: flex-start;
+	  justify-content: center;
+	  min-height: 320px;
+	  padding: 24px 8px 16px;
+	}
+
+	.home-title {
+	  font-size: 2.4rem;
+	  letter-spacing: 0.22em;
+	  text-transform: uppercase;
+	  color: var(--accent);
+	}
+
+	.home-subtitle {
+	  font-size: 1rem;
+	  color: var(--muted);
+	}
+
+	.home-text {
+	  font-size: 0.95rem;
+	  color: #f3e7d6;
+	  max-width: 620px;
+	}
+	/* Portada */
+
+	.home {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 14px;
+	  align-items: flex-start;
+	  justify-content: center;
+	  min-height: 320px;
+	  padding: 24px 8px 16px;
+	}
+
+	.home-title {
+	  font-size: 2.4rem;
+	  letter-spacing: 0.22em;
+	  text-transform: uppercase;
+	  color: var(--accent);
+	}
+
+	.home-subtitle {
+	  font-size: 1rem;
+	  color: var(--muted);
+	}
+
+	.home-heading {
+	  font-size: 1rem;
+	  text-transform: uppercase;
+	  letter-spacing: 0.14em;
+	  margin-top: 6px;
+	  color: var(--accent);
+	}
+
+	.home-text {
+	  font-size: 0.95rem;
+	  color: #f3e7d6;
+	  max-width: 650px;
+	}
+
+	.home-list {
+	  margin-left: 1.2rem;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 6px;
+	  font-size: 0.9rem;
+	  color: #f3e7d6;
+	  max-width: 650px;
+	}
+
+	.home-buttons {
+	  display: flex;
+	  flex-wrap: wrap;
+	  gap: 10px;
+	  margin-top: 10px;
+	}
+
+	/* Botón secundario */
+
+	button.action.secondary {
+	  background: transparent;
+	  border-color: rgba(255,255,255,0.35);
+	  color: var(--text);
+	  font-weight: 500;
+	}
+
+	button.action.secondary:hover {
+	  background: rgba(255,255,255,0.06);
+	}
+	.rules {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 10px;
+	  padding: 18px 4px 12px;
+	  max-width: 920px;
+  margin: 0 auto;
+  }
+
+	.rules-title {
+	  font-size: 1.4rem;
+	  letter-spacing: 0.16em;
+	  text-transform: uppercase;
+	  color: var(--accent);
+	}
+
+	.rules-heading {
+	  font-size: 0.95rem;
+	  text-transform: uppercase;
+	  letter-spacing: 0.12em;
+	  margin-top: 6px;
+	  color: var(--accent);
+	}
+
+	.rules-text {
+	  font-size: 0.9rem;
+	  color: #f3e7d6;
+	}
+
+	.rules-list {
+	  margin-left: 1.2rem;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 4px;
+	  font-size: 0.9rem;
+	  color: #f3e7d6;
+	}
+
+	/* En modo portada/reglas ocultamos la sidebar y centramos contenido */
+	.app.home-mode .sidebar {
+	  display: none;
+	}
+
+	.app.home-mode .main {
+	  margin: 0 auto;
+	  max-width: 900px;
+	}
+	
+	.room-header {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: flex-end;
+	  gap: 16px;
+	}
+
+	.room-header-right {
+	  display: flex;
+	  flex-direction: column;
+	  align-items: flex-end;
+	  gap: 6px;
+	}
+
+	.puzzle-jump {
+	  display: flex;
+	  align-items: center;
+	  gap: 6px;
+	}
+
+	.puzzle-jump input {
+	  background: rgba(0, 0, 0, 0.4);
+	  border: 1px solid rgba(255, 255, 255, 0.16);
+	  border-radius: 999px;
+	  padding: 4px 10px;
+	  font-size: 0.75rem;
+	  color: #f5f5f7;
+	  width: 90px;
+	}
+
+	.puzzle-jump input::placeholder {
+	  color: rgba(255, 255, 255, 0.4);
+	  text-transform: uppercase;
+	  letter-spacing: 0.15em;
+	}
+
+	button.action.small {
+	  padding: 4px 10px;
+	  font-size: 0.75rem;
+	}
+
+	.puzzle-code-message {
+	  font-size: 0.75rem;
+	  color: #f5e0b3;
+	  min-height: 1em;
+	}
+
+	.puzzle-state {
+	  font-size: 0.75rem;
+	  text-transform: uppercase;
+	  letter-spacing: 0.12em;
+	  color: var(--muted);
+	  margin-top: 2px;
+	  display: inline-block;
+	}
+
+	.puzzle-card.solved {
+	  border-color: rgba(120, 216, 150, 0.7);
+	  box-shadow: 0 0 0 1px rgba(120, 216, 150, 0.35);
+	}
+
+	.puzzle-card.solved h3#puzzleTitle {
+	  color: #78d896;
+	}
+
+	.puzzle-card.solved .pill {
+	  border-color: rgba(120, 216, 150, 0.4);
+	}
+
+	/* botón secundario (si aún no lo tienes) */
+	button.action.secondary {
+	  background: transparent;
+	  border-color: rgba(255,255,255,0.35);
+	  color: var(--text);
+	  font-weight: 500;
+	}
+	button.action.secondary:hover {
+	  background: rgba(255,255,255,0.06);
+	}
+	
+	.room-meta {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 2px;
+	}
+
+	.room-progress {
+	  font-size: 0.75rem;
+	  opacity: 0.8;
+	}
+
+	.room-solved-summary {
+	  display: block;
+	  font-size: 0.8rem;
+	  opacity: 0.8;
+	  margin-top: 0.25rem;
+	}
+
+	.global-solved {
+	  font-size: 0.8rem;
+	  margin-bottom: 0.25rem;
+	}
+
+	/* Opcional: marcar visualmente acertijos resueltos */
+	.puzzle-card.puzzle-solved {
+	  border-color: #3b7f3b;
+	  box-shadow: 0 0 0 1px rgba(59, 127, 59, 0.4);
+	}
+
+	#toggleSolvedBtn.solved {
+	  background: #1f5a2f;
+	  border-color: #1f5a2f;
+	}
+	
+	button.action.secondary {
+	  background: transparent;
+	  border-color: rgba(255,255,255,0.35);
+	  color: var(--text);
+	}
+	button.action.secondary:hover {
+	  background: rgba(255,255,255,0.06);
+	}
+	
+	.campaign-setup {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 12px;
+	  max-width: 680px;
+	  padding: 24px 8px 16px;
+	}
+
+	.campaign-form {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 10px;
+	}
+
+	.campaign-form label {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 4px;
+	  font-size: 0.9rem;
+	  color: #f3e7d6;
+	}
+
+	.campaign-form input {
+	  background: #15110c;
+	  border: 1px solid rgba(255,255,255,0.15);
+	  border-radius: 999px;
+	  padding: 6px 10px;
+	  color: #f3e7d6;
+	  font-size: 0.9rem;
+	}
+
+	.board-section {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 24px;
+	  padding: 16px 8px;
+	}
+
+	/* El tablero ocupa todo el ancho disponible y los bloques
+	   de jugadores pasan debajo */
+	.board-layout {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 24px;
+	  align-items: center;
+	}
+
+	/* Tablero cuadrado y centrado */
+	.board-main {
+	  position: relative;
+	  width: 100%;
+	  max-width: 950px;          /* ajusta si quieres más o menos grande */
+	  aspect-ratio: 1 / 1;       /* <- cuadrado */
+	  border-radius: 18px;
+	  overflow: hidden;
+	  background: radial-gradient(circle at center, #2a2520, #120e0a);
+	}
+
+	/* La imagen rellena el cuadro */
+	.board-image {
+	  display: block;
+	  width: 100%;
+	  height: 100%;
+	  object-fit: cover;         /* recorta si la imagen no es cuadrada */
+	}
+
+	/* Bloque de jugadores y código, debajo del tablero */
+	.board-sidebar {
+	  width: 100%;
+	  max-width: 950px;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 12px;
+	}
+
+	.players-summary {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 6px;
+	  font-size: 0.9rem;
+	  color: #f3e7d6;
+	}
+
+	.player-row {
+	  padding: 6px 10px;
+	  border-radius: 999px;
+	  background: rgba(0,0,0,0.35);
+	  display: flex;
+	  flex-direction: column;
+	  gap: 2px;
+	}
+
+	.player-row strong {
+	  color: var(--accent);
+	}
+
+	.board-controls {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 6px;
+	  margin-top: 6px;
+	}
+
+	.board-controls input {
+	  background: #15110c;
+	  border: 1px solid rgba(255,255,255,0.15);
+	  border-radius: 999px;
+	  padding: 6px 10px;
+	  color: #f3e7d6;
+	}
+	
+	.effect-card {
+	  display: flex;
+	  gap: 8px;
+	  padding: 6px 8px;
+	  border-radius: 12px;
+	  background: rgba(0, 0, 0, 0.35);
+	  align-items: flex-start;
+	  margin-top: 4px;
+	}
+
+	.effect-card img {
+	  width: 40px;
+	  height: 40px;
+	  object-fit: cover;
+	  border-radius: 999px;
+	  flex-shrink: 0;
+	}
+
+	.effect-title {
+	  font-size: 0.85rem;
+	  font-weight: 600;
+	}
+
+	.effect-tag {
+	  font-size: 0.75rem;
+	  opacity: 0.8;
+	  margin-bottom: 2px;
+	}
+
+	.effect-desc {
+	  font-size: 0.75rem;
+	  line-height: 1.3;
+	}
+
+	.pecado-selector label {
+	  font-size: 0.8rem;
+	  margin-bottom: 4px;
+	}
+
+	.sin-select {
+	  width: 100%;
+	  background: #15110c;
+	  border: 1px solid rgba(255,255,255,0.25);
+	  border-radius: 999px;
+	  padding: 4px 8px;
+	  color: #f3e7d6;
+	  font-size: 0.8rem;
+	}
+
+	.roles-grid {
+	  display: grid;
+	  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	  gap: 1.25rem;
+	  margin-top: 1.5rem;
+	}
+
+	.player-role-card {
+	  background: rgba(0, 0, 0, 0.35);
+	  border-radius: 16px;
+	  padding: 1rem 1.25rem;
+	  border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.player-role-header {
+	  font-weight: 600;
+	  margin-bottom: 0.5rem;
+	  color: var(--accent, #e0b66b);
+	}
+
+	.effect-card {
+	  display: flex;
+	  gap: 0.75rem;
+	  margin-bottom: 0.75rem;
+	}
+
+	.effect-card img {
+	  width: 70px;
+	  height: 110px;
+	  object-fit: cover;
+	  border-radius: 8px;
+	  border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.effect-card-text h4 {
+	  margin: 0;
+	  font-size: 0.95rem;
+	}
+
+	.effect-card-text small {
+	  display: block;
+	  color: var(--muted, #a0a4b3);
+	  margin-bottom: 0.25rem;
+	}
+
+	.effect-card-text p {
+	  margin: 0;
+	  font-size: 0.85rem;
+	}
+
+	.sins-grid {
+	  display: grid;
+	  grid-template-columns: repeat(2, minmax(0, 1fr));
+	  gap: 0.5rem;
+	}
+
+	.sin-card {
+	  display: flex;
+	  align-items: flex-start;
+	  gap: 0.5rem;
+	  padding: 0.4rem 0.5rem;
+	  border-radius: 10px;
+	  border: 1px solid rgba(255, 255, 255, 0.08);
+	  background: rgba(0, 0, 0, 0.25);
+	  cursor: pointer;
+	  text-align: left;
+	}
+
+	.sin-card img {
+	  border-radius: 14px;
+	  width: 100%;
+	  height: auto;          /* deja que se ajuste según el ancho */
+	  max-height: 360px;     /* límite de altura para que no se dispare */
+	  object-fit: contain;   /* encaja la imagen completa dentro del recuadro */
+	}
+
+	.sin-card.selected {
+	  border-color: var(--accent, #e0b66b);
+	  box-shadow: 0 0 0 1px rgba(224, 182, 107, 0.4);
+	}
+
+	.sin-card.disabled {
+	  opacity: 0.35;
+	  cursor: default;
+	}
+
+	.roles-actions {
+	  margin-top: 1.5rem;
+	  display: flex;
+	  gap: 0.75rem;
+	}
+
+	/* ==== OVERLAY DE PECADOS ==== */
+
+	.sin-overlay {
+	  position: fixed;
+	  inset: 0;
+	  background: radial-gradient(circle at center, rgba(0,0,0,0.8), rgba(0,0,0,0.95));
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  z-index: 999;
+	}
+
+	.sin-overlay--hidden {
+	  display: none;
+	}
+
+	.sin-overlay-inner {
+	  background: rgba(15, 10, 5, 0.96);
+	  border-radius: 24px;
+	  border: 1px solid rgba(255, 214, 150, 0.25);
+	  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8);
+	  padding: 2.5rem 3rem;
+	  width: min(1180px, 96vw);   /* ⬅ más ancho */
+	  max-height: 90vh;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 1.75rem;
+	  position: relative;
+	}
+
+
+	.sin-overlay-close {
+	  position: absolute;
+	  top: 0.75rem;
+	  right: 0.9rem;
+	  border: none;
+	  background: transparent;
+	  color: #f5f1e6;
+	  font-size: 1.8rem;
+	  cursor: pointer;
+	  line-height: 1;
+	}
+
+	.sin-overlay-title {
+	  font-size: 1.4rem;
+	  letter-spacing: 0.08em;
+	  text-transform: uppercase;
+	  color: #f4d9a0;
+	}
+
+	.sin-overlay-subtitle {
+	  font-size: 0.95rem;
+	  color: rgba(245, 241, 230, 0.8);
+	}
+
+	/* Carrusel */
+
+	.sin-carousel {
+	  display: flex;
+	  gap: 2rem;
+	  overflow-x: auto;
+	  padding-bottom: 0.9rem;
+	  scroll-snap-type: x mandatory; /* efecto de “encaje” al deslizar */
+	}
+
+	.sin-carousel::-webkit-scrollbar {
+	  height: 6px;
+	}
+	.sin-carousel::-webkit-scrollbar-track {
+	  background: transparent;
+	}
+	.sin-carousel::-webkit-scrollbar-thumb {
+	  background: rgba(255, 214, 150, 0.3);
+	  border-radius: 3px;
+	}
+
+	/* Carta de pecado */
+
+	.sin-card {
+	  min-width: 240px;              /* ⬅ más anchas */
+	  max-width: 260px;
+	  background: radial-gradient(circle at top, rgba(255,255,255,0.06), rgba(0,0,0,0.9));
+	  border-radius: 20px;
+	  border: 1px solid rgba(255,255,255,0.14);
+	  padding: 1.1rem;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 0.7rem;
+	  align-items: center;
+	  scroll-snap-align: center;
+	  cursor: pointer;
+	  transition:
+		transform 0.18s ease,
+		box-shadow 0.18s ease,
+		border-color 0.18s ease,
+		opacity 0.18s ease;
+	}
+
+	.sin-card-title {
+	  font-weight: 600;
+	  letter-spacing: 0.06em;
+	  text-transform: uppercase;
+	  font-size: 0.85rem;
+	}
+
+	.sin-card-text {
+	  font-size: 0.8rem;
+	  color: rgba(245, 241, 230, 0.85);
+	  text-align: center;
+	}
+
+	/* estados */
+
+	.sin-card:hover {
+	  transform: translateY(-4px);
+	  border-color: rgba(255, 214, 150, 0.7);
+	  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+	}
+
+	.sin-card--selected {
+	  border-color: rgba(255, 214, 150, 1);
+	  box-shadow: 0 0 20px rgba(255, 214, 150, 0.8);
+	}
+
+	.sin-card--taken {
+	  opacity: 0.25;
+	  cursor: not-allowed;
+	}
+
+	.player-panel {
+	  margin-bottom: 1.75rem;
+	}
+
+	.player-panel-title {
+	  font-size: 1.05rem;
+	  margin-bottom: 0.5rem;
+	}
+
+	.player-panel-inner {
+	  display: flex;
+	  flex-wrap: wrap;
+	  gap: 1rem;
+	}
+
+	.role-card {
+	  flex: 1 1 260px;
+	  background: radial-gradient(circle at top left, rgba(255,255,255,0.06), rgba(0,0,0,0.9));
+	  border-radius: 16px;
+	  border: 1px solid rgba(255,255,255,0.12);
+	  padding: 1rem;
+	}
+
+	.role-card-label {
+	  font-size: 0.75rem;
+	  letter-spacing: 0.12em;
+	  text-transform: uppercase;
+	  opacity: 0.7;
+	}
+
+	.role-card-name {
+	  font-weight: 600;
+	  margin-top: 0.25rem;
+	}
+
+	.role-card-body {
+	  display: flex;
+	  gap: 0.75rem;
+	  margin-top: 0.75rem;
+	}
+
+	.role-card-body img {
+	  width: 80px;
+	  height: auto;
+	  border-radius: 10px;
+	}
+
+	.role-card-desc {
+	  font-size: 0.85rem;
+	  margin-top: 0.5rem;
+	  color: rgba(245,241,230,0.9);
+	}
+
+	.player-panel-footer {
+	  margin-top: 0.5rem;
+	  font-size: 0.85rem;
+	  opacity: 0.8;
+	}
+	
+	/* Iconos CUADRADOS para los mandamientos */
+	.role-card--commandment .role-card-body img {
+	  width: 120px;
+	  height: 120px;        /* mismo ancho y alto -> cuadrado */
+	  object-fit: contain;  /* no deforma el dibujo */
+	  border-radius: 10px;  /* opcional, para que quede suave */
+	  display: block;
+	}
+
+	/* (Opcional) aseguramos que los pecados sigan siendo rectangulares */
+	.role-card--sin .role-card-body img {
+	  width: 90px;
+	  height: auto;
+	  object-fit: contain;
+	}
+
+		.global-music-toggle{
+	  position: absolute; /* anclado al contenedor .app para que no “flote” fuera */
+	  top: 16px;
+	  right: 16px;
+	  z-index: 20000;
+	  display: flex;
+	  gap: 10px;
+	  align-items: center;
+	  pointer-events: auto;
+	}
+
+	.global-music-toggle .action.small {
+	  font-size: 0.75rem;
+	  padding: 4px 10px;
+	  opacity: 0.85;
+	}
+	
+	.room-music-toggle {
+	  margin-bottom: 8px;
+	  display: flex;
+	  justify-content: flex-end;
+	}
+
+	  
+/* --- Transiciones suaves entre pantallas (ARCHIVUM) --- */
+:root{
+  --archivum-tx-duration: 340ms;
+  --archivum-tx-ease: cubic-bezier(.2,.8,.2,1);
+}
+
+#homeSection,
+#campaignSetupSection,
+#rulesSection,
+#campaignJoinSection,
+#playerSection,
+#campaignRolesSection,
+#campaignBoardSection,
+#roomSection{
+  opacity: 1;
+  transition: opacity var(--archivum-tx-duration) var(--archivum-tx-ease);
+  will-change: opacity;
+}
+
+.view-hidden{
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.fade-pop{
+  animation: archivumFadePop 420ms var(--archivum-tx-ease);
+}
+@keyframes archivumFadePop{
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* Fade-to-black transition overlay */
+.fade-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10001;
+  transition: opacity 240ms ease-in-out;
+}
+.fade-overlay.is-on{
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Ritual overlay (host / jugador) */
+#ritualOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none; /* se gestiona vía JS */
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(0,0,0,.15), rgba(0,0,0,.78) 60%, rgba(0,0,0,.92) 100%);
+  backdrop-filter: blur(2px);
+}
+#ritualOverlay.ritual-visible{
+  display: flex;
+}
+#ritualCard{
+  max-width: 720px;
+  width: 100%;
+  border: 1px solid rgba(210,175,110,.45);
+  border-radius: 16px;
+  padding: 20px 18px;
+  background: rgba(10,8,6,.70);
+  box-shadow: 0 18px 60px rgba(0,0,0,.55);
+}
+#ritualTitle{
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(210,175,110,.95);
+}
+#ritualText{
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.45;
+  color: rgba(245,235,210,.95);
+}
+
+@media (prefers-reduced-motion: reduce){
+  #homeSection,
+  #campaignSetupSection,
+  #rulesSection,
+  #campaignJoinSection,
+  #playerSection,
+  #campaignRolesSection,
+  #campaignBoardSection,
+  #roomSection{
+    transition: none !important;
+    transform: none !important;
+  }
+  .fade-pop{ animation: none !important; }
+}
+
+
+/* Modo jugador: ocultar controles de música */
+body.player-mode #globalMusicToggleContainer,
+body.player-mode #roomMusicToggleContainer{ display:none !important; }
+
+/* --- Respuesta final (campaña) --- */
+.answer-bar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:10px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,0.10);
+}
+.answer-bar input{
+  flex:1 1 220px;
+  min-width:200px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(0,0,0,0.25);
+  color:inherit;
+  outline:none;
+}
+.answer-bar input::placeholder{ opacity:0.7; }
+.answer-feedback{
+  width:100%;
+  margin-top:6px;
+  font-size:0.95rem;
+  opacity:0.95;
+}
+.answer-feedback.ok{ color:#bfffc1; }
+.answer-feedback.bad{ color:#ffbfbf; }
+
+</style>
+</head>
+<body>
+  <div id="fadeOverlay" class="fade-overlay" aria-hidden="true"></div>
+  
+  <div class="app booting" id="appRoot">
+    
+  <!-- Botón global de música (siempre visible) -->
+  <div class="global-music-toggle" id="globalMusicToggleContainer">
+    <button id="musicToggleBtn" class="action secondary small" type="button">🔊 Música General: ON</button>
+  </div>
+<aside class="sidebar" style="display:none;">
+		<div class="logo" id="homeLogo" style="cursor:pointer;">
+		  <div class="logo-title">ARCHIVUM</div>
+		  <div class="logo-subtitle">Salas y acertijos bíblicos</div>
+		</div>
+      <div class="room-list-wrapper">
+        <div class="room-label">Salas</div>
+        <div class="room-list">
+			<button class="room-btn active" data-room="origen">
+			  <span class="icon">α</span>
+			  <div class="room-meta">
+				<small>1 · Génesis</small>
+				<strong>Sala del Origen</strong>
+				<span class="room-progress" data-room-counter="origen">0/0</span>
+			  </div>
+			</button>
+
+			<button class="room-btn" data-room="promesa">
+			  <span class="icon">✶</span>
+			  <div class="room-meta">
+				<small>2 · Patriarcas</small>
+				<strong>Sala de la Promesa</strong>
+				<span class="room-progress" data-room-counter="promesa">0/0</span>
+			  </div>
+			</button>
+
+			<button class="room-btn" data-room="libertad">
+			  <span class="icon">⇡</span>
+			  <div class="room-meta">
+				<small>3 · Éxodo</small>
+				<strong>Sala de la Libertad</strong>
+				<span class="room-progress" data-room-counter="libertad">0/0</span>
+			  </div>
+			</button>
+
+			<button class="room-btn" data-room="sabiduria">
+			  <span class="icon">φ</span>
+			  <div class="room-meta">
+				<small>4 · Sabiduría</small>
+				<strong>Sala de la Sabiduría</strong>
+				<span class="room-progress" data-room-counter="sabiduria">0/0</span>
+			  </div>
+			</button>
+
+			<button class="room-btn" data-room="sacrificio">
+			  <span class="icon">✝</span>
+			  <div class="room-meta">
+				<small>5 · Pasión</small>
+				<strong>Sala del Sacrificio</strong>
+				<span class="room-progress" data-room-counter="sacrificio">0/0</span>
+			  </div>
+			</button>
+
+			<button class="room-btn" data-room="vida">
+			  <span class="icon">☼</span>
+			  <div class="room-meta">
+				<small>6 · Resurrección</small>
+				<strong>Sala de la Vida Nueva</strong>
+				<span class="room-progress" data-room-counter="vida">0/0</span>
+			  </div>
+			</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+		  <div id="globalSolvedSummary" class="global-solved">
+			0 acertijos resueltos en total
+		  </div>
+      </div>
+    </aside>
+
+	<main class="main">
+  <!-- Pantalla de inicio -->
+		<section id="homeSection" class="home">
+		  <h1 class="home-title">ARCHIVUM</h1>
+		  <p class="home-subtitle">Juego de acertijos bíblicos y filosóficos.</p>
+
+		  <h2 class="home-heading">Historia del Archivum</h2>
+		  <p class="home-text">
+			Se cuenta que en un antiguo monasterio existía un códice llamado <em>Archivum</em>,
+			una recopilación de relatos bíblicos, símbolos y enigmas que ayudaban a comprender
+			la historia de la salvación. Durante un incendio, muchas páginas se perdieron o
+			quedaron ilegibles.
+		  </p>
+		  <p class="home-text">
+			Lo que ves ahora es el intento de reconstruir ese archivo. Cada sala corresponde
+			a una etapa de la historia bíblica. Para recuperar los fragmentos perdidos tendrás
+			que resolver acertijos de lógica, matemáticas, filosofía y escritura. Algunas
+			pruebas te pedirán abrir la Biblia física; otras jugarán con patrones, números
+			o símbolos.
+		  </p>
+
+		  <h2 class="home-heading">¿Cómo se juega?</h2>
+		  <ul class="home-list">
+			<li>Colocad el tablero físico sobre la mesa y situad las fichas en la sala inicial indicada.</li>
+			<li>Elegid si jugáis en <strong>Modo Campaña</strong> (recorriendo las salas en orden) o en <strong>Modo Libre</strong> (saltando a la sala que queráis).</li>
+			<li>Cuando caigáis en una casilla con código (por ejemplo <strong>OR-01</strong>), buscad ese código en la app y leed el acertijo correspondiente.</li>
+			<li>Podéis pedir pistas, consultar la Biblia y debatir. Cuando creáis tener la solución, reveladla en la app.</li>
+			<li>Si el acertijo está superado, avanzad por el tablero según indiquen las reglas de la partida (casillas, puntos o símbolos). Si no, podéis volver a intentarlo más adelante.</li>
+		  </ul>
+
+			<div class="home-buttons">
+			  <button id="startBtn" class="action primary">
+				Empezar partida
+			  </button>
+			  <button id="exploreBtn" class="action secondary">
+				Explorar salas
+			  </button>
+			  <button id="rulesBtn" class="action secondary">
+				Ver reglas completas
+			  </button>
+			</div>
+		</section>
+
+		<section id="campaignSetupSection" class="campaign-setup" style="display:none;">
+		  <h2 class="home-heading">Modo campaña</h2>
+		  <p class="home-text">
+			Configura la partida: número de jugadores, dificultad y cuántos acertijos
+			queréis resolver en cada sala antes de avanzar en el tablero.
+		  </p>
+
+		  <div class="campaign-form">
+			<label>
+			  Número de jugadores
+			  <input id="playersCountInput" type="number" min="1" max="7" value="3">
+			</label>
+
+			<label>
+			  Acertijos por sala para avanzar
+			  <input id="puzzlesPerRoomInput" type="number" min="1" max="10" value="3">
+			</label>
+
+			<p class="home-text" style="margin-top:8px;">
+			  Los nombres se introducen desde el móvil al unirse a la partida.
+			</p>
+			<input id="playersNamesInput" type="hidden" value="">
+<p class="home-text" style="margin-top:8px;">
+			  Al iniciar la campaña, la app repartirá al azar los <strong>Mandamientos</strong>
+			  (ventajas) y los <strong>Pecados capitales</strong> (restricciones) entre los jugadores.
+			</p>
+
+			<div class="home-buttons">
+			  <button id="startCampaignBtn" class="action primary">
+				Iniciar campaña
+			  </button>
+			  <button id="campaignBackBtn" class="action secondary">
+				Volver al inicio
+			  </button>
+			</div>
+		  </div>
+		</section>
+
+	<!-- REGLAS COMPLETAS -->
+	<section id="rulesSection" class="rules" style="display:none;">
+	  <h2 class="rules-title">REGLAS COMPLETAS DE ARCHIVUM</h2>
+
+	  <!-- 1. Ambientación -->
+	  <h3 class="rules-heading">1. Ambientación: el códice perdido</h3>
+	  <p class="rules-text">
+		Se cuenta que en un antiguo monasterio existía un códice llamado <strong>Archivum</strong>, una
+		recopilación de relatos bíblicos, símbolos y enigmas que ayudaban a comprender la historia de
+		la salvación.
+	  </p>
+	  <p class="rules-text">
+		Durante un incendio, muchas páginas se perdieron o quedaron ilegibles. Lo que tenéis delante
+		es el intento de reconstruir ese archivo. Cada sala del juego corresponde a una etapa de la
+		historia bíblica:
+	  </p>
+	  <ul class="rules-list">
+		<li><strong>Sala del Origen</strong> – Génesis, creación y primeros relatos.</li>
+		<li><strong>Sala de la Promesa</strong> – Abraham, patriarcas y bendición.</li>
+		<li><strong>Sala de la Libertad</strong> – Éxodo, desierto y combate interior.</li>
+		<li><strong>Sala de la Sabiduría</strong> – Salomón, profetas y parábolas.</li>
+		<li><strong>Sala del Sacrificio</strong> – Pasión y muerte de Jesús.</li>
+		<li><strong>Sala de la Vida Nueva</strong> – Resurrección y Pentecostés.</li>
+	  </ul>
+
+	  <p class="rules-text">
+		Para recuperar los fragmentos perdidos tendréis que resolver acertijos de lógica,
+		matemáticas, arte, filosofía y escritura. Algunos necesitarán una Biblia física; otros se
+		resolverán con patrones, símbolos y números.
+	  </p>
+
+	  <!-- 2. Componentes -->
+	  <h3 class="rules-heading">2. Componentes</h3>
+
+	  <h4 class="rules-heading">Componentes físicos</h4>
+	  <ul class="rules-list">
+		<li>Tablero de <strong>ARCHIVUM</strong> con el mapa y las seis salas marcadas (A–F).</li>
+		<li>Rueda o marcador de <strong>salas</strong> (A–F) y <strong>números romanos</strong> (I–X).</li>
+		<li>1 ficha por jugador (o equipo).</li>
+		<li>Papel y lápiz para anotaciones y cálculos.</li>
+		<li>Una Biblia física (recomendada).</li>
+	  </ul>
+
+	  <h4 class="rules-heading">Componentes de la web / app</h4>
+	  <ul class="rules-list">
+		<li>
+		  Pantalla de <strong>Portada</strong>: explica la historia y permite elegir
+		  <em>Modo Campaña</em> o <em>Modo Libre</em>.
+		</li>
+		<li>
+		  Pantalla de <strong>Salas y acertijos</strong>: muestra ilustración, enunciado, pistas y
+		  solución.
+		</li>
+		<li>
+		  Pantalla de <strong>Campaña en curso</strong>:
+		  <ul>
+			<li>Número de jugadores.</li>
+			<li>Asignación automática de <strong>mandamientos</strong>.</li>
+			<li>Elección de <strong>pecados capitales</strong>.</li>
+			<li>Resumen de efectos y contadores de acertijos resueltos.</li>
+			<li>Campo para introducir el <strong>código del acertijo</strong> (ej. OR-03).</li>
+		  </ul>
+		</li>
+		<li>Música ambiental (tema general y temas de sala).</li>
+	  </ul>
+
+	  <!-- 3. Objetivo -->
+	  <h3 class="rules-heading">3. Objetivo del juego</h3>
+	  <p class="rules-text">
+		El objetivo es <strong>reconstruir el códice Archivum</strong> superando acertijos bíblicos,
+		matemáticos y filosóficos repartidos en las seis salas.
+	  </p>
+	  <p class="rules-text">Podéis jugar de forma:</p>
+	  <ul class="rules-list">
+		<li>
+		  <strong>Cooperativa</strong>: el grupo gana si todas las salas alcanzan el número de
+		  acertijos resueltos que hayáis fijado al inicio (por ejemplo, al menos 5 de 10 en cada sala).
+		</li>
+		<li>
+		  <strong>Semi–competitiva</strong>: cada jugador avanza su ficha; gana quien llegue antes a la
+		  última sala o quien haya resuelto más acertijos cuando se acabe el tiempo o la partida.
+		</li>
+	  </ul>
+
+	  <!-- 4. Preparación -->
+	  <h3 class="rules-heading">4. Preparación de la partida (Modo Campaña)</h3>
+	  <ol class="rules-list">
+		<li>Colocad el tablero en el centro de la mesa.</li>
+		<li>Cada jugador elige una ficha y la coloca en la casilla inicial o puerto de salida.</li>
+		<li>Abrid la web y, en la portada, pulsad <strong>“Campaña”</strong>.</li>
+	  </ol>
+	  <p class="rules-text">En la web:</p>
+	  <ol class="rules-list" start="4">
+		<li>
+		  Elegid <strong>número de jugadores</strong> (2–6 recomendado) y algunas
+		  <strong>opciones de partida</strong>:
+		  <ul class="rules-list">
+			<li>Número de acertijos necesarios para pasar de sala (p.ej. 3, 5 o 7).</li>
+			<li>Si jugáis con límite de tiempo por acertijo (p.ej. 8–10 minutos).</li>
+			<li>Qué salas vais a usar (todas o sólo algunas para partidas más cortas).</li>
+		  </ul>
+		</li>
+		<li>
+		  <strong>Reparto de mandamientos</strong>: la app asigna un mandamiento al azar a cada
+		  jugador. Aparece su icono, título y una breve explicación. Ese mandamiento actúa como
+		  “bendición personal”.
+		</li>
+		<li>
+		  <strong>Elección de pecados capitales</strong>: se abre el carrusel de cartas. Empezando por
+		  el Jugador 1, cada uno elige un pecado distinto haciendo clic en la imagen. Una vez elegido,
+		  no se puede cambiar durante esa campaña.
+		</li>
+		<li>
+		  Acordad las <strong>reglas de pistas</strong>:
+		  <ul class="rules-list">
+			<li>0 pistas = premio máximo.</li>
+			<li>1 pista = premio normal.</li>
+			<li>2 pistas = premio reducido.</li>
+			<li>
+			  Ver solución = no se cuenta como acertijo resuelto para avanzar, pero sirve para seguir la
+			  historia.
+			</li>
+		  </ul>
+		</li>
+		<li>Decidid el orden de turno (por edad, por sorteo, etc.) y comenzad.</li>
+	  </ol>
+
+	  <!-- 5. Turno -->
+	  <h3 class="rules-heading">5. Desarrollo del turno en campaña</h3>
+	  <ol class="rules-list">
+		<li>
+		  <strong>Movimiento en el tablero</strong><br />
+		  Tirad el dado y moved la ficha según las reglas que hayáis decidido. Si caéis en una casilla
+		  con código de sala y número (por ejemplo, OR-03, PR-05, SB-02…), será el acertijo que debéis
+		  resolver.<br />
+		  <em>Variante sencilla:</em> en lugar de casillas concretas, el jugador puede girar la rueda
+		  de salas (A–F) y la rueda de números romanos (I–X) para determinar al azar la sala y el número
+		  de acertijo.
+		</li>
+		<li>
+		  <strong>Introducir el código en la app</strong><br />
+		  En la pantalla de campaña, escribid el código (ej. <code>OR-03</code>) y pulsad
+		  <strong>“Ir al acertijo”</strong>. La app os llevará a la sala correspondiente.
+		</li>
+		<li>
+		  <strong>Leer y pensar el acertijo</strong><br />
+		  Leed el texto en voz alta, observad la ilustración y tomad notas. Si el acertijo lo indica,
+		  consultad el pasaje bíblico correspondiente.
+		</li>
+		<li>
+		  <strong>Uso de pistas</strong><br />
+		  Si os atascáis, podéis pedir Pista 1 y después Pista 2. Cada pista puede reducir la
+		  recompensa o añadir una pequeña penalización, según lo acordado.
+		</li>
+		<li>
+		  <strong>Dar la respuesta</strong><br />
+		  Cuando creáis tener la solución, el <strong>Host</strong> escribe una <strong>Respuesta final</strong> y pulsa <strong>“Verificar”</strong>.
+<ul>
+  <li>
+    Si es <strong>correcta</strong>, el acertijo se marca como resuelto automáticamente, se actualiza el progreso y se vuelve al tablero.
+  </li>
+  <li>
+    Si es <strong>incorrecta</strong>, consume <strong>–1 intento</strong> y aplica la penalización de tiempo del modo campaña.
+  </li>
+  <li>
+    Si un acertijo no tiene verificación automática (o la respuesta es equivalente), podéis usar <strong>“Marcar correcto”</strong> / <strong>“Marcar como resuelto”</strong> manualmente.
+  </li>
+</ul>
+</li>
+			<li>
+			  Si es incorrecta, podéis volver a intentarlo, usar pistas o dejar el acertijo “sin
+			  resolver” por el momento.
+			</li>
+		  </ul>
+		</li>
+		<li><strong>Fin del turno</strong>: pasa al siguiente jugador.</li>
+	  </ol>
+
+	  <!-- 6. Mandamientos -->
+	  <h3 class="rules-heading">6. Mandamientos: bendiciones y estilo de juego</h3>
+	  <p class="rules-text">
+		Los <strong>mandamientos</strong> no son castigos, sino pequeñas
+		<strong>bendiciones de estilo</strong> que dan color al modo de jugar de cada uno. Podéis
+		usarlos sólo como ambientación o con efectos más concretos, según el grupo.
+	  </p>
+	  <ol class="rules-list">
+		<li>
+		  <strong>No tendrás otros dioses frente a mí</strong><br />
+		  Prioridad de la misión común. Este jugador recibe pequeños bonus cuando ayuda al grupo o
+		  toma decisiones que favorecen a todos por encima de su ventaja personal.
+		</li>
+		<li>
+		  <strong>No tomarás el nombre de Dios en vano</strong><br />
+		  Cuidado al afirmar cosas con demasiada seguridad. Si “jura” estar totalmente seguro y acierta,
+		  perfecto; si falla, la penalización puede ser algo mayor (por ejemplo, perder el movimiento de
+		  ese turno).
+		</li>
+		<li>
+		  <strong>Santificarás las fiestas</strong><br />
+		  El descanso también ilumina. Una vez por sala, puede declarar un turno de “descanso”: usar una
+		  pista extra o repetir una tirada sin penalización, en lugar de afrontar un nuevo acertijo.
+		</li>
+		<li>
+		  <strong>Honrarás a tu padre y a tu madre</strong><br />
+		  Reconocer a quienes te sostienen. Una vez por partida, puede “honrar” a otro jugador
+		  ayudándole claramente. Más adelante, ese jugador estará obligado moralmente a devolver el
+		  favor.
+		</li>
+		<li>
+		  <strong>No matarás</strong><br />
+		  No cortar el camino del otro. Si existen reglas para enviar muy atrás a otro jugador, este
+		  jugador no puede usarlas; a cambio puede recibir alguna compensación cooperativa cuando decide
+		  no perjudicar.
+		</li>
+		<li>
+		  <strong>No cometerás actos impuros</strong><br />
+		  Juego limpio. Hace de “árbitro moral”: si detecta trampas evidentes, puede proponer correcciones
+		  o pequeñas penalizaciones (siempre con acuerdo del grupo).
+		</li>
+		<li>
+		  <strong>No robarás</strong><br />
+		  Compartir en lugar de apropiarse. Cuando comparte una pista o idea importante, ambos jugadores
+		  pueden recibir un pequeño bonus. Si intenta apropiarse de soluciones ajenas, puede perder ese
+		  bonus.
+		</li>
+		<li>
+		  <strong>No darás falso testimonio</strong><br />
+		  Palabra responsable. Si se arriesga a dar una respuesta clara sin pistas y acierta, recibe un
+		  bonus extra; si falla, puede quedar sin moverse ese turno.
+		</li>
+		<li>
+		  <strong>No consentirás pensamientos impuros</strong><br />
+		  Perseverancia interior. No puede rendirse al primer bloqueo. Si aguanta un poco más antes de
+		  pedir solución, el grupo puede premiarle con una pista sin penalización una vez por sala.
+		</li>
+		<li>
+		  <strong>No codiciarás los bienes ajenos</strong><br />
+		  Caminar tu propio camino. No puede limitarse a copiar recetas o rutas del jugador más
+		  adelantado. Cuando resuelve algo por sus propios medios, puede recibir un pequeño
+		  reconocimiento o punto extra.
+		</li>
+	  </ol>
+
+	  <!-- 7. Pecados -->
+	  <h3 class="rules-heading">7. Pecados capitales: debilidades y desafíos</h3>
+	  <p class="rules-text">
+		Cada jugador elige un <strong>pecado capital</strong> que actúa como debilidad personal. No
+		tienen por qué convertirse en castigos duros; pueden ser simplemente un toque de humor y
+		autoconocimiento sobre cómo afrontamos los retos.
+	  </p>
+	  <ol class="rules-list">
+		<li>
+		  <strong>Soberbia</strong> – Orgullo desmedido.<br />
+		  Tiende a sobreestimar sus respuestas. Si declara estar totalmente seguro y falla, la
+		  penalización puede ser mayor que para los demás; si acierta, no recibe más recompensa que el
+		  resto.
+		</li>
+		<li>
+		  <strong>Avaricia</strong> – Apego exagerado a lo que posee.<br />
+		  Le cuesta compartir pistas o ayudas. Cada vez que recibe una ayuda clara, queda “en deuda”
+		  hasta que la devuelva con otra ayuda equivalente.
+		</li>
+		<li>
+		  <strong>Pereza</strong> – Tendencia a posponer esfuerzos.<br />
+		  Una vez por sala puede “dormir” un turno sin resolver acertijo, pero más adelante estará
+		  obligado a afrontar un reto más difícil elegido por el grupo.
+		</li>
+		<li>
+		  <strong>Envidia</strong> – Compararte constantemente.<br />
+		  No puede simplemente copiar una solución sin entenderla. Si otro jugador resuelve, debe ser
+		  capaz de explicar el razonamiento antes de anotarlo como propio.
+		</li>
+		<li>
+		  <strong>Gula</strong> – Exceso de pistas o recursos.<br />
+		  Tiende a pedir demasiadas pistas. Podéis limitarle el número de pistas por sala o exigir
+		  que al menos otro jugador esté de acuerdo antes de pedirlas.
+		</li>
+		<li>
+		  <strong>Ira</strong> – Impulsividad y prisa.<br />
+		  Se precipita al responder. El grupo puede exigirle que deje hablar al menos a otra persona
+		  antes de formular una respuesta definitiva.
+		</li>
+		<li>
+		  <strong>Lujuria</strong> – Búsqueda impulsiva de placer.<br />
+		  Se deja llevar por la “solución rápida”. Cuando quiera responder muy rápido, tiene que
+		  argumentar mínimamente su razonamiento antes de que el grupo acepte la respuesta.
+		</li>
+	  </ol>
+
+	  <!-- 8. Biblia y pistas -->
+	  <h3 class="rules-heading">8. Uso de la Biblia y de las pistas</h3>
+	  <ul class="rules-list">
+		<li>
+		  Muchos acertijos están inspirados en textos bíblicos. Cuando veáis la etiqueta
+		  <strong>“Este acertijo puede requerir una Biblia física”</strong>, id al pasaje indicado:
+		  forma parte de la experiencia.
+		</li>
+		<li>
+		  Las pistas están pensadas para acompañar, no para sustituir el proceso. Procurad negociar
+		  como grupo cuándo usarlas y qué coste tienen.
+		</li>
+	  </ul>
+
+	  <!-- 9. Modos de juego -->
+	  <h3 class="rules-heading">9. Modos de juego</h3>
+
+	  <h4 class="rules-heading">Modo Campaña (con tablero)</h4>
+	  <p class="rules-text">
+		Usáis el tablero físico y la rueda de salas/números. La app sirve para asignar mandamientos y
+		pecados, llevar el registro de acertijos resueltos y mostrar ilustraciones, pistas y
+		soluciones. Es el modo “historia larga”: recorréis las seis salas como un viaje a través de la
+		Biblia.
+	  </p>
+
+	  <h4 class="rules-heading">Modo Libre (Explorar salas)</h4>
+	  <p class="rules-text">
+		Desde la portada, elegid <strong>“Explorar salas”</strong>. Podéis entrar en cualquier sala y
+		resolver los acertijos en el orden que queráis. Es ideal para sesiones cortas, para practicar
+		antes de la campaña o para trabajar sólo un tema concreto (por ejemplo, la Sala de la
+		Sabiduría).
+	  </p>
+
+	  <!-- 10. Fin de la partida -->
+	  <h3 class="rules-heading">10. Fin de la partida</h3>
+	  <p class="rules-text">Podéis elegir varias condiciones de final:</p>
+	  <ul class="rules-list">
+		<li>
+		  <strong>Cooperativa clásica</strong>: la partida termina cuando habéis resuelto al menos
+		  <em>N</em> acertijos en cada sala (por ejemplo, 5 de 10). Habéis recuperado lo esencial del
+		  códice Archivum.
+		</li>
+		<li>
+		  <strong>Carrera de campaña</strong>: gana el jugador que antes llega a la
+		  <strong>Sala de la Vida Nueva</strong> y ha resuelto un mínimo de acertijos (por ejemplo, 10
+		  en total).
+		</li>
+		<li>
+		  <strong>Contrarreloj</strong>: fijáis un tiempo total (p.ej. 60–90 minutos). Al término del
+		  tiempo, contáis acertijos resueltos por jugador y salas completadas por el grupo.
+		</li>
+	  </ul>
+	  <p class="rules-text">
+		En cualquier caso, el espíritu del juego es que al final dediquéis un momento a comentar:
+		qué sala os ha gustado más, qué acertijos os han sorprendido, qué mandamientos y pecados
+		se han notado más en la forma de jugar.
+	  </p>
+
+	  <!-- Botón para volver al inicio -->
+	  <div class="home-buttons" style="margin-top:14px;">
+		<button id="rulesBackBtn" class="action secondary">
+		  Volver al inicio
+		</button>
+	  </div>
+	</section>
+
+		
+
+	<!-- NUEVA PANTALLA: unirse con móviles (estilo Kahoot) -->
+	<section id="campaignJoinSection" style="display:none;">
+	  <h2 class="rules-heading">Unirse a la partida</h2>
+	  <p class="rules-text">
+		Cada jugador abre este enlace en su móvil (o escanea el QR) para recibir su mandamiento y su número secreto.
+	  </p>
+
+	  <div class="roles-grid" style="grid-template-columns: 1fr; max-width: 720px;">
+		<div class="player-role-card">
+		  <div class="player-role-header">Código de partida</div>
+		  <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+			<div style="font-size:1.8rem; letter-spacing:0.2em; font-weight:700; color:var(--accent);"
+				 id="joinCodeText">----</div>
+			<button class="action secondary" id="copyJoinLinkBtn" type="button">Copiar enlace</button>
+		  </div>
+		  <p class="rules-text" style="margin-top:10px; opacity:0.9;">
+			Enlace para móviles: <span id="joinLinkText" style="word-break:break-all;"></span>
+		  </p>
+		  <div id="qrWrap" style="margin-top:12px; display:flex; justify-content:center;"></div>
+
+		  <hr style="border:0; border-top:1px solid rgba(255,255,255,0.12); margin:14px 0;">
+
+		  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+			<div>
+			  <div class="role-card-label">Jugadores conectados</div>
+			  <div style="font-size:1.1rem; margin-top:4px;"><span id="joinedCount">0</span>/<span id="maxCount">0</span></div>
+			</div>
+			<button class="action primary" id="startSinRitualBtn" type="button" disabled>Comenzar elección de pecados</button>
+		  </div>
+
+		  <p id="joinStatusText" class="rules-text" style="margin-top:10px; opacity:0.85;"></p>
+		</div>
+	  </div>
+
+	  <div class="roles-actions">
+		<button id="joinCancelBtn" class="action secondary" type="button">Cancelar</button>
+	  </div>
+	</section>
+
+
+	<!-- NUEVA PANTALLA: móvil del jugador -->
+	<section id="playerSection" style="display:none;">
+	  <h2 class="rules-heading">ARCHIVUM — Jugador</h2>
+
+	  <div class="roles-grid" style="grid-template-columns: 1fr; max-width: 720px;">
+		<div class="player-role-card" id="playerJoinCard">
+		  <div class="player-role-header">Unirse</div>
+		  <p class="rules-text">Introduce tu nombre para unirte a la partida.</p>
+		  <label class="rules-text" style="display:block; margin-top:8px;">
+			Nombre
+			<input id="playerNameInput" type="text" placeholder="Tu nombre" style="width:100%; margin-top:6px;">
+		  </label>
+		  <button class="action primary" id="playerJoinBtn" type="button" style="margin-top:12px;">Unirme</button>
+		  <p id="playerJoinError" class="rules-text" style="margin-top:10px; color:#ffb3b3; display:none;"></p>
+		</div>
+
+		<div class="player-role-card" id="playerInfoCard" style="display:none;">
+		  <div class="player-role-header">Tu identidad</div>
+		  <p class="rules-text" style="margin-bottom:10px;">
+			Tu número secreto para elegir pecado es:
+			<span id="playerPickNumber" style="font-weight:800; color:var(--accent); font-size:1.2rem;"></span>
+		  </p>
+
+		  <article class="role-card role-card--commandment" style="margin-bottom:12px;">
+			<header>
+			  <div class="role-card-label">Mandamiento</div>
+			  <div class="role-card-name" id="playerCommandmentName">—</div>
+			</header>
+			<div class="role-card-body">
+			  <img id="playerCommandmentImg" src="" alt="" style="display:none;">
+			  <p class="role-card-desc" id="playerCommandmentDesc">—</p>
+			</div>
+		  </article>
+
+		  <article class="role-card role-card--sin">
+			<header>
+			  <div class="role-card-label">Pecado capital</div>
+			  <div class="role-card-name" id="playerSinName">Aún sin elegir</div>
+			</header>
+			<div id="playerSinBody" class="role-card-body" style="display:none;">
+			  <img id="playerSinImg" src="" alt="">
+			  <p class="role-card-desc" id="playerSinDesc"></p>
+			</div>
+			<p class="role-card-desc" id="playerSinHint">
+			  Espera tu turno. Cuando el host diga “NÚMERO X, elegid pecado”, aquí se activará la selección.
+			</p>
+			<button class="action primary" id="playerOpenSinPickerBtn" type="button" style="display:none; margin-top:10px;">
+			  Elegir mi pecado ahora
+			</button>
+		  </article>
+
+		  
+          <div class="player-role-card" id="playerTurnCard" style="margin-top:14px; display:none;">
+            <div class="player-role-header">Acción de turno</div>
+            <p id="playerTurnStatus" class="rules-text" style="margin:10px 0; opacity:0.9;"></p>
+            <div class="controls" style="display:flex; flex-direction:column; gap:10px;">
+              <button class="action" id="playerUnlockHint2Btn" type="button">Gastar símbolo: desbloquear Pista 2</button>
+              <button class="action primary" id="playerUseCommandmentPowerBtn" type="button">Gastar símbolo: activar mi Mandamiento</button>
+              <button class="action secondary" id="playerUseSinPowerBtn" type="button" style="display:none;">Gastar símbolo: activar mi Pecado</button>
+            </div>
+          </div>
+
+<p id="playerPhaseText" class="rules-text" style="margin-top:12px; opacity:0.9;"></p>
+		</div>
+	  </div>
+	</section>
+
+	<!-- NUEVA PANTALLA: asignación de mandamientos y pecados -->
+	<section id="campaignRolesSection" style="display:none;">
+	  <h2 class="rules-heading">Campaña – Mandamientos y pecados</h2>
+	  <p class="rules-text">
+		Cada jugador recibe un mandamiento como bendición y elige un pecado capital
+		como debilidad. Léelos con calma: lo que te toque afectará a cómo juegas
+		durante toda la campaña.
+	  </p>
+
+	  <div id="rolesPlayersContainer" class="roles-grid">
+		<!-- aquí se generarán las tarjetas de cada jugador (mandamiento + pecados) -->
+	  </div>
+
+	  <div class="roles-actions">
+		<button id="rolesToBoardBtn" class="action primary" disabled>
+		  Continuar al tablero
+		</button>
+		<button id="rolesCancelBtn" class="action secondary">
+		  Cancelar campaña
+		</button>
+	  </div>
+	</section>
+
+
+	<!-- PANTALLA DEL TABLERO (la que ya tienes ahora) -->
+	<section id="campaignBoardSection" style="display:none;">
+	  <div class="board-layout">
+		<div class="board-main">
+		  <img src="tablero-archivum.png"
+			   alt="Tablero de ARCHIVUM"
+			   class="board-image">
+		  <!-- Aquí podrías dibujar posiciones de cada jugador más adelante -->
+		</div>
+
+		<aside class="board-sidebar">
+		  <h2 class="home-heading">Campaña en curso</h2>
+		  <div id="playersSummary" class="players-summary">
+			<!-- Se rellena por JS con jugadores, mandamientos y pecados -->
+		  </div>
+
+		<div class="board-controls" id="boardControls">
+		  <h3>Código del acertijo (ej: OR-03)</h3>
+		  <input type="text" id="codeInput" placeholder="Escribe el código que indica el tablero...">
+		  <button id="goToCodeBtn">Ir al acertijo</button>
+		</div>
+
+		  <button id="endCampaignBtn" class="action secondary">
+			Terminar campaña y volver al inicio
+		  </button>
+		</aside>
+	  </div>
+	</section>
+
+	<!-- Sección de sala (imagen + acertijos) -->
+	<div id="roomSection" style="display:none;">
+		  <!-- Botón de música específico de la sala -->
+		  <div class="room-music-toggle" style="display:none;">
+			<button id="roomMusicToggleBtn" class="action secondary small" type="button">
+			  🔊 Música de la sala: ON
+			</button>
+		  </div>
+		<header class="room-header">
+		  <div class="room-header-left">
+			<h2 id="roomTitle">Sala del Origen</h2>
+			<p id="roomSubtitle">
+			  Creación, primeros relatos y el misterio del inicio.
+			</p>
+		  </div>
+
+		  <div class="room-header-right">
+			<div class="puzzle-jump">
+			  <input
+				id="puzzleCodeInput"
+				type="text"
+				placeholder="OR-01"
+				autocomplete="off"
+			  />
+			  <button id="puzzleCodeBtn" class="action small">
+				Ir
+			  </button>
+			</div>
+
+			<div class="progress">
+			  <span id="puzzleCounter">Acertijo 1 de 1</span>
+				<span id="roomSolvedSummary" class="room-solved-summary">
+				  Resueltos en esta sala: 0 de 0
+				</span>			  
+			  <div class="progress-bar">
+				<div class="progress-fill" id="progressFill"></div>
+			  </div>
+			</div>
+
+			<div id="puzzleCodeMessage" class="puzzle-code-message"></div>
+		  </div>
+		</header>
+
+		<section class="image-section">
+		  <div class="image-frame">
+			<!-- Cambia la ruta de esta imagen por tu tablero de la sala -->
+			<img id="roomImage"
+				 src="sala-origen.png"
+				 alt="Ilustración de la sala actual" />
+		  </div>
+		  <p class="tagline" id="roomTagline">
+			“En el principio…” – Génesis, del caos al orden.
+		  </p>
+		</section>
+
+
+      <section class="puzzle-card">
+        <div class="puzzle-meta">
+          <div class="puzzle-meta-left">
+            <div class="pill">
+              <span class="dot"></span>
+              <span id="puzzleId">OR-01</span>
+              <span>·</span>
+              <span id="puzzleDifficulty">Media</span>
+            </div>
+            <h3 id="puzzleTitle">Título del acertijo</h3>
+            <span id="puzzleState" class="puzzle-state">Sin resolver</span>
+          </div>
+          <div id="puzzleTags" class="pill"></div>
+        </div>
+
+        <p class="puzzle-body" id="puzzleBody">
+          Carga inicial…
+        </p>
+
+        <div id="bibleBadge" class="badge-bible" style="display:none;">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor"
+              d="M6 3h11a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.8.4L16 18.5l-2.2 1.4a.5.5 0 0 1-.8-.4V5H6a1 1 0 0 0-1 1v11H4V6a2 2 0 0 1 2-2zm8 2v10.7l1.7-1.1a.5.5 0 0 1 .6 0l1.7 1.1V5h-4z" />
+          </svg>
+          <span>Este acertijo puede requerir una Biblia física.</span>
+        </div>
+
+        <div class="controls">
+          <button id="hint1Btn" class="action">Pista 1</button>
+          <button id="hint2Btn" class="action">Pista 2</button>
+          <button id="solutionBtn" class="action">Ver solución</button>
+          <button id="toggleSolvedBtn" class="action secondary">Marcar como resuelto</button>
+          <button id="prevBtn" class="action secondary">Anterior acertijo</button>
+          <button id="nextBtn" class="action primary">Siguiente acertijo</button>
+          <button id="backToBoardBtn" class="action secondary">Volver al tablero</button>
+        </div>
+		
+		<div class="puzzle-meta">
+		  <div class="timer-wrap">
+			<span class="timer-label">Tiempo</span>
+			<span id="campaignTimer" class="timer">03:00</span>
+		  </div>
+
+		  
+          <div class="attempts-wrap">
+            <span class="timer-label">Intentos</span>
+            <span id="campaignAttempts" class="timer">2</span>
+          </div>
+          <div id="campaignStatus" class="rules-text" style="margin-top:8px; opacity:0.85;"></div>
+
+          <button id="failAttemptBtn" class="btn ghost">Fallo (-1 intento)</button>
+<button id="skipPuzzleBtn" class="btn ghost">Saltar acertijo</button>
+
+          <div id="answerBar" class="answer-bar">
+            <input id="answerInput" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+                   placeholder="Respuesta final (solo host)…" />
+            <button id="verifyAnswerBtn" class="action primary">Verificar</button>
+            <button id="manualCorrectBtn" class="action secondary" title="Si no hay verificación automática, marca como resuelto manualmente.">Marcar correcto</button>
+            <div id="answerFeedback" class="answer-feedback" aria-live="polite"></div>
+          </div>
+
+		</div>
+
+        <div id="hint1" class="reveal"></div>
+        <div id="hint2" class="reveal"></div>
+        <div id="solution" class="reveal"></div>
+    </main>
+	<audio id="roomAudio" loop style="display:none;" preload="auto" playsinline></audio>
+	<audio id="bgAudio" src="background-theme.mp3" loop style="display:none;" preload="auto" playsinline></audio>
+  </div>
+
+	<!-- Overlay de selección de pecado -->
+	<div id="sinOverlay" class="sin-overlay sin-overlay--hidden">
+	  <div class="sin-overlay-inner">
+		<button id="sinOverlayClose" class="sin-overlay-close" aria-label="Cerrar selección de pecado">
+		  ×
+		</button>
+		<h2 id="sinOverlayTitle" class="sin-overlay-title">Elige un pecado</h2>
+		<p class="sin-overlay-subtitle">
+		  Cada pecado tiene una debilidad distinta. Elige con sabiduría.
+		</p>
+
+		<div id="sinCarousel" class="sin-carousel">
+		  <!-- Aquí se inyectan las cartas de pecados por JS -->
+		</div>
+	  </div>
+	</div>
+
+
+<!-- Multiplayer libs (Firebase + QRCode) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
+<script src="puzzles_roles_final.js"></script>
+
+
+  <!-- Ritual overlay (suave, estilo ARCHIVUM) -->
+  <div id="ritualOverlay" aria-hidden="true">
+    <div id="ritualCard" class="fade-pop">
+      <div id="ritualTitle">RITUAL</div>
+      <p id="ritualText">Cerrad los ojos…</p>
+    </div>
+  </div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+
+  const appRoot = document.getElementById("appRoot");
+  const homeSection = document.getElementById("homeSection");
+  
+  const campaignSetupSection = document.getElementById("campaignSetupSection");
+  const boardSection = document.getElementById("campaignBoardSection");
+  const boardMain = document.querySelector(".board-main");
+  const roomSection = document.getElementById("roomSection");
+  const boardControls = document.getElementById("boardControls");
+
+	// Overlay de pecados
+	const sinOverlay = document.getElementById("sinOverlay");
+	const sinOverlayTitle = document.getElementById("sinOverlayTitle");
+	const sinOverlayClose = document.getElementById("sinOverlayClose");
+	const sinCarousel = document.getElementById("sinCarousel");
+
+	let sinSelectionPlayerId = null;
+  
+	const CAMPAIGN_PER_ROOM_TARGET = 3;
+
+  const globalMusicToggleContainer = document.querySelector(".global-music-toggle");
+  const roomMusicToggleContainer = document.querySelector(".room-music-toggle");
+  const roomMusicToggleBtn = document.getElementById("roomMusicToggleBtn");
+  const rulesSection = document.getElementById("rulesSection");
+  const homeLogo = document.getElementById("homeLogo");
+  const startBtn = document.getElementById("startBtn");
+  const exploreBtn = document.getElementById("exploreBtn");
+  const rulesBtn = document.getElementById("rulesBtn");
+  const rulesBackBtn = document.getElementById("rulesBackBtn");
+  const playersCountInput = document.getElementById("playersCountInput");
+  const puzzlesPerRoomInput = document.getElementById("puzzlesPerRoomInput");
+  const playersNamesInput = document.getElementById("playersNamesInput");
+  const startCampaignBtn = document.getElementById("startCampaignBtn");
+  const campaignBackBtn = document.getElementById("campaignBackBtn");
+  const playersSummaryEl = document.getElementById("playersSummary");
+  const codeInput = document.getElementById("codeInput");
+  const goToCodeBtn = document.getElementById("goToCodeBtn");
+  const endCampaignBtn = document.getElementById("endCampaignBtn");
+  const roomButtons = document.querySelectorAll(".room-btn");
+  const roomTitleEl = document.getElementById("roomTitle");
+  const roomSubtitleEl = document.getElementById("roomSubtitle");
+  const roomTaglineEl = document.getElementById("roomTagline");
+  const roomImageEl = document.getElementById("roomImage");
+  const roomAudioEl = document.getElementById("roomAudio");
+  const bgAudioEl = document.getElementById("bgAudio");
+  const sidebar = document.querySelector(".sidebar");
+  const puzzleCounterEl = document.getElementById("puzzleCounter");
+  const progressFillEl = document.getElementById("progressFill");
+  const roomSolvedSummaryEl = document.getElementById("roomSolvedSummary");
+  const globalSolvedSummaryEl = document.getElementById("globalSolvedSummary");
+  const puzzleCodeInput = document.getElementById("puzzleCodeInput");
+  const puzzleCodeBtn = document.getElementById("puzzleCodeBtn");
+  const puzzleCodeMessage = document.getElementById("puzzleCodeMessage");
+  const puzzleCardEl = document.querySelector(".puzzle-card");
+  const puzzleStateEl = document.getElementById("puzzleState");
+  const puzzleIdEl = document.getElementById("puzzleId");
+  const puzzleDifficultyEl = document.getElementById("puzzleDifficulty");
+  const puzzleTitleEl = document.getElementById("puzzleTitle");
+  const puzzleBodyEl = document.getElementById("puzzleBody");
+  const puzzleTagsEl = document.getElementById("puzzleTags");
+  const bibleBadgeEl = document.getElementById("bibleBadge");
+  const hint1Btn = document.getElementById("hint1Btn");
+  const hint2Btn = document.getElementById("hint2Btn");
+  const solutionBtn = document.getElementById("solutionBtn");
+  const toggleSolvedBtn = document.getElementById("toggleSolvedBtn");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const backToBoardBtn = document.getElementById("backToBoardBtn");
+  const hint1El = document.getElementById("hint1");
+  const hint2El = document.getElementById("hint2");
+  const solutionEl = document.getElementById("solution");
+
+	const rolesSection = document.getElementById("campaignRolesSection");
+	const rolesPlayersContainer = document.getElementById("rolesPlayersContainer");
+	const rolesToBoardBtn = document.getElementById("rolesToBoardBtn");
+	const rolesCancelBtn = document.getElementById("rolesCancelBtn");
+
+
+/* startCampaignBtn listener replaced by multiplayer host flow */
+
+  if (campaignBackBtn) {
+    campaignBackBtn.addEventListener("click", showHome);
+  }
+
+  if (goToCodeBtn && codeInput) {
+    goToCodeBtn.addEventListener("click", () => {
+      const result = findPuzzleByCode(codeInput.value);
+      if (!result) {
+        alert("No se ha encontrado ese código.");
+        return;
+      }
+		if (campaignState) {
+          campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
+          campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
+        }
+
+        // Campaña (host): publica acertijo activo para móviles
+        if (multiplayer.roomRef && appMode !== "player" && campaignState) {
+          const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
+            ? campaignState.players[campaignState.activePlayerIndex].id
+            : (campaignState.activePlayerIndex + 1);
+          multiplayer.roomRef.update({
+            activeSeatNumber: activeSeat,
+            currentPuzzleCode: result.code,
+            currentRoomKey: result.roomKey,
+            hint2Unlocked: false,
+            turnTokenUsed: false
+          }).catch(()=>{});
+          campaignState.hint2Unlocked = false;
+          campaignState.turnTokenUsed = false;
+        }
+
+      gameMode = "campaign-room";
+      loadRoom(result.roomKey, result.index);
+    });
+  }
+
+  if (endCampaignBtn) {
+    endCampaignBtn.addEventListener("click", () => {
+      campaignState = null;
+  if (appMode !== "player") {
+    showHome();
+  }
+    });
+  }
+
+  if (puzzleCodeBtn && puzzleCodeInput) {
+    function handleRoomCodeSearch() {
+      const result = findPuzzleByCode(puzzleCodeInput.value);
+      if (!result) {
+        if (puzzleCodeMessage) {
+          puzzleCodeMessage.textContent = "No se ha encontrado ese código.";
+        }
+        return;
+      }
+
+      
+      // Campaña (host): publica acertijo activo para que el jugador tenga botón de símbolo
+      if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player" && campaignState) {
+        multiplayer.roomRef.update({
+          currentPuzzleCode: result.code,
+          currentRoomKey: result.roomKey,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+        campaignState.hint2Unlocked = false;
+        campaignState.turnTokenUsed = false;
+      }
+
+// Si el código pertenece a la sala actual, cambiamos solo el acertijo (sin transición)
+      if (result.roomKey === currentRoomKey) {
+        currentPuzzleIndex = result.index;
+        loadPuzzle();
+        updateRoomSolvedSummary();
+        updateSidebarRoomCounters();
+        updateGlobalSolvedSummary();
+      } else {
+        // Cambio de sala: pasa por la transición (negro -> cambio -> vuelve)
+        loadRoom(result.roomKey, result.index);
+      }
+
+      puzzleCodeInput.value = result.code;
+      if (puzzleCodeMessage) puzzleCodeMessage.textContent = "";
+    }
+
+    puzzleCodeBtn.addEventListener("click", handleRoomCodeSearch);
+    puzzleCodeInput.addEventListener("keydown", ev => {
+      if (ev.key === "Enter") handleRoomCodeSearch();
+    });
+  }
+
+  if (hint1Btn && hint1El) {
+    hint1Btn.addEventListener("click", () => {
+      if (hint1Btn.disabled) return;
+      if (gameMode === "campaign-room" && campaignState && campaignState.blockHint1Until && Date.now() < campaignState.blockHint1Until) {
+        const remain = Math.ceil((campaignState.blockHint1Until - Date.now()) / 1000);
+        setCampaignStatus(`🔒 Pista 1 bloqueada durante ${remain}s.`);
+        return;
+      }
+      setCampaignStatus("");
+      hint1El.classList.toggle("visible");
+    });
+  }
+if (hint2Btn && hint2El) {
+    hint2Btn.addEventListener("click", () => {
+      if (hint2Btn.disabled) return;
+      if (isHint2Locked()) {
+        setCampaignStatus("🔒 Pista 2 requiere que el jugador activo gaste su símbolo (Pista 2) en el móvil.");
+        return;
+      }
+      setCampaignStatus("");
+      hint2El.classList.toggle("visible");
+    });
+  }
+if (solutionBtn && solutionEl) {
+    solutionBtn.addEventListener("click", () => {
+      if (!solutionBtn.disabled) {
+        solutionEl.classList.toggle("visible");
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const room = rooms[currentRoomKey];
+      if (!room || !room.puzzles || room.puzzles.length === 0) return;
+      currentPuzzleIndex = (currentPuzzleIndex + 1) % room.puzzles.length;
+      loadPuzzle();
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      const room = rooms[currentRoomKey];
+      if (!room || !room.puzzles || room.puzzles.length === 0) return;
+      const total = room.puzzles.length;
+      currentPuzzleIndex = (currentPuzzleIndex - 1 + total) % total;
+      loadPuzzle();
+    });
+  }
+
+  if (toggleSolvedBtn) {
+    toggleSolvedBtn.addEventListener("click", toggleSolvedCurrentPuzzle);
+  }
+
+  if (backToBoardBtn) {
+    backToBoardBtn.addEventListener("click", () => {
+      if (gameMode === "campaign-room") showBoard();
+      else showHome();
+    });
+  }
+  
+	if (boardSection) {
+	  boardSection.addEventListener("change", (ev) => {
+		const select = ev.target.closest(".sin-select");
+		if (!select || !campaignState) return;
+
+		const playerId = parseInt(select.dataset.playerId, 10);
+		const player = campaignState.players.find(p => p.id === playerId);
+		if (!player) return;
+
+		const chosen = select.value || null;
+		player.sin = chosen;
+
+		renderPlayersSummary();
+	  });
+	}
+
+	if (playersSummaryEl) {
+	  playersSummaryEl.addEventListener("click", (ev) => {
+		const btn = ev.target.closest(".btn-open-sin-picker");
+		if (!btn) return;
+		const playerId = Number(btn.dataset.playerId);
+		openSinOverlayForPlayer(playerId);
+	  });
+	}
+
+	if (roomMusicToggleBtn) {
+	  roomMusicToggleBtn.addEventListener("click", () => {
+		roomMusicMuted = !roomMusicMuted;
+
+		if (roomMusicMuted) {
+		  stopAudio(); // parar música de sala
+		  roomMusicToggleBtn.textContent = "🔇 Música de la sala: OFF";
+		} else {
+		  playRoomMusic(); // reanudar música de sala actual
+		  roomMusicToggleBtn.textContent = "🔊 Música de la sala: ON";
+		}
+	  });
+	}
+
+  
+  let currentPuzzleIndex = 0;
+  let gameMode = "home"; // "home", "campaign-setup", "campaign-board", "campaign-room", "free", "rules"
+  let bgMusicMuted = false; // false = suena, true = apagada
+
+  const STORAGE_KEY = "archivum_solved_v1";
+  // --- Parámetros de URL (necesarios antes de mostrar la vista inicial) ---
+  const urlParams = new URLSearchParams(location.search);
+  const appMode = urlParams.get("mode") === "player" ? "player" : "host";
+  const roomFromUrl = (urlParams.get("room") || "").toUpperCase();
+
+  let solvedMap = {};
+  let campaignState = null;
+  let roomMusicMuted = false; // controla solo la música de las salas
+
+  const rooms = ROOMS_DATA;
+  let currentRoomKey = null;
+
+// --- INICIO ---
+  // Al abrir el juego en modo host, reiniciamos progreso local para evitar arrastres entre partidas.
+  if (appMode !== "player") {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }
+  loadSolvedFromStorage();
+  updateSidebarRoomCounters();
+  updateGlobalSolvedSummary();
+// =========================
+  // MULTIJUGADOR (Host + Móviles)
+  // =========================
+  // Uso:
+  // - Host: abre la web normal (sin parámetros) y crea partida.
+  // - Jugador: abre ?mode=player&room=ABCD (vía QR/enlace).
+  //
+  // Requiere Firebase (Firestore). Rellena FIREBASE_CONFIG.
+  // (URL params ya leídos arriba: appMode, roomFromUrl)
+  // ⚠️ Rellena esto con tu config de Firebase
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDrWVQQEO-h8KKi37_sjwDl6WeApOBMEcA",
+    authDomain: "archivum-87947.firebaseapp.com",
+    projectId: "archivum-87947",
+    storageBucket: "archivum-87947.firebasestorage.app",
+    messagingSenderId: "279795022764",
+    appId: "1:279795022764:web:d40e06233bd54ead67ac09",
+    measurementId: "G-GGGL3CZ695"
+  };
+
+  const multiplayer = {
+    enabled: true,
+    roomCode: null,
+    roomRef: null,
+    playersUnsub: null,
+    roomUnsub: null,
+    actionsUnsub: null,
+    latestRoom: null,
+    playerListUnsub: null,
+    playerList: [],
+    isReady: false,
+    hostPlayers: [],   // [{id, name, seatNumber, sinChosen}]
+    player: {
+      id: null,
+      name: null,
+      seatNumber: null,
+      pickNumber: null,
+      commandmentKey: null,
+      sinKey: null,
+    }
+  };
+
+  function hasFirebaseConfig() {
+    return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+  }
+
+  function ensureFirebase() {
+    if (!hasFirebaseConfig()) return null;
+    if (!window.firebase || !firebase.apps) return null;
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    return firebase.firestore();
+  }
+
+  function genRoomCode(len = 4) {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin 0/O/1/I para evitar confusiones
+    let out = "";
+    for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return out;
+  }
+
+  function shuffleLocal(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Elementos UI nuevos
+  const joinSection = document.getElementById("campaignJoinSection");
+  const joinCodeText = document.getElementById("joinCodeText");
+  const joinLinkText = document.getElementById("joinLinkText");
+  const qrWrap = document.getElementById("qrWrap");
+  const joinedCountEl = document.getElementById("joinedCount");
+  const maxCountEl = document.getElementById("maxCount");
+  const startSinRitualBtn = document.getElementById("startSinRitualBtn");
+  const joinCancelBtn = document.getElementById("joinCancelBtn");
+  const joinStatusText = document.getElementById("joinStatusText");
+  const copyJoinLinkBtn = document.getElementById("copyJoinLinkBtn");
+
+  const playerSection = document.getElementById("playerSection");
+  const playerNameInput = document.getElementById("playerNameInput");
+  const playerJoinBtn = document.getElementById("playerJoinBtn");
+  const playerJoinError = document.getElementById("playerJoinError");
+  const playerJoinCard = document.getElementById("playerJoinCard");
+  const playerInfoCard = document.getElementById("playerInfoCard");
+
+  const playerPickNumber = document.getElementById("playerPickNumber");
+  const playerCommandmentName = document.getElementById("playerCommandmentName");
+  const playerCommandmentImg = document.getElementById("playerCommandmentImg");
+  const playerCommandmentDesc = document.getElementById("playerCommandmentDesc");
+
+  const playerSinName = document.getElementById("playerSinName");
+  const playerSinBody = document.getElementById("playerSinBody");
+  const playerSinImg = document.getElementById("playerSinImg");
+  const playerSinDesc = document.getElementById("playerSinDesc");
+  const playerSinHint = document.getElementById("playerSinHint");
+  const playerOpenSinPickerBtn = document.getElementById("playerOpenSinPickerBtn");
+  const playerPhaseText = document.getElementById("playerPhaseText");
+
+  // Overlay "ritual" (host): reutilizamos el sinOverlay como overlay general con mensaje,
+  // pero dejamos el carrusel solo para jugador (móvil).
+  // Si en un futuro quieres un overlay distinto, lo separamos en otro div.
+  function showJoinSectionHost(roomCode, joinUrl, maxPlayers) {
+  transitionTo(() => {
+      if (!joinSection) return;
+      showView(joinSection);
+      if (appRoot) appRoot.classList.remove("home-mode");
+      if (sidebar) sidebar.style.display = "none";
+    
+      joinCodeText.textContent = roomCode;
+      joinLinkText.textContent = joinUrl;
+      copyJoinLinkBtn.disabled = false;
+    
+      joinedCount.textContent = "0";
+      maxCount.textContent = String(maxPlayers || 0);
+      joinStatusText.textContent = "";
+      startSinRitualBtn.disabled = true;
+    
+      // Genera QR (si librería disponible)
+      try {
+        if (typeof QRCode !== "undefined" && qrWrap) {
+          qrWrap.innerHTML = "";
+          new QRCode(qrWrap, {
+            text: joinUrl,
+            width: 180,
+            height: 180,
+            colorDark: "#d2af6e",
+            colorLight: "#00000000",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        }
+      } catch (e) {
+        // Si falla el QR, no pasa nada (el enlace sigue funcionando).
+      }
+  });
+}
+
+
+  function showPlayerMode() {
+  transitionTo(() => {
+      showView(playerSection);
+    // Modo jugador: sin música ni controles (evita solape con el host)
+    stopAudio();
+    stopBackgroundMusic();
+    try { if (roomAudioEl) roomAudioEl.pause(); } catch(e) {}
+    bgMusicMuted = true;
+    roomMusicMuted = true;
+    if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "none";
+    if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
+      if (sidebar) sidebar.style.display = "none";
+      if (appRoot) appRoot.classList.remove("home-mode");
+      if (appRoot) requestAnimationFrame(() => appRoot.classList.remove("booting"));
+  });
+}
+
+
+
+  function setJoinStatus(text) {
+    if (!joinStatusText) return;
+    joinStatusText.textContent = text || "";
+    joinStatusText.classList.remove("fade-pop");
+    void joinStatusText.offsetWidth;
+    joinStatusText.classList.add("fade-pop");
+  }
+
+  // --- Helpers de UI: transiciones entre pantallas ---
+  function getMainViews() {
+    return [
+      document.getElementById("homeSection"),
+      document.getElementById("campaignSetupSection"),
+      document.getElementById("rulesSection"),
+      document.getElementById("campaignJoinSection"),
+      document.getElementById("playerSection"),
+      document.getElementById("campaignRolesSection"),
+      document.getElementById("campaignBoardSection"),
+      document.getElementById("roomSection")
+    ].filter(Boolean);
+  }
+
+function isVisible(el) {
+    return !!el && el.style.display !== "none";
+  }
+
+  
+  const fadeOverlay = document.getElementById("fadeOverlay");
+  let __isFading = false;
+  let __hasBooted = false;
+
+  function fadeTo(actionFn){
+  if (!fadeOverlay) { actionFn(); return; }
+  if (__isFading) { actionFn(); return; }
+  __isFading = true;
+
+  let doneCalled = false;
+
+  const runAction = () => {
+    if (doneCalled) return;
+    doneCalled = true;
+    try {
+      actionFn();
+    } finally {
+      // Pequeña pausa "en negro" para que no se vea el cambio de layout
+      setTimeout(() => {
+        fadeOverlay.classList.remove("is-on");
+
+        const unlock = () => { __isFading = false; };
+        fadeOverlay.addEventListener("transitionend", unlock, { once: true });
+        setTimeout(unlock, 450);
+      }, 80);
+    }
+  };
+
+  // Ejecuta la acción cuando el overlay ya está completamente opaco
+  fadeOverlay.addEventListener("transitionend", runAction, { once: true });
+
+  // Arrancamos el fade a negro en el siguiente frame para asegurar transición
+  requestAnimationFrame(() => {
+    fadeOverlay.classList.add("is-on");
+  });
+
+  // Fallback por si transitionend no dispara (p.ej. tab en background)
+  setTimeout(runAction, 380);
+}
+
+
+
+function transitionTo(actionFn, opts){
+  opts = opts || {};
+  // Primera carga: sin fundido para evitar flashes
+  if (!__hasBooted) { __hasBooted = true; actionFn(); return; }
+  if (opts.instant) { actionFn(); return; }
+  fadeTo(actionFn);
+}
+
+function hideView(el) {
+    if (!el) return;
+    el.style.display = 'none';
+    el.setAttribute('aria-hidden', 'true');
+    el.classList.add('view-hidden');
+  }
+
+  function showView(el) {
+    setRitualOverlay("", false);
+    if (!el) return;
+
+    // Oculta otras vistas principales (sin animación propia)
+    getMainViews().forEach(v => { if (v !== el) hideView(v); });
+
+    // Muestra objetivo
+    el.style.display = "block";
+    el.setAttribute("aria-hidden", "false");
+    el.classList.remove("view-hidden");
+  }
+
+
+  // --- Ritual overlay ---
+  function setRitualOverlay(message, visible) {
+    const overlay = document.getElementById("ritualOverlay");
+    const textEl = document.getElementById("ritualText");
+    if (!overlay || !textEl) return;
+
+    textEl.textContent = message || "";
+    if (visible) {
+      overlay.classList.add("ritual-visible");
+      overlay.setAttribute("aria-hidden", "false");
+    } else {
+      overlay.classList.remove("ritual-visible");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+  }
+
+
+  function setPlayerError(text) {
+    if (!playerJoinError) return;
+    playerJoinError.style.display = text ? "block" : "none";
+    playerJoinError.textContent = text || "";
+  }
+
+  function computeJoinUrl(roomCode) {
+    const base = location.origin + location.pathname;
+    return `${base}?mode=player&room=${encodeURIComponent(roomCode)}`;
+  }
+
+  // Firestore schema:
+  // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
+  // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
+  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom }) {
+    const code = genRoomCode(4);
+    const pickQueue = shuffleLocal(Array.from({ length: playersMax }, (_, i) => i + 1));
+
+    const roomRef = db.collection("rooms").doc(code);
+    await roomRef.set({
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      phase: "joining",
+      playersMax,
+      puzzlesPerRoom,
+      seatsTaken: 0,
+      pickQueue,
+      pickCursor: 0,
+      assignedPickNumbers: [],
+      assignedCommandments: [],
+    });
+
+    return { code, roomRef };
+  }
+
+  async function playerJoinRoom(db, roomCode, playerName) {
+    const roomRef = db.collection("rooms").doc(roomCode);
+
+    // token persistente por sala
+    const tokenKey = `archivum_player_${roomCode}`;
+    let playerId = localStorage.getItem(tokenKey);
+    if (!playerId) {
+      playerId = "p_" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(tokenKey, playerId);
+    }
+
+    const playerRef = roomRef.collection("players").doc(playerId);
+
+    // Si ya existe, lo reutilizamos (reconexión)
+    const existing = await playerRef.get();
+    if (existing.exists) {
+      const data = existing.data() || {};
+      return { playerId, playerRef, data };
+    }
+
+    // Asignación atómica (número secreto + mandamiento + asiento)
+    const result = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(roomRef);
+      if (!snap.exists) throw new Error("No existe esa partida.");
+      const room = snap.data();
+
+      if (room.phase !== "joining") {
+        throw new Error("La partida ya ha empezado. Pide al host un nuevo código.");
+      }
+
+      const playersMax = room.playersMax || 7;
+      const seatsTaken = room.seatsTaken || 0;
+      if (seatsTaken >= playersMax) throw new Error("La partida está completa.");
+
+      const assignedPick = new Set(room.assignedPickNumbers || []);
+      const availablePick = [];
+      for (let i = 1; i <= playersMax; i++) if (!assignedPick.has(i)) availablePick.push(i);
+      if (!availablePick.length) throw new Error("No quedan números disponibles.");
+
+      const assignedCmd = new Set(room.assignedCommandments || []);
+      const availableCmd = COMMANDMENTS.filter(k => !assignedCmd.has(k));
+      if (!availableCmd.length) throw new Error("No quedan mandamientos disponibles.");
+
+      const pickNumber = availablePick[Math.floor(Math.random() * availablePick.length)];
+      const commandmentKey = availableCmd[Math.floor(Math.random() * availableCmd.length)];
+      const seatNumber = seatsTaken + 1;
+
+      tx.set(playerRef, {
+        name: playerName,
+        seatNumber,
+        pickNumber,
+        commandmentKey,
+        sinKey: null,
+        solved: 0,
+        joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      tx.update(roomRef, {
+        seatsTaken: seatNumber,
+        assignedPickNumbers: firebase.firestore.FieldValue.arrayUnion(pickNumber),
+        assignedCommandments: firebase.firestore.FieldValue.arrayUnion(commandmentKey),
+      });
+
+      return { playerId, seatNumber, pickNumber, commandmentKey };
+    });
+
+    return { playerId: result.playerId, playerRef, data: result };
+  }
+
+  function hostListenRoom(db, roomCode) {
+    multiplayer.roomCode = roomCode;
+    multiplayer.roomRef = db.collection("rooms").doc(roomCode);
+
+    // Acciones del móvil -> host (Pista 2 o Poder). Se consumen (1 símbolo por turno).
+    if (multiplayer.actionsUnsub) multiplayer.actionsUnsub();
+    multiplayer.actionsUnsub = multiplayer.roomRef.collection("actions").orderBy("clientTs").onSnapshot((qs) => {
+      qs.docChanges().forEach(async (ch) => {
+        if (ch.type !== "added") return;
+        const actionRef = ch.doc.ref;
+        const a = ch.doc.data() || {};
+        try { await hostHandleAction(db, a); } catch (e) {}
+        // limpiar acción para evitar re-procesado
+        actionRef.delete().catch(()=>{});
+      });
+    });
+
+    // Room listener
+    multiplayer.roomUnsub = multiplayer.roomRef.onSnapshot((snap) => {
+      if (!snap.exists) return;
+      const room = snap.data() || {};
+      multiplayer.latestRoom = room;
+
+      const seatsTaken = room.seatsTaken || 0;
+      const playersMax = room.playersMax || 0;
+      if (joinedCountEl) joinedCountEl.textContent = String(seatsTaken);
+      if (maxCountEl) maxCountEl.textContent = String(playersMax);
+
+      // Habilitar botón cuando estén todos
+      if (startSinRitualBtn) startSinRitualBtn.disabled = !(seatsTaken >= playersMax && room.phase === "joining");
+
+      // Ritual host: mostrar mensaje en rolesSection (usamos sinOverlayTitle para texto grande)
+      if (room.phase === "sin-picking") {
+        const currentNumber = (room.pickQueue && room.pickQueue[room.pickCursor]) || null;
+        // Mostramos un overlay "oscuro" sin carrusel
+        sinOverlayTitle.textContent = currentNumber
+          ? `Todos cerrad los ojos. El NÚMERO ${currentNumber} elige pecado.`
+          : "Preparando selección de pecados…";
+        // ocultamos el botón de cerrar para que no sea confuso en host
+        if (sinOverlayClose) sinOverlayClose.style.display = "none";
+        if (sinCarousel) sinCarousel.style.display = "none";
+        sinOverlay.classList.remove("sin-overlay--hidden");
+      } else {
+        // oculta overlay si no estamos en ritual
+        if (sinOverlayClose) sinOverlayClose.style.display = "";
+        if (sinCarousel) sinCarousel.style.display = "";
+        sinOverlay.classList.add("sin-overlay--hidden");
+      }
+
+      if (room.phase === "playing") {
+        // entrar al tablero (host)
+        multiplayer.isReady = true;
+        // Construye un campaignState mínimo público
+        const players = (multiplayer.hostPlayers || []).slice()
+          .sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0))
+          .map(p => ({ id: p.seatNumber, name: p.name, solved: p.solved || 0, sinChosen: !!p.sinKey }));
+        campaignState = {
+          players,
+          activePlayerIndex: 0,
+          hideSecretsOnHost: true,
+          phase: "playing",
+          puzzlesPerRoom: room.puzzlesPerRoom || 3,
+          roomSolvedTotals: {},
+          solvedAttribution: {},
+          lastLoadedCode: null,
+          lastLoadedRoomKey: null,
+          autoPassTurn: true,
+          attemptsMax: 2,
+          attemptsRemaining: 2,
+          hint2Unlocked: false,
+          turnTokenUsed: false,
+          ignoreNextTimePenaltyOnce: false,
+          blockHint1Until: 0,
+          timeLimitSec: 180,
+          timerEnabled: true,
+          timerRemaining: 180,
+          timerIntervalId: null,
+        };
+        showBoard();
+      }
+    });
+
+    // Players listener
+    multiplayer.playersUnsub = multiplayer.roomRef.collection("players").onSnapshot((qs) => {
+      const list = [];
+      qs.forEach(doc => {
+        const d = doc.data() || {};
+        list.push({ id: doc.id, ...d });
+      });
+      multiplayer.hostPlayers = list;
+
+      // Texto de estado host
+      const picked = list.filter(p => !!p.sinKey).length;
+      if (setJoinStatus) {
+        setJoinStatus(picked ? `Pecados elegidos: ${picked}/${list.length}` : "");
+      }
+
+      // Auto-avanzar el cursor cuando el número actual ya eligió
+      // (Esto evita que el host tenga que pulsar "Siguiente")
+      // Nota: el cursor avanza cuando detecta que el jugador con pickNumber actual tiene sinKey.
+      // Con pocos jugadores, hacerlo por snapshot es suficiente.
+      advancePickCursorIfNeeded(db);
+
+      // Si ya estamos jugando, re-render del panel público
+      if (campaignState && campaignState.hideSecretsOnHost) {
+        renderPlayersSummaryHostPublic();
+      }
+    });
+  }
+
+  async function advancePickCursorIfNeeded(db) {
+    if (!multiplayer.roomRef) return;
+    const snap = await multiplayer.roomRef.get();
+    if (!snap.exists) return;
+    const room = snap.data() || {};
+    if (room.phase !== "sin-picking") return;
+
+    const playersMax = room.playersMax || 0;
+    const pickQueue = room.pickQueue || [];
+    const cursor = room.pickCursor || 0;
+    const currentNumber = pickQueue[cursor];
+    if (!currentNumber) return;
+
+    // ¿Ya eligió el jugador con ese número?
+    const list = multiplayer.hostPlayers || [];
+    const currentPlayer = list.find(p => p.pickNumber === currentNumber);
+    if (!currentPlayer) return; // todavía no está ese número unido (raro, pero posible)
+    if (!currentPlayer.sinKey) return;
+
+    // Avanza cursor en transacción para evitar carreras
+    await db.runTransaction(async (tx) => {
+      const fresh = await tx.get(multiplayer.roomRef);
+      if (!fresh.exists) return;
+      const r = fresh.data() || {};
+      if (r.phase !== "sin-picking") return;
+
+      const c = r.pickCursor || 0;
+      const q = r.pickQueue || [];
+      const curNum = q[c];
+      if (curNum !== currentNumber) return; // ya cambió
+
+      const nextCursor = c + 1;
+      if (nextCursor >= (r.playersMax || 0)) {
+        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: 180, attemptsMax: 2, pendingPenalties: {} });
+      } else {
+        tx.update(multiplayer.roomRef, { pickCursor: nextCursor });
+      }
+    });
+  }
+
+  async function hostStartSinRitual(db) {
+    if (!multiplayer.roomRef) return;
+    await multiplayer.roomRef.update({ phase: "sin-picking", pickCursor: 0 });
+  }
+
+  function playerListenRoom(db, roomCode, playerRef) {
+    const roomRef = db.collection("rooms").doc(roomCode);
+
+    // Lista de jugadores (para seleccionar objetivo de Tentación)
+    if (multiplayer.playerListUnsub) multiplayer.playerListUnsub();
+    multiplayer.playerListUnsub = roomRef.collection("players").onSnapshot((qs) => {
+      const list = [];
+      qs.forEach(doc => {
+        const d = doc.data() || {};
+        if (d.seatNumber) {
+          list.push({
+            seatNumber: d.seatNumber,
+            name: d.name || (`Jugador ${d.seatNumber}`)
+          });
+        }
+      });
+      list.sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0));
+      multiplayer.playerList = list;
+    });
+
+
+    // Player doc listener (para reflejar cambios)
+    playerRef.onSnapshot((snap) => {
+      if (!snap.exists) return;
+      const d = snap.data() || {};
+      multiplayer.player.name = d.name || multiplayer.player.name;
+      multiplayer.player.seatNumber = d.seatNumber || multiplayer.player.seatNumber;
+      multiplayer.player.pickNumber = d.pickNumber || multiplayer.player.pickNumber;
+      multiplayer.player.commandmentKey = d.commandmentKey || multiplayer.player.commandmentKey;
+      multiplayer.player.sinKey = d.sinKey || null;
+
+      // Render identidad
+      playerJoinCard.style.display = "none";
+      playerInfoCard.style.display = "block";
+
+      playerPickNumber.textContent = multiplayer.player.pickNumber ? String(multiplayer.player.pickNumber) : "—";
+
+      const cmdKey = multiplayer.player.commandmentKey;
+      playerCommandmentName.textContent = cmdKey || "—";
+      const cmdInfo = cmdKey ? (COMMANDMENT_META[cmdKey] || null) : null;
+
+      // Mostrar imagen si existe, pero NO ocultar el texto si falta el PNG.
+      if (cmdInfo && cmdInfo.image) {
+        playerCommandmentImg.src = cmdInfo.image;
+        playerCommandmentImg.alt = cmdKey;
+        playerCommandmentImg.style.display = "";
+      } else {
+        playerCommandmentImg.style.display = "none";
+      }
+
+      playerCommandmentDesc.innerHTML = cmdInfo ? (
+        `<strong>${cmdInfo.short || ""}</strong><br>` +
+        `${cmdInfo.vow ? `<em>${cmdInfo.vow.title}:</em> ${cmdInfo.vow.text}<br>` : ""}` +
+        `${cmdInfo.power ? `<em>${cmdInfo.power.title}:</em> ${cmdInfo.power.text}` : ""}`
+      ) : "—";
+
+      if (multiplayer.player.sinKey) {
+        const sinInfo = SIN_META[multiplayer.player.sinKey] || null;
+        playerSinName.textContent = sinInfo ? sinInfo.key : multiplayer.player.sinKey;
+        if (sinInfo) {
+          playerSinBody.style.display = "flex";
+          playerSinImg.src = sinInfo.img;
+          playerSinImg.alt = sinInfo.key;
+          playerSinDesc.innerHTML = `<strong>${sinInfo.short}</strong><br>${sinInfo.effect}` + (sinInfo.temptation ? `<br><em>${sinInfo.temptation.title}:</em> ${sinInfo.temptation.text}` : "");
+        }
+        playerSinHint.style.display = "none";
+        playerOpenSinPickerBtn.style.display = "none";
+      } else {
+        playerSinName.textContent = "Aún sin elegir";
+        playerSinBody.style.display = "none";
+        playerSinHint.style.display = "";
+      }
+    });
+
+    // Room doc listener (para saber si es tu turno)
+    roomRef.onSnapshot((snap) => {
+      if (!snap.exists) return;
+      const room = snap.data() || {};
+      multiplayer.latestRoom = room;
+      const phase = room.phase || "joining";
+      const cursor = room.pickCursor || 0;
+      const currentNumber = (room.pickQueue && room.pickQueue[cursor]) || null;
+
+      if (phase === "joining") {
+        playerPhaseText.textContent = "Esperando a que se unan todos los jugadores…";
+        playerOpenSinPickerBtn.style.display = "none";
+      } else if (phase === "sin-picking") {
+        if (currentNumber && multiplayer.player.pickNumber === currentNumber && !multiplayer.player.sinKey) {
+          playerPhaseText.textContent = "¡Es tu turno! Elige tu pecado y pulsa listo.";
+          playerOpenSinPickerBtn.style.display = "";
+        } else {
+          playerPhaseText.textContent = currentNumber
+            ? `Ahora elige el NÚMERO ${currentNumber}. Espera tu turno.`
+            : "Selección de pecados en curso…";
+          playerOpenSinPickerBtn.style.display = "none";
+        }
+      } else if (phase === "playing") {
+        // Estado general
+        playerPhaseText.textContent = "La partida ha comenzado. Consulta aquí tus rasgos cuando quieras.";
+        playerOpenSinPickerBtn.style.display = "none";
+
+        const turnCard = document.getElementById("playerTurnCard");
+        const turnStatus = document.getElementById("playerTurnStatus");
+        const btnHint2 = document.getElementById("playerUnlockHint2Btn");
+        const btnCmd = document.getElementById("playerUseCommandmentPowerBtn");
+        const btnSin = document.getElementById("playerUseSinPowerBtn");
+
+        const activeSeat = room.activeSeatNumber || null;
+        const puzzleCode = room.currentPuzzleCode || null;
+        const tokenUsed = !!room.turnTokenUsed;
+
+        const isMyTurn = (activeSeat != null && multiplayer.player.seatNumber != null && Number(activeSeat) === Number(multiplayer.player.seatNumber));
+        const canAct = isMyTurn && puzzleCode && !tokenUsed;
+
+        if (turnCard) turnCard.style.display = (isMyTurn && puzzleCode) ? "" : "none";
+        if (turnStatus) {
+          const notice = room.turnNotice || null;
+          const showNotice = !!(notice && isMyTurn && Number(notice.seat) === Number(multiplayer.player.seatNumber));
+          if (!puzzleCode) {
+            turnStatus.textContent = "Aún no hay un acertijo activo en el host.";
+          } else if (!isMyTurn) {
+            turnStatus.textContent = `Turno del jugador ${activeSeat}.`;
+          } else if (showNotice) {
+            const title = notice.title ? (notice.title + " ") : "";
+            turnStatus.textContent = `⚠️ ${title}${notice.text || ""}`.trim();
+          } else if (tokenUsed) {
+            turnStatus.textContent = "Tu símbolo ya se ha gastado este turno.";
+          } else {
+            turnStatus.textContent = "Tienes 1 símbolo este turno. Elige: Pista 2 o activar poder.";
+          }
+        }
+
+        if (btnHint2) btnHint2.disabled = !canAct;
+        if (btnCmd) btnCmd.disabled = !canAct;
+        if (btnSin) {
+          btnSin.style.display = multiplayer.player.sinKey ? "" : "none";
+          btnSin.disabled = !canAct || !multiplayer.player.sinKey;
+        }
+
+        // listeners (una sola vez)
+        if (btnHint2 && !btnHint2.dataset.bound) {
+          btnHint2.dataset.bound = "1";
+          btnHint2.addEventListener("click", async () => {
+            try {
+              const db = firebase.firestore();
+              await playerSendTurnAction(db, roomCode, { type: "HINT2_UNLOCK", turnCounter: room.turnCounter || 0 });
+            } catch (e) {
+              alert("No se pudo enviar la acción.");
+            }
+          });
+        }
+
+        if (btnCmd && !btnCmd.dataset.bound) {
+          btnCmd.dataset.bound = "1";
+          btnCmd.addEventListener("click", async () => {
+            try {
+              const db = firebase.firestore();
+              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "commandment", key: multiplayer.player.commandmentKey, turnCounter: room.turnCounter || 0 });
+            } catch (e) {
+              alert("No se pudo enviar la acción.");
+            }
+          });
+        }
+
+        if (btnSin && !btnSin.dataset.bound) {
+          btnSin.dataset.bound = "1";
+          btnSin.addEventListener("click", async () => {
+            if (!multiplayer.player.sinKey) return;
+            // elegir objetivo (por número de asiento)
+            const others = (multiplayer.playerList || []).filter(p => p.seatNumber !== multiplayer.player.seatNumber);
+            if (!others.length) { alert("No hay objetivo disponible."); return; }
+            const options = others.map(p => `${p.seatNumber} — ${p.name}`).join("\n");
+            const input = prompt(`Elige objetivo (escribe el número):\n${options}`);
+            if (!input) return;
+            const targetSeat = parseInt(input, 10);
+            if (!targetSeat || !others.some(p => p.seatNumber === targetSeat)) { alert("Objetivo inválido."); return; }
+
+            try {
+              const db = firebase.firestore();
+              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "sin", key: multiplayer.player.sinKey, targetSeat, turnCounter: room.turnCounter || 0 });
+            } catch (e) {
+              alert("No se pudo enviar la acción.");
+            }
+          });
+        }
+      }
+    });
+  }
+
+  
+  async function playerSendTurnAction(db, roomCode, payload) {
+    const roomRef = db.collection("rooms").doc(roomCode);
+    const data = Object.assign({}, payload, {
+      seatNumber: multiplayer.player.seatNumber || null,
+      clientTs: Date.now()
+    });
+    await roomRef.collection("actions").add(data);
+  }
+async function playerChooseSin(db, roomCode, sinKey) {
+    const tokenKey = `archivum_player_${roomCode}`;
+    const playerId = localStorage.getItem(tokenKey);
+    if (!playerId) throw new Error("No estás unido a la partida.");
+    const playerRef = db.collection("rooms").doc(roomCode).collection("players").doc(playerId);
+    await playerRef.update({ sinKey });
+  }
+
+  // Host panel público (sin secretos)
+  function renderPlayersSummaryHostPublic() {
+    if (!playersSummaryEl || !campaignState) return;
+    playersSummaryEl.innerHTML = "";
+    (multiplayer.hostPlayers || [])
+      .slice()
+      .sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0))
+      .forEach((p, idx) => {
+        const wrapper = document.createElement("section");
+        wrapper.className = "player-row";
+        const isActive = (campaignState.activePlayerIndex === idx);
+        wrapper.style.outline = (campaignState.phase === "playing" && isActive) ? "2px solid var(--accent)" : "none";
+
+        const sinState = p.sinKey ? "✅ Pecado elegido" : "⏳ Sin elegir";
+        wrapper.innerHTML = `
+          <strong>${p.name || ("Jugador " + (idx+1))}</strong>
+          <span>${sinState} · Resueltos: ${p.solved || 0}</span>
+        `;
+        playersSummaryEl.appendChild(wrapper);
+      });
+  }
+
+  // Hook: si estamos en host y hideSecretsOnHost, sustituimos el render normal
+  const _origShowBoard = showBoard;
+  showBoard = function() {
+    _origShowBoard();
+    if (campaignState && campaignState.hideSecretsOnHost) {
+      renderPlayersSummaryHostPublic();
+      // Asegura que tablero/controls solo se ven cuando playing
+      if (boardMain) boardMain.style.display = "";
+      if (boardControls) boardControls.style.display = "";
+    }
+  };
+
+  // Inicialización por modo
+  if (appMode === "player") {
+    
+    document.body.classList.add("player-mode");
+showPlayerMode();
+    // Reenganche automático: si ya te uniste antes en este dispositivo, no pedimos nombre otra vez.
+    (async () => {
+      try {
+        if (!roomFromUrl) return;
+        const db0 = ensureFirebase();
+        if (!db0) return;
+        const tokenKey = `archivum_player_${roomFromUrl}`;
+        const existingId = localStorage.getItem(tokenKey);
+        if (!existingId) return;
+
+        const roomRef = db0.collection("rooms").doc(roomFromUrl);
+        const playerRef = roomRef.collection("players").doc(existingId);
+        const snap = await playerRef.get();
+        if (!snap.exists) return;
+
+        // Oculta el formulario y entra directamente
+        if (playerJoinCard) playerJoinCard.style.display = "none";
+        if (playerInfoCard) playerInfoCard.style.display = "block";
+        playerListenRoom(db0, roomFromUrl, playerRef);
+      } catch (e) {
+        // si falla, dejamos el flujo normal de "Unirse"
+      }
+    })();
+
+    if (!roomFromUrl) setPlayerError("Falta el código de partida en el enlace.");
+    const db = ensureFirebase();
+    if (!db) setPlayerError("Falta configurar Firebase (FIREBASE_CONFIG).");
+
+    if (playerJoinBtn) {
+      playerJoinBtn.addEventListener("click", async () => {
+        try {
+          setPlayerError("");
+          const name = (playerNameInput.value || "").trim();
+          if (!name) { setPlayerError("Escribe tu nombre."); return; }
+          if (!roomFromUrl) { setPlayerError("Falta el código de partida."); return; }
+          const db2 = ensureFirebase();
+          if (!db2) { setPlayerError("Firebase no está configurado."); return; }
+
+          const { playerRef, data } = await playerJoinRoom(db2, roomFromUrl, name);
+          // Arranca listeners
+          playerListenRoom(db2, roomFromUrl, playerRef);
+        } catch (e) {
+          setPlayerError(e.message || "No se pudo unir.");
+        }
+      });
+    }
+
+    // Botón para abrir selección: reutiliza overlay de pecados ya existente
+    if (playerOpenSinPickerBtn) {
+      playerOpenSinPickerBtn.addEventListener("click", async () => {
+        // Abrimos el carrusel, pero sin “tomados” visibles (los mostramos como sellados)
+        sinSelectionPlayerId = -1; // marcador especial para móvil
+        sinOverlayTitle.textContent = "Elige tu pecado";
+        // "Tomados" se saca del room.assignedSins para evitar duplicados
+        const db2 = ensureFirebase();
+        let taken = new Set();
+        try {
+          const roomSnap = await db2.collection("rooms").doc(roomFromUrl).get();
+          const room = roomSnap.exists ? (roomSnap.data() || {}) : {};
+          taken = new Set(room.assignedSins || []);
+        } catch (e) {
+          // si falla, asumimos vacío
+          taken = new Set();
+        }
+
+        sinCarousel.innerHTML = "";
+        Object.values(SIN_META).forEach(meta => {
+          const takenByOther = taken.has(meta.key);
+          const card = document.createElement("button");
+          card.className = "sin-card";
+          card.dataset.sin = meta.key;
+
+          if (takenByOther) {
+            // Sellado para no dar info por descarte
+            card.classList.add("sin-card--taken");
+            card.innerHTML = `
+              <div class="sin-card-title">Sellado</div>
+              <div class="sin-card-text">Este pecado ya ha sido reclamado.</div>
+            `;
+          } else {
+            card.innerHTML = `
+              <img src="${meta.img}" alt="${meta.key}">
+              <div class="sin-card-title">${meta.key}</div>
+              <div class="sin-card-text">
+                ${meta.advantage ? `<strong>Ventaja:</strong> ${meta.advantage}<br>` : ""}
+                ${meta.cost ? `<strong>Coste:</strong> ${meta.cost}<br>` : ""}
+                ${meta.temptation ? `<strong>${meta.temptation.title}:</strong> ${meta.temptation.text}` : ""}
+              </div>
+            `;
+          }
+          sinCarousel.appendChild(card);
+        });
+
+        sinOverlayClose.style.display = ""; // en móvil sí permitimos cerrar
+        sinCarousel.style.display = "";
+        sinOverlay.classList.remove("sin-overlay--hidden");
+      });
+    }
+
+    // Click en carta pecado (móvil)
+    if (sinCarousel) {
+      sinCarousel.addEventListener("click", async (ev) => {
+        const card = ev.target.closest(".sin-card");
+        if (!card) return;
+        if (card.classList.contains("sin-card--taken")) return;
+        const chosen = card.dataset.sin;
+        try {
+          const db2 = ensureFirebase();
+          if (!db2) throw new Error("Firebase no está configurado.");
+          await playerChooseSin(db2, roomFromUrl, chosen);
+          sinOverlay.classList.add("sin-overlay--hidden");
+        } catch (e) {
+          alert(e.message || "No se pudo elegir el pecado.");
+        }
+      });
+    }
+
+  } else {
+    // Host (por defecto): al crear campaña, se mostrará join con QR
+    showHome();
+    if (joinCancelBtn) joinCancelBtn.addEventListener("click", showHome);
+
+    if (copyJoinLinkBtn) {
+      copyJoinLinkBtn.addEventListener("click", async () => {
+        try {
+          const text = joinLinkText ? joinLinkText.textContent : "";
+          if (!text) return;
+          await navigator.clipboard.writeText(text);
+          setJoinStatus("✅ Enlace copiado.");
+          setTimeout(() => setJoinStatus(""), 1500);
+        } catch (e) {
+          setJoinStatus("No se pudo copiar (tu navegador lo bloqueó).");
+        }
+      });
+    }
+
+    if (startSinRitualBtn) {
+      startSinRitualBtn.addEventListener("click", async () => {
+        try {
+          const db2 = ensureFirebase();
+          if (!db2) { alert("Falta configurar Firebase."); return; }
+          await hostStartSinRitual(db2);
+        } catch (e) {
+          alert(e.message || "No se pudo iniciar el ritual.");
+        }
+      });
+    }
+
+    // Sobrescribimos el botón Iniciar campaña para crear sala y mostrar QR
+    if (startCampaignBtn) {
+      startCampaignBtn.addEventListener("click", async () => {
+        const db2 = ensureFirebase();
+        if (!db2) {
+          alert("Falta configurar Firebase (FIREBASE_CONFIG). Sin eso, no hay móviles.");
+          return;
+        }
+        const playersMax = Math.max(1, Math.min(7, parseInt(playersCountInput.value, 10) || 1));
+        const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
+
+        // Reset de estado local al iniciar una campaña nueva
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        solvedMap = {};
+        campaignState = null;
+        updateSidebarRoomCounters();
+        updateGlobalSolvedSummary();
+
+        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom });
+        const joinUrl = computeJoinUrl(code);
+
+        showJoinSectionHost(code, joinUrl, playersMax);
+        hostListenRoom(db2, code);
+      });
+    }
+  }
+
+
+
+
+
+
+
+
+// Listas de nombres que usaremos para repartir y para los selects
+  const COMMANDMENTS = Object.keys(COMMANDMENT_META);
+  const SINS = Object.keys(SIN_META);
+  const musicToggleBtn = document.getElementById("musicToggleBtn");
+
+	function showCampaignRolesSection() {
+  transitionTo(() => {
+      showView(rolesSection);
+      if (sidebar) sidebar.style.display = "none";
+  });
+}
+
+
+	  renderPlayersSummary();
+	  updateContinueEnabled(); // lo que ya tengas aquí
+	
+
+	function initCampaignPlayers(numPlayers) {
+	  campaignState.roomSolvedCounts = Array.from({ length: numPlayers }, () => ({}));
+	  campaignState.solvedPuzzlesByPlayer = Array.from({ length: numPlayers }, () => new Set());
+	  campaignState.activePlayerIndex = 0;
+	  campaignState.stage = "board";
+	}
+
+	function goToPuzzleFromCode(code) {
+	  const parsed = parsePuzzleCode(code); // { roomKey:"origen", puzzleIndex:3 } etc.
+	  if (!parsed) return;
+
+	  campaignState.currentPuzzleCode = code;
+	  campaignState.currentRoomKey = parsed.roomKey;
+	  campaignState.stage = "puzzle";
+
+	  loadRoom(parsed.roomKey, { forcePuzzleCode: code, fromCampaign: true });
+	}
+
+	function markCurrentPuzzleSolved() {
+	  const p = campaignState.activePlayerIndex;
+	  const code = campaignState.currentPuzzleCode;
+	  const roomKey = campaignState.currentRoomKey;
+
+	  if (!code || !roomKey) return;
+
+	  // evitar doble conteo si ya lo resolvió ese jugador
+	  if (campaignState.solvedPuzzlesByPlayer[p].has(code)) {
+		// opcional: mostrar aviso “ya resuelto”
+		return;
+	  }
+
+	  campaignState.solvedPuzzlesByPlayer[p].add(code);
+
+	  const roomCounts = campaignState.roomSolvedCounts[p];
+	  roomCounts[roomKey] = (roomCounts[roomKey] || 0) + 1;
+
+	  // ¿ha completado la sala?
+	  if (roomCounts[roomKey] >= campaignState.perRoomTarget) {
+		campaignState.stage = "board";
+		campaignState.currentPuzzleCode = null;
+		campaignState.currentRoomKey = null;
+
+		// IMPORTANTE: aquí vuelves al tablero
+		showBoardScreen({
+		  toast: `Sala completada (${roomCounts[roomKey]}/${campaignState.perRoomTarget}). Vuelve al tablero y gira la sala.`,
+		});
+	  } else {
+		// si no ha completado sala, puedes:
+		// - volver al tablero igualmente (para meter siguiente código)
+		// - o dejarlo en salas
+		// yo recomiendo volver al tablero siempre para ritmo de mesa
+		campaignState.stage = "board";
+		campaignState.currentPuzzleCode = null;
+		campaignState.currentRoomKey = null;
+		showBoardScreen();
+	  }
+
+	  renderCampaignSidebarStats(); // actualiza “Resueltos: …”
+	}
+
+	function nextPlayerTurn() {
+	  const n = campaignState.solvedPuzzlesByPlayer.length;
+	  campaignState.activePlayerIndex = (campaignState.activePlayerIndex + 1) % n;
+	  renderCampaignSidebarStats();
+	  renderTurnIndicator();
+	}
+
+	function openSinOverlayForPlayer(playerId) {
+	  if (!campaignState) return;
+	  sinSelectionPlayerId = playerId;
+
+	  const player = campaignState.players.find(p => p.id === playerId);
+	  if (!player) return;
+
+	  sinOverlayTitle.textContent = `Elige un pecado para ${player.name}`;
+
+	  const taken = new Set(
+		campaignState.players
+		  .filter(p => p.id !== playerId)
+		  .map(p => p.sin)
+		  .filter(Boolean)
+	  );
+
+	  sinCarousel.innerHTML = "";
+
+	  Object.values(SIN_META).forEach(meta => {
+		const takenByOther = taken.has(meta.key);
+
+		const card = document.createElement("button");
+		card.className = "sin-card";
+		if (takenByOther) card.classList.add("sin-card--taken");
+		if (player.sin === meta.key) card.classList.add("sin-card--selected");
+
+		card.dataset.sin = meta.key;
+		card.innerHTML = `
+		  <img src="${meta.img}" alt="${meta.key}">
+		  <div class="sin-card-title">${meta.key}</div>
+		  <div class="sin-card-text">
+			${meta.advantage ? `<strong>Ventaja:</strong> ${meta.advantage}<br>` : ""}
+			${meta.cost ? `<strong>Coste:</strong> ${meta.cost}<br>` : ""}
+			${meta.temptation ? `<strong>${meta.temptation.title}:</strong> ${meta.temptation.text}` : ""}
+		  </div>
+		`;
+
+		sinCarousel.appendChild(card);
+	  });
+
+	  sinOverlay.classList.remove("sin-overlay--hidden");
+	}
+
+	function showCampaignBoardSection() {
+  transitionTo(() => {
+      showView(boardSection);
+      setRitualOverlay("", false);
+      if (sidebar) sidebar.style.display = "none";
+  });
+}
+
+	
+
+	function renderRolesScreen() {
+	  rolesPlayersContainer.innerHTML = "";
+	  campaignState.players.forEach((player, idx) => {
+		const div = document.createElement("div");
+		div.className = "player-role-card";
+		div.innerHTML = `
+		  <div class="player-role-header">Jugador ${idx + 1}</div>
+		  <div class="effect-card">
+			<img src="${player.mandamiento.img}" alt="${player.mandamiento.name}">
+			<div class="effect-card-text">
+			  <h4>Mandamiento: ${player.mandamiento.name}</h4>
+			  <small>${player.mandamiento.tag}</small>
+			  <p>${player.mandamiento.description}</p>
+			  <p><strong>Efecto en el juego:</strong> ${player.mandamiento.effect}</p>
+			</div>
+		  </div>
+		  <p style="margin-bottom:0.5rem;">Elige un pecado capital para este jugador:</p>
+		  <div class="sins-grid" data-player="${idx}">
+			${PECADOS.map(
+			  s => `
+			  <button class="sin-card" data-sin="${s.id}">
+				<img src="${s.img}" alt="${s.name}">
+				<div>
+				  <strong>${s.name}</strong>
+				  <small style="display:block;color:var(--muted);">${s.tag}</small>
+				  <span style="font-size:0.8rem;display:block;">${s.effect}</span>
+				</div>
+			  </button>`
+			).join("")}
+		  </div>
+		`;
+		rolesPlayersContainer.appendChild(div);
+	  });
+
+	  // listeners para elegir pecados
+	  rolesPlayersContainer.querySelectorAll(".sin-card").forEach(btn => {
+		btn.addEventListener("click", () => {
+		  const playerIdx = parseInt(
+			btn.closest(".sins-grid").dataset.player,
+			10
+		  );
+		  const sinId = btn.dataset.sin;
+		  chooseSinForPlayer(playerIdx, sinId);
+		  updateSinCardsUI();
+		  updateContinueEnabled();
+		});
+	  });
+
+	  updateSinCardsUI();
+	  updateContinueEnabled();
+	}
+
+	function chooseSinForPlayer(playerIdx, sinId) {
+	  // Un pecado no puede repetirse en dos jugadores
+	  if (
+		campaignState.players.some(
+		  (p, i) => i !== playerIdx && p.pecado && p.pecado.id === sinId
+		)
+	  ) {
+		alert("Ese pecado ya lo lleva otro jugador.");
+		return;
+	  }
+	  const sin = SIN_META.find(s => s.id === sinId);
+	  campaignState.players[playerIdx].pecado = sin;
+	}
+
+	function updateSinCardsUI() {
+	  rolesPlayersContainer.querySelectorAll(".sins-grid").forEach((grid, idx) => {
+		const chosen = campaignState.players[idx].pecado
+		  ? campaignState.players[idx].pecado.id
+		  : null;
+
+		grid.querySelectorAll(".sin-card").forEach(btn => {
+		  const id = btn.dataset.sin;
+		  const takenByOther = campaignState.players.some(
+			(p, i) => i !== idx && p.pecado && p.pecado.id === id
+		  );
+		  btn.classList.toggle("selected", id === chosen);
+		  btn.classList.toggle("disabled", takenByOther);
+		});
+	  });
+	}
+
+	function updateContinueEnabled() {
+	  if (!rolesToBoardBtn || !campaignState) return;
+	  const allHaveSin = campaignState.players.every(p => p.pecado);
+	  rolesToBoardBtn.disabled = !allHaveSin;
+	}
+
+  // --- PROGRESO ---
+
+  function loadSolvedFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      solvedMap = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      console.error("Error leyendo progreso:", e);
+      solvedMap = {};
+    }
+  }
+
+  function saveSolvedToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(solvedMap));
+    } catch (e) {
+      console.error("Error guardando progreso:", e);
+    }
+  }
+
+  function isPuzzleSolved(id) {
+    return !!(id && solvedMap[id]);
+  }
+
+  // --- CAMPaña: mandamientos y pecados ---
+
+  function shuffle(array) {
+    return array
+      .map(v => ({ v, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ v }) => v);
+  }
+
+	function startCampaign(numPlayers) {
+	  // baraja mandamientos
+	  const shuffled = shuffle(Object.keys(COMMANDMENT_META));
+	  const cmdKey = shuffled[i % shuffled.length];
+
+	  const players = [];
+	  for (let i = 0; i < numPlayers; i++) {
+		const mand = shuffled[i % shuffled.length];
+		players.push({
+		  id: i + 1,
+		  name: `Jugador ${i + 1}`,
+		  mandamiento: mand,
+		  pecado: null,
+		  solved: 0
+		});
+	  }
+
+	  campaignState = { players };
+
+	  renderRolesScreen();
+	  showCampaignRolesSection();
+	}
+
+	function renderPlayersSummary() {
+  if (!playersSummaryEl || !campaignState) return;
+  playersSummaryEl.innerHTML = "";
+
+  const hideSecretsHost = (appMode === "host" && !!campaignState.hideSecretsOnHost);
+
+  (campaignState.players || []).forEach(p => {
+    const wrapper = document.createElement("section");
+    wrapper.className = "player-panel";
+
+    const isActive = (campaignState.activePlayerIndex === (p.id - 1));
+    wrapper.style.outline = (campaignState.phase === "playing" && isActive) ? "2px solid var(--accent)" : "none";
+    wrapper.style.borderRadius = "18px";
+
+    const cmdInfo = (!hideSecretsHost && p.commandment) ? (COMMANDMENT_META[p.commandment] || null) : null;
+    const cmdName = hideSecretsHost ? "Secreto" : (p.commandment || "—");
+    const cmdImgHtml = cmdInfo ? `<img src="${cmdInfo.image}" alt="${cmdName}">` : "";
+    const cmdDesc = cmdInfo
+      ? cmdInfo.short
+      : (hideSecretsHost ? "Oculto para el host." : "Bendición especial para este jugador.");
+
+    const sinInfo = (!hideSecretsHost && p.sin) ? (SIN_META[p.sin] || null) : null;
+
+    let sinTitle = "Sin elegir";
+    let sinBodyHtml = "";
+
+    if (hideSecretsHost) {
+      sinTitle = "Secreto";
+      // En modo host-multijugador, el pecado vive en Firestore (hostPlayers), no en campaignState.players.
+      const hp = (multiplayer && multiplayer.hostPlayers ? multiplayer.hostPlayers : []).find(h => (h.seatNumber || 0) === (p.id || 0));
+      const hasSin = !!(hp && hp.sinKey);
+      sinBodyHtml = `<p class="role-card-desc">
+        ${hasSin ? "Elegido en el móvil (oculto)." : "Pendiente de elegir en el móvil."}
+      </p>`;
+    } else if (sinInfo) {
+      sinTitle = sinInfo.key;
+      sinBodyHtml = `<div class="role-card-body">
+        <img src="${sinInfo.img}" alt="${sinInfo.key}">
+        <p class="role-card-desc"><strong>${sinInfo.short}</strong><br>${sinInfo.effect}</p>
+      </div>`;
+    } else {
+      sinTitle = "Sin elegir";
+      sinBodyHtml = `<p class="role-card-desc">
+        Elige un pecado para este jugador. Cada uno modifica su forma de jugar.
+      </p>
+      <button class="action secondary btn-open-sin-picker" data-player-id="${p.id}">
+        Elegir pecado
+      </button>`;
+    }
+
+    wrapper.innerHTML = `
+      <div class="player-panel-title">${p.name || ("Jugador " + p.id)}</div>
+
+      <div class="player-panel-roles">
+        <article class="role-card role-card--cmd">
+          <header>
+            <div class="role-card-label">Mandamiento</div>
+            <div class="role-card-name">${cmdName}</div>
+          </header>
+          <div class="role-card-body">
+            ${cmdImgHtml}
+            <p class="role-card-desc">${cmdDesc}</p>
+          </div>
+        </article>
+
+        <article class="role-card role-card--sin">
+          <header>
+            <div class="role-card-label">Pecado capital</div>
+            <div class="role-card-name">${sinTitle}</div>
+          </header>
+          ${sinBodyHtml}
+        </article>
+      </div>
+
+      <div class="player-panel-footer">
+        <span>Acertijos resueltos: ${p.solved || 0}</span>
+      </div>
+    `;
+
+    playersSummaryEl.appendChild(wrapper);
+  });
+
+  // En multijugador (secretismo), el tablero no debe depender de si el host conoce los pecados.
+  const shouldHideBoard = (!campaignState.hideSecretsOnHost) && (campaignState.phase === "sin-picking");
+  if (boardMain) boardMain.style.display = shouldHideBoard ? "none" : "";
+  if (boardControls) boardControls.style.display = shouldHideBoard ? "none" : "";
+}
+
+
+
+
+  // --- AUXILIARES DE UI ---
+
+  function setActiveRoomButton(key) {
+    roomButtons.forEach(btn => {
+      btn.classList.toggle("active", key && btn.dataset.room === key);
+    });
+  }
+
+	function playBackgroundMusic() {
+  if (appMode === "player") return; // sin música en pantallas individuales
+
+  // En modo salas (Explorar / Campaña) NUNCA suena la música general
+  const inRoomView = (typeof roomSection !== "undefined" && roomSection && roomSection.style.display !== "none");
+  if (inRoomView || gameMode === "free" || gameMode === "campaign-room") return;
+
+	  if (!bgAudioEl || bgMusicMuted) return; // ⬅ respeta el mute
+	  try {
+		bgAudioEl.volume = 0.4; // ajusta si quieres
+		const p = bgAudioEl.play();
+		if (p && p.catch) {
+		  p.catch(() => {
+			// El navegador puede bloquear el autoplay, no pasa nada.
+		  });
+		}
+	  } catch (e) {
+		console.warn("No se pudo reproducir la música de fondo", e);
+	  }
+	}
+
+	function playRoomMusic() {
+	  if (!roomAudioEl || roomMusicMuted) return;
+	  try {
+		const p = roomAudioEl.play();
+		if (p && p.catch) {
+		  p.catch(() => {
+			// por si el navegador bloquea el autoplay
+		  });
+		}
+	  } catch (e) {
+		console.warn("No se pudo reproducir la música de la sala", e);
+	  }
+	}
+
+	function stopBackgroundMusic() {
+	  if (!bgAudioEl) return;
+	  bgAudioEl.pause();
+	  // Si NO quieres que vuelva al principio cada vez, comenta la siguiente línea:
+	  // bgAudioEl.currentTime = 0;
+	}
+
+  function stopAudio() {
+    if (roomAudioEl) roomAudioEl.pause();
+  }
+
+  // Mantiene la música coherente al volver a la pestaña/ventana (evita que reaparezca la música general en salas)
+  function syncAudioForCurrentView() {
+    if (appMode === "player") return;
+
+    const inRoomView = (roomSection && roomSection.style.display !== "none") || gameMode === "free" || gameMode === "campaign-room";
+    if (inRoomView) {
+      stopBackgroundMusic();
+      playRoomMusic(); // respeta roomMusicMuted
+    } else {
+      // Fuera de salas: solo música general
+      if (roomAudioEl) roomAudioEl.pause();
+      playBackgroundMusic(); // ya respeta bgMusicMuted
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) syncAudioForCurrentView();
+  });
+  window.addEventListener("focus", syncAudioForCurrentView);
+
+
+  function getRoomSolvedCounts(roomKey) {
+    const room = rooms[roomKey];
+    if (!room || !room.puzzles) return { solved: 0, total: 0 };
+    let solved = 0;
+    const total = room.puzzles.length;
+    room.puzzles.forEach(p => {
+      if (p.id && isPuzzleSolved(p.id)) solved++;
+    });
+    return { solved, total };
+  }
+
+  function updateSidebarRoomCounters() {
+    Object.keys(rooms).forEach(key => {
+      const { solved, total } = getRoomSolvedCounts(key);
+      const span = document.querySelector(`[data-room-counter="${key}"]`);
+      if (span) span.textContent = `${solved}/${total}`;
+    });
+  }
+
+  function updateRoomSolvedSummary() {
+    if (!roomSolvedSummaryEl || !currentRoomKey) return;
+    const { solved, total } = getRoomSolvedCounts(currentRoomKey);
+    roomSolvedSummaryEl.textContent =
+      `Resueltos en esta sala: ${solved} de ${total}`;
+  }
+
+  function getGlobalSolvedCounts() {
+    let solved = 0;
+    let total = 0;
+    Object.values(rooms).forEach(room => {
+      const puzzles = room.puzzles || [];
+      total += puzzles.length;
+      puzzles.forEach(p => {
+        if (p.id && isPuzzleSolved(p.id)) solved++;
+      });
+    });
+    return { solved, total };
+  }
+
+  function updateGlobalSolvedSummary() {
+    if (!globalSolvedSummaryEl) return;
+    const { solved, total } = getGlobalSolvedCounts();
+    globalSolvedSummaryEl.textContent =
+      `Total: ${solved} acertijo(s) resuelto(s) de ${total}`;
+  }
+
+  function updateSolvedUIForCurrentPuzzle() {
+    const room = rooms[currentRoomKey];
+    const puzzles = room ? room.puzzles : null;
+    const puzzle = (puzzles && puzzles.length > 0)
+      ? puzzles[currentPuzzleIndex]
+      : null;
+    const solved = puzzle && puzzle.id && isPuzzleSolved(puzzle.id);
+
+    if (puzzleCardEl) {
+      puzzleCardEl.classList.toggle("puzzle-solved", !!solved);
+      puzzleCardEl.classList.toggle("solved", !!solved);
+    }
+
+    if (toggleSolvedBtn) {
+      const hasPuzzle = !!(puzzle && puzzle.id);
+      toggleSolvedBtn.disabled = !hasPuzzle;
+      toggleSolvedBtn.classList.toggle("solved", !!solved);
+      toggleSolvedBtn.textContent = solved
+        ? "Marcar como NO resuelto"
+        : "Marcar como resuelto";
+    }
+
+    if (puzzleStateEl) {
+      if (!puzzle) puzzleStateEl.textContent = "Sin acertijos";
+      else puzzleStateEl.textContent = solved ? "Resuelto" : "Sin resolver";
+    }
+  }
+
+	function stopCampaignTimer() {
+	  if (!campaignState) return;
+	  if (campaignState.timerIntervalId) {
+		clearInterval(campaignState.timerIntervalId);
+		campaignState.timerIntervalId = null;
+	  }
+	}
+
+	
+	
+  async function hostHandleAction(db, a) {
+    if (!multiplayer.roomRef || appMode === "player") return;
+    if (!campaignState || gameMode !== "campaign-room") return;
+
+    const room = multiplayer.latestRoom || {};
+    const activeSeat = room.activeSeatNumber || null;
+    const puzzleCode = room.currentPuzzleCode || null;
+    const tokenUsed = !!room.turnTokenUsed;
+
+    if (!puzzleCode) return; // no hay acertijo activo
+    if (!activeSeat || !a.seatNumber || a.seatNumber !== activeSeat) return; // solo jugador activo
+    if (tokenUsed || campaignState.turnTokenUsed) return;
+    if ((room.turnCounter || 0) !== (a.turnCounter || 0)) return; // acción de turno viejo
+
+    if (a.type === "HINT2_UNLOCK") {
+      campaignState.hint2Unlocked = true;
+      campaignState.turnTokenUsed = true;
+      setCampaignStatus("✅ Pista 2 desbloqueada por el jugador activo.");
+      refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+      await multiplayer.roomRef.update({ hint2Unlocked: true, turnTokenUsed: true });
+      return;
+    }
+
+    if (a.type === "POWER") {
+      // consumir símbolo
+      campaignState.turnTokenUsed = true;
+      await multiplayer.roomRef.update({ turnTokenUsed: true });
+
+      if (a.role === "commandment") {
+        const key = a.key;
+        const meta = key ? COMMANDMENT_META[key] : null;
+        const eff = meta && meta.power && meta.power.effect ? meta.power.effect : {};
+        if (eff.addTimeSec) {
+          campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) + eff.addTimeSec);
+          updateTimerUI();
+        }
+        if (eff.addAttempts) {
+          campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) + eff.addAttempts);
+          updateAttemptsUI();
+        }
+        if (eff.ignoreNextTimePenaltyOnce) {
+          campaignState.ignoreNextTimePenaltyOnce = true;
+        }
+        setCampaignStatus(`✨ Poder activado (Mandamiento): ${meta?.power?.text || "OK"}`);
+        return;
+      }
+
+      if (a.role === "sin") {
+        const key = a.key;
+        const meta = key ? SIN_META[key] : null;
+        const penBase = meta && meta.temptation && meta.temptation.targetPenalty ? meta.temptation.targetPenalty : null;
+        const pen = penBase ? Object.assign({}, penBase, {
+          _sinKey: key,
+          _notice: (meta && meta.temptation && meta.temptation.text) ? meta.temptation.text : ""
+        }) : null;
+        const targetSeat = a.targetSeat;
+        if (!targetSeat || !pen) return;
+
+        // Guardar penalización para el siguiente acertijo del objetivo
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(multiplayer.roomRef);
+          if (!snap.exists) return;
+          const r = snap.data() || {};
+          const pending = Object.assign({}, r.pendingPenalties || {});
+          const cur = Object.assign({}, pending[String(targetSeat)] || {});
+          pending[String(targetSeat)] = Object.assign(cur, pen);
+          tx.update(multiplayer.roomRef, { pendingPenalties: pending });
+        });
+
+        setCampaignStatus(`☠️ Tentación activada contra el jugador ${targetSeat}. Se aplicará en su próximo acertijo.`);
+        return;
+      }
+    }
+  }
+function updateAttemptsUI() {
+	  const el = document.getElementById("campaignAttempts");
+	  if (!el || !campaignState) return;
+	  el.textContent = String(Math.max(0, campaignState.attemptsRemaining ?? 0));
+	}
+
+	function setCampaignStatus(msg) {
+	  const el = document.getElementById("campaignStatus");
+	  if (!el) return;
+	  el.textContent = msg || "";
+	}
+
+	function isHint2Locked() {
+	  return (gameMode === "campaign-room" && campaignState && !campaignState.hint2Unlocked);
+	}
+
+	function refreshHintButtonsUI(puzzle) {
+	  const hint1Btn = document.getElementById("hint1Btn");
+	  const hint2Btn = document.getElementById("hint2Btn");
+	  if (hint1Btn) {
+	    const locked1 = (gameMode === "campaign-room" && campaignState && campaignState.blockHint1Until && Date.now() < campaignState.blockHint1Until);
+	    hint1Btn.textContent = locked1 ? "Pista 1 🔒" : "Pista 1";
+	  }
+	  if (hint2Btn) {
+	    const locked2 = !!(puzzle && puzzle.hint2) && isHint2Locked();
+	    hint2Btn.textContent = locked2 ? "Pista 2 🔒" : "Pista 2";
+	  }
+	}
+function updateTimerUI() {
+	  const el = document.getElementById("campaignTimer");
+	  if (!el || !campaignState) return;
+
+	  const s = Math.max(0, campaignState.timerRemaining);
+	  const mm = String(Math.floor(s / 60)).padStart(2, "0");
+	  const ss = String(s % 60).padStart(2, "0");
+	  el.textContent = `${mm}:${ss}`;
+	}
+
+	function startCampaignTimer() {
+	  if (!campaignState) return;
+
+	  stopCampaignTimer();
+	  if (!campaignState.timerEnabled) return;
+
+	  updateTimerUI();
+	  campaignState.timerIntervalId = setInterval(() => {
+		campaignState.timerRemaining -= 1;
+		updateTimerUI();
+
+		if (campaignState.timerRemaining <= 0) {
+		  stopCampaignTimer();
+		  failOrSkipCurrentPuzzle("timeout"); // se acabó el tiempo
+		}
+	  }, 1000);
+	}
+
+	function advanceTurnCampaign() {
+      if (!campaignState) return;
+      campaignState.activePlayerIndex = (campaignState.activePlayerIndex + 1) % campaignState.players.length;
+
+      // Publicar turno en Firestore (host)
+      if (multiplayer.roomRef && appMode !== "player") {
+        const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
+          ? campaignState.players[campaignState.activePlayerIndex].id
+          : (campaignState.activePlayerIndex + 1);
+
+        multiplayer.roomRef.update({
+          activeSeatNumber: activeSeat,
+          turnTokenUsed: false,
+          hint2Unlocked: false,
+          currentPuzzleCode: null,
+          currentRoomKey: null,
+          activePuzzleSeat: null,
+          turnNotice: null,
+          turnCounter: firebase.firestore.FieldValue.increment(1)
+        }).catch(()=>{});
+      }
+    }
+
+	function failOrSkipCurrentPuzzle(reason = "skip") {
+	  if (!campaignState) return;
+
+	  // No sumamos nada. Sólo limpiamos el puzzle actual y volvemos al tablero.
+	  stopCampaignTimer();
+	  campaignState.currentPuzzleCode = null;
+	  campaignState.currentRoomKey = null;
+	  if (multiplayer.roomRef && appMode !== "player") {
+		multiplayer.roomRef.update({ currentPuzzleCode: null, currentRoomKey: null, hint2Unlocked: false, turnTokenUsed: false }).catch(()=>{});
+	  }
+	  campaignState.timerRemaining = campaignState.timeLimitSec;
+      // Reset UI de respuesta
+      if (answerInput) answerInput.value = "";
+      setAnswerFeedback("", null);
+
+
+	  campaignState.attemptsRemaining = campaignState.attemptsMax || 2;
+	  campaignState.hint2Unlocked = false;
+	  campaignState.turnTokenUsed = false;
+	  updateAttemptsUI();
+	  refreshHintButtonsUI(null);
+
+	  // Pasa turno
+	  advanceTurnCampaign();
+
+	  // Volver al tablero (función real que sí tienes)
+	  showBoard();
+	  renderPlayersSummary();
+	}
+
+	function toggleSolvedCurrentPuzzle() {
+	  const room = rooms[currentRoomKey];
+	  stopCampaignTimer();
+	  if (!room || !room.puzzles || room.puzzles.length === 0) return;
+
+	  const puzzle = room.puzzles[currentPuzzleIndex];
+	  if (!puzzle || !puzzle.id) return;
+
+	  const id = puzzle.id.toUpperCase();
+	  const wasSolved = !!solvedMap[id];
+
+	  // 1) Toggle en el progreso global
+	  if (wasSolved) delete solvedMap[id];
+	  else solvedMap[id] = true;
+
+	  saveSolvedToStorage();
+
+	  // 2) ✅ Si estamos en campaña, y lo ACABAMOS de marcar como resuelto:
+	  if (gameMode === "campaign-room" && campaignState && !wasSolved) {
+		const pIdx = campaignState.activePlayerIndex;
+
+		// Atribución (evita doble conteo si alguien vuelve a marcar lo mismo)
+		if (campaignState.solvedAttribution[id] == null) {
+		  campaignState.solvedAttribution[id] = pIdx;
+
+		  // contador jugador
+		  campaignState.players[pIdx].solved = (campaignState.players[pIdx].solved || 0) + 1;
+
+		  // contador sala (global del grupo)
+		  const rk = campaignState.lastLoadedRoomKey || currentRoomKey;
+		  campaignState.roomSolvedTotals[rk] = (campaignState.roomSolvedTotals[rk] || 0) + 1;
+
+		  // ¿sala completada?
+		  const target = campaignState.puzzlesPerRoom || 3;
+		  const done = campaignState.roomSolvedTotals[rk] >= target;
+
+		  // 3) ✅ Pasar turno automáticamente (actualiza Firestore) y limpiar estado remoto
+          advanceTurnCampaign();
+
+          // 4) ✅ Volver al tablero sí o sí (y sin acertijo activo)
+          showBoard();
+
+// Actualiza el panel
+		  renderPlayersSummary();
+
+		  // Mensaje opcional
+		  if (done) {
+			alert(`✅ Sala completada (${target}/${target}). Volved al tablero y girad la sala.`);
+		  }
+		} else {
+		  // Ya estaba atribuido: igualmente vuelve al tablero para ritmo
+		  showBoard();
+		  renderPlayersSummary();
+		}
+
+		// Importante: no sigas, porque ya hemos navegado al tablero
+		return;
+	  }
+
+	  // UI estándar (modo libre o desmarcar)
+	  updateSolvedUIForCurrentPuzzle();
+	  updateSidebarRoomCounters();
+	  updateRoomSolvedSummary();
+	  updateGlobalSolvedSummary();
+	}
+
+
+  // --- CAMBIO DE PANTALLA ---
+
+	function showHome() {
+  transitionTo(() => {
+      gameMode = "home";
+      stopCampaignTimer();
+      showView(homeSection);
+      if (appRoot) appRoot.classList.add("home-mode");
+      if (sidebar) sidebar.style.display = "none";
+      
+      stopAudio();
+      playBackgroundMusic();
+      
+      if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
+      if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
+      
+      setActiveRoomButton(null);
+      if (appRoot) requestAnimationFrame(() => appRoot.classList.remove("booting"));
+  });
+}
+
+
+
+	function showCampaignSetup() {
+  transitionTo(() => {
+      gameMode = "campaign-setup";
+      showView(campaignSetupSection);
+      if (appRoot) appRoot.classList.remove("home-mode");
+      if (sidebar) sidebar.style.display = "none";
+      
+      stopAudio();
+      playBackgroundMusic();
+      
+      if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
+      if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
+      setActiveRoomButton(null);
+  });
+}
+
+
+	function showBoard() {
+  transitionTo(() => {
+      gameMode = "campaign-board";
+      stopCampaignTimer();
+      showView(boardSection);
+      setRitualOverlay("", false);
+      if (sidebar) sidebar.style.display = "none";
+
+      // Al volver al tablero, NO hay acertijo activo (bloquea acciones móviles)
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          currentRoomKey: null,
+          activePuzzleSeat: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
+
+      stopAudio();
+      playBackgroundMusic();
+      if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
+      if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
+      setActiveRoomButton(null);
+  });
+}
+
+
+  function showRules() {
+  transitionTo(() => {
+      gameMode = "rules";
+      showView(rulesSection);
+      if (appRoot) appRoot.classList.add("home-mode");
+      if (sidebar) sidebar.style.display = "none";
+      
+      stopAudio();
+      playBackgroundMusic();
+      if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
+      if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
+      setActiveRoomButton(null);
+  });
+}
+
+
+	function showRoomSectionImmediate() {
+      // OJO: no cambiamos gameMode aquí. Quien navega decide si es "free" o "campaign-room".
+      showView(roomSection);
+
+      const inCampaignRoom = (gameMode === "campaign-room");
+
+      // Sidebar (menú de salas) solo en modo libre
+      if (sidebar) sidebar.style.display = inCampaignRoom ? "none" : "block";
+
+      // En campaña no se permite navegar por libre entre acertijos/salas
+      const puzzleJump = document.querySelector(".puzzle-jump");
+      if (puzzleJump) puzzleJump.style.display = inCampaignRoom ? "none" : "flex";
+      if (prevBtn) prevBtn.style.display = inCampaignRoom ? "none" : "";
+      if (nextBtn) nextBtn.style.display = inCampaignRoom ? "none" : "";
+
+      // Música: en salas suena la música de sala (y se corta la general)
+      stopBackgroundMusic();
+      playRoomMusic(); // respeta roomMusicMuted
+
+      // Controles: en sala solo botón de sala
+      if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "none";
+      if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "flex";
+
+      // Resaltado de la sala actual solo en modo libre
+      if (!inCampaignRoom) setActiveRoomButton(currentRoomKey);
+      else setActiveRoomButton(null);
+
+      // Texto del botón según estado
+      if (roomMusicToggleBtn) {
+        roomMusicToggleBtn.textContent = roomMusicMuted
+          ? "🔇 Música de la sala: OFF"
+          : "🔊 Música de la sala: ON";
+      }
+}
+
+function showRoomSection() {
+  transitionTo(() => {
+    showRoomSectionImmediate();
+  });
+}
+
+
+
+
+  // --- Carga de acertijos/salas ---
+
+  function loadPuzzle() {
+    const room = rooms[currentRoomKey];
+    const puzzles = room ? room.puzzles : null;
+
+    if (!room || !puzzles || puzzles.length === 0) {
+      if (puzzleIdEl) puzzleIdEl.textContent = "--";
+      if (puzzleDifficultyEl) puzzleDifficultyEl.textContent = "Sin acertijos aún";
+      if (puzzleTitleEl) puzzleTitleEl.textContent = "Sin acertijos definidos en esta sala";
+      if (puzzleBodyEl) {
+        puzzleBodyEl.textContent =
+          "Todavía no has añadido acertijos a esta sala. Úsala como campaña futura o en construcción.";
+      }
+      if (puzzleTagsEl) puzzleTagsEl.textContent = "";
+      if (bibleBadgeEl) bibleBadgeEl.style.display = "none";
+
+      [hint1El, hint2El, solutionEl].forEach(el => {
+        if (el) {
+          el.classList.remove("visible");
+          el.textContent = "";
+        }
+      });
+
+      if (hint1Btn) hint1Btn.disabled = true;
+      if (hint2Btn) hint2Btn.disabled = true;
+      if (solutionBtn) solutionBtn.disabled = true;
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+
+      if (puzzleCounterEl) puzzleCounterEl.textContent = "0 acertijos";
+      // Reset UI de respuesta (vacío)
+      if (answerInput) answerInput.value = "";
+      setAnswerFeedback("", null);
+
+      if (progressFillEl) progressFillEl.style.width = "0%";
+
+		updateSolvedUIForCurrentPuzzle();
+
+		// ✅ Timer de campaña: reset y start al cargar un acertijo (solo en campaña)
+		if (gameMode === "campaign-room" && campaignState && campaignState.timerEnabled) {
+		  campaignState.timerRemaining = campaignState.timeLimitSec; // reset
+		  startCampaignTimer();
+		} else {
+		  stopCampaignTimer();
+		}
+	  
+      return;
+    }
+
+    if (currentPuzzleIndex < 0) currentPuzzleIndex = 0;
+    if (currentPuzzleIndex >= puzzles.length) currentPuzzleIndex = 0;
+
+    const puzzle = puzzles[currentPuzzleIndex];
+
+    if (puzzleIdEl) puzzleIdEl.textContent = puzzle.id || "--";
+    if (puzzleDifficultyEl) puzzleDifficultyEl.textContent = puzzle.difficulty || "";
+    if (puzzleTitleEl) puzzleTitleEl.textContent = puzzle.title || "";
+    if (puzzleBodyEl) puzzleBodyEl.textContent = puzzle.body || "";
+    if (puzzleTagsEl) puzzleTagsEl.textContent = puzzle.tags || "";
+    if (bibleBadgeEl) {
+      bibleBadgeEl.style.display = puzzle.requiresBible ? "inline-flex" : "none";
+    }
+
+    const position = currentPuzzleIndex + 1;
+    const total = puzzles.length;
+    if (puzzleCounterEl) {
+      puzzleCounterEl.textContent = `Acertijo ${position} de ${total}`;
+    }
+    if (progressFillEl) {
+      const progressPercent = (position / total) * 100;
+      progressFillEl.style.width = progressPercent + "%";
+    }
+
+    if (hint1El) {
+      hint1El.classList.remove("visible");
+      hint1El.textContent = puzzle.hint1 || "Sin pista definida.";
+    }
+    if (hint2El) {
+      hint2El.classList.remove("visible");
+      hint2El.textContent = puzzle.hint2 || "Sin segunda pista definida.";
+    }
+    if (solutionEl) {
+      solutionEl.classList.remove("visible");
+      solutionEl.textContent = puzzle.solution || "Sin solución registrada.";
+    }
+
+    if (hint1Btn) hint1Btn.disabled = !puzzle.hint1;
+    if (hint2Btn) hint2Btn.disabled = !puzzle.hint2;
+    if (solutionBtn) solutionBtn.disabled = !puzzle.solution;
+
+    // --- Campaña: reset de intentos + bloqueo Pista 2 por símbolo ---
+    if (gameMode === "campaign-room" && campaignState) {
+      // defaults
+      campaignState.timeLimitSec = 180;
+      campaignState.attemptsMax = 2;
+      campaignState.attemptsRemaining = 2;
+      campaignState.hint2Unlocked = false;
+      campaignState.turnTokenUsed = false;
+      campaignState.ignoreNextTimePenaltyOnce = false;
+      campaignState.blockHint1Until = 0;
+
+      // Reset timer y arrancar
+      campaignState.timerRemaining = campaignState.timeLimitSec;
+
+      // Aplicar penalizaciones pendientes (pecados) al jugador activo (solo 1 vez)
+      const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
+        ? campaignState.players[campaignState.activePlayerIndex].id
+        : (campaignState.activePlayerIndex + 1);
+
+      const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.pendingPenalties)
+        ? multiplayer.latestRoom.pendingPenalties[String(activeSeat)]
+        : null;
+
+      if (pending) {
+        if (pending.timeDelta) campaignState.timerRemaining = Math.max(0, campaignState.timerRemaining + pending.timeDelta);
+        if (pending.attemptsDelta) campaignState.attemptsRemaining = Math.max(0, campaignState.attemptsRemaining + pending.attemptsDelta);
+        if (pending.blockHint1) campaignState.blockHint1Until = Date.now() + 30000;
+
+        // limpiar penalización en Firestore (host)
+        if (multiplayer.roomRef && appMode !== "player") {
+          const field = `pendingPenalties.${activeSeat}`;
+          const noticeText = (pending._notice && String(pending._notice).trim())
+            ? String(pending._notice).trim()
+            : "Te han aplicado una tentación.";
+          const noticeTitle = pending._sinKey ? `Te han aplicado ${pending._sinKey}.` : "Te han aplicado un pecado.";
+          multiplayer.roomRef.update({
+            [field]: firebase.firestore.FieldValue.delete(),
+            turnNotice: {
+              seat: activeSeat,
+              title: noticeTitle,
+              text: noticeText,
+              turnCounter: (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0,
+              ts: Date.now()
+            }
+          }).catch(()=>{});
+        }
+      }
+
+      updateTimerUI();
+      updateAttemptsUI();
+      startCampaignTimer();
+      refreshHintButtonsUI(puzzle);
+      setCampaignStatus("");
+    } else {
+      refreshHintButtonsUI(puzzle);
+    }
+    if (prevBtn) prevBtn.disabled = puzzles.length <= 1;
+    if (nextBtn) nextBtn.disabled = false;
+
+    updateSolvedUIForCurrentPuzzle();
+  }
+
+  function loadRoom(roomKey, puzzleIndexOverride, opts) {
+    opts = opts || {};
+    const room = rooms[roomKey];
+    if (!room) return;
+
+    const apply = () => {
+      currentRoomKey = roomKey;
+
+      const puzzles = room.puzzles || [];
+      if (puzzleIndexOverride != null &&
+          puzzleIndexOverride >= 0 &&
+          puzzleIndexOverride < puzzles.length) {
+        currentPuzzleIndex = puzzleIndexOverride;
+      } else {
+        if (currentPuzzleIndex >= puzzles.length) currentPuzzleIndex = 0;
+      }
+
+      if (roomTitleEl) roomTitleEl.textContent = room.name || "";
+      if (roomSubtitleEl) roomSubtitleEl.textContent = room.subtitle || "";
+      if (roomTaglineEl) roomTaglineEl.textContent = room.tagline || "";
+      if (roomImageEl && room.image) {
+        roomImageEl.src = room.image;
+        roomImageEl.alt = `Ilustración de ${room.name || ""}`;
+      }
+
+      // Prepara audio de sala (NO lo reproducimos aquí; lo gestiona showRoomSectionImmediate)
+      if (roomAudioEl) {
+        roomAudioEl.src = room.audio || "";
+        roomAudioEl.load();
+      }
+
+      // Estado/UI
+      setActiveRoomButton(roomKey);
+      loadPuzzle();
+      updateRoomSolvedSummary();
+      updateSidebarRoomCounters();
+      updateGlobalSolvedSummary();
+
+      // Mostrar la sala ya dentro de la transición (evita “cambios antes del negro”)
+      showRoomSectionImmediate();
+    };
+
+    if (opts.noTransition) apply();
+    else transitionTo(apply);
+  }
+
+  function findPuzzleByCode(rawCode) {
+    if (!rawCode) return null;
+    const normalized = rawCode.trim().toUpperCase();
+    for (const [key, room] of Object.entries(rooms)) {
+      const puzzles = room.puzzles || [];
+      const idx = puzzles.findIndex(
+        p => p.id && p.id.toUpperCase() === normalized
+      );
+      if (idx !== -1) {
+        return { roomKey: key, index: idx, code: normalized };
+      }
+    }
+    return null;
+  }
+
+  // --- LISTENERS ---
+
+  roomButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.room;
+      if (key && key !== currentRoomKey) {
+        gameMode = "free";
+        loadRoom(key, 0);
+      }
+    });
+  });
+
+	if (musicToggleBtn) {
+    // Persistencia simple del estado de música general
+    try { bgMusicMuted = localStorage.getItem("archivum_bgMusicMuted") === "1"; } catch (_) {}
+
+    const refreshMusicLabel = () => {
+      musicToggleBtn.textContent = bgMusicMuted ? "🔇 Música general: OFF" : "🔈 Música general: ON";
+    };
+    refreshMusicLabel();
+
+    musicToggleBtn.addEventListener("click", () => {
+      bgMusicMuted = !bgMusicMuted;
+      try { localStorage.setItem("archivum_bgMusicMuted", bgMusicMuted ? "1" : "0"); } catch (_) {}
+      refreshMusicLabel();
+      if (bgMusicMuted) {
+        stopBackgroundMusic();
+      } else {
+        playBackgroundMusic();
+      }
+    });
+
+    // Intento de reproducción al cargar (si el navegador lo permite)
+    if (!bgMusicMuted) {
+      playBackgroundMusic();
+      // Si el navegador bloquea el autoplay con sonido, lo reintentamos al primer gesto del usuario.
+      const resumeOnFirstGesture = () => {
+        if (!bgMusicMuted) playBackgroundMusic();
+      };
+      window.addEventListener("pointerdown", resumeOnFirstGesture, { once: true, capture: true });
+      window.addEventListener("keydown", resumeOnFirstGesture, { once: true, capture: true });
+    }
+  }
+
+	const skipBtn = document.getElementById("skipPuzzleBtn");
+	if (skipBtn) {
+	  skipBtn.addEventListener("click", () => {
+		failOrSkipCurrentPuzzle("skip");
+	  });
+	}
+
+	const failBtn = document.getElementById("failAttemptBtn");
+	if (failBtn) {
+	  failBtn.addEventListener("click", () => {
+		if (gameMode !== "campaign-room" || !campaignState) return;
+		campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) - 1);
+		updateAttemptsUI();
+
+		// Penalización de tiempo por fallo
+		const penalty = (GAME_RULES && GAME_RULES.wrongAttemptTimePenaltySec) ? GAME_RULES.wrongAttemptTimePenaltySec : 30;
+		if (campaignState.ignoreNextTimePenaltyOnce) {
+		  campaignState.ignoreNextTimePenaltyOnce = false;
+		} else {
+		  campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - penalty);
+		}
+		updateTimerUI();
+
+		if (campaignState.attemptsRemaining <= 0 || campaignState.timerRemaining <= 0) {
+		  failOrSkipCurrentPuzzle(campaignState.attemptsRemaining <= 0 ? "attempts" : "timeout");
+		}
+	  });
+	}
+
+	
+// --- Respuesta final (verificación en host) ---
+const answerBar = document.getElementById("answerBar");
+const answerInput = document.getElementById("answerInput");
+const verifyAnswerBtn = document.getElementById("verifyAnswerBtn");
+const manualCorrectBtn = document.getElementById("manualCorrectBtn");
+const answerFeedback = document.getElementById("answerFeedback");
+
+function normalizeAnswer(raw) {
+  if (raw == null) return "";
+  let s = String(raw).trim().toLowerCase();
+  // quitar tildes/diacríticos
+  try { s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (_) {}
+  // quitar puntuación común
+  s = s.replace(/[\.;:¡!¿\?\(\)\[\]\{\}"]/g, " ");
+  s = s.replace(/\s+/g, " ").trim();
+  return s;
+}
+
+function normalizeNumeric(raw) {
+  let s = normalizeAnswer(raw);
+  // para números con coma decimal
+  s = s.replace(/,/g, ".");
+  // deja solo números, signo y punto
+  s = s.replace(/[^0-9\-\.]/g, "");
+  // quitar ceros a la izquierda (manteniendo "0" si aplica)
+  if (/^-?\d+(?:\.\d+)?$/.test(s)) {
+    const num = Number(s);
+    if (!Number.isNaN(num)) return String(num);
+  }
+  return s;
+}
+
+function extractFinalAnswerFromSolutionText(solutionText) {
+  if (!solutionText) return null;
+  const t = String(solutionText);
+
+  // 1) Línea con "Código final"
+  const m = t.match(/c[oó]digo\s*final\s*[:=]\s*([^\n\r]+)/i);
+  const line = m ? m[1] : null;
+
+  const pickFrom = (str) => {
+    if (!str) return null;
+    // Preferir último número (incluye coma decimal)
+    const nums = str.match(/-?\d+(?:[\.,]\d+)?/g);
+    if (nums && nums.length) return nums[nums.length - 1];
+    // Si no hay números, intentar última palabra "fuerte"
+    const words = str.match(/[A-ZÁÉÍÓÚÜÑ]{3,}|[a-záéíóúüñ]{3,}/g);
+    if (words && words.length) return words[words.length - 1];
+    return null;
+  };
+
+  const candidate = pickFrom(line) || pickFrom(t.split(/\r?\n/).slice(-2).join(" "));
+  return candidate ? String(candidate).trim() : null;
+}
+
+function getAcceptedAnswersForPuzzle(puzzle) {
+  if (!puzzle) return [];
+  if (Array.isArray(puzzle.acceptedAnswers) && puzzle.acceptedAnswers.length) return puzzle.acceptedAnswers;
+  if (typeof puzzle.answer === "string" && puzzle.answer.trim()) return [puzzle.answer.trim()];
+  // fallback: intentar extraer del texto de solución
+  const extracted = extractFinalAnswerFromSolutionText(puzzle.solution);
+  return extracted ? [extracted] : [];
+}
+
+function setAnswerFeedback(msg, kind) {
+  if (!answerFeedback) return;
+  answerFeedback.textContent = msg || "";
+  answerFeedback.classList.remove("ok", "bad");
+  if (kind === "ok") answerFeedback.classList.add("ok");
+  if (kind === "bad") answerFeedback.classList.add("bad");
+}
+
+function getCurrentPuzzleSafe() {
+  const room = rooms[currentRoomKey];
+  const puzzles = room ? (room.puzzles || []) : [];
+  if (!puzzles.length) return null;
+  return puzzles[currentPuzzleIndex] || null;
+}
+
+function applyWrongAnswerPenalty() {
+  if (gameMode !== "campaign-room" || !campaignState) return;
+  campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) - 1);
+  updateAttemptsUI();
+
+  const penalty = (GAME_RULES && GAME_RULES.wrongAttemptTimePenaltySec) ? GAME_RULES.wrongAttemptTimePenaltySec : 30;
+  if (campaignState.ignoreNextTimePenaltyOnce) {
+    campaignState.ignoreNextTimePenaltyOnce = false;
+  } else {
+    campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - penalty);
+  }
+  updateTimerUI();
+
+  if (campaignState.attemptsRemaining <= 0 || campaignState.timerRemaining <= 0) {
+    failOrSkipCurrentPuzzle(campaignState.attemptsRemaining <= 0 ? "attempts" : "timeout");
+  }
+}
+
+function verifyCurrentAnswer() {
+  if (appMode === "player") return;
+  if (gameMode !== "campaign-room") {
+    setAnswerFeedback("La verificación solo está disponible durante la campaña.", "bad");
+    return;
+  }
+  const puzzle = getCurrentPuzzleSafe();
+  if (!puzzle || !puzzle.id) return;
+
+  const raw = answerInput ? answerInput.value : "";
+  const entered = String(raw || "").trim();
+  if (!entered) {
+    setAnswerFeedback("Escribe una respuesta antes de verificar.", "bad");
+    return;
+  }
+
+  const accepted = getAcceptedAnswersForPuzzle(puzzle);
+  if (!accepted.length) {
+    setAnswerFeedback("Este acertijo no tiene respuesta automática. Usa 'Marcar correcto' o 'Ver solución'.", "bad");
+    return;
+  }
+
+  // comparar (texto normalizado + numérico normalizado)
+  const enteredNorm = normalizeAnswer(entered);
+  const enteredNum = normalizeNumeric(entered);
+
+  let ok = false;
+  for (const a of accepted) {
+    const aNorm = normalizeAnswer(a);
+    const aNum = normalizeNumeric(a);
+    if (enteredNorm && aNorm && enteredNorm === aNorm) { ok = true; break; }
+    if (enteredNum && aNum && enteredNum === aNum) { ok = true; break; }
+  }
+
+  if (ok) {
+    setAnswerFeedback("✅ Correcto. Acertijo resuelto.", "ok");
+    // si ya estaba resuelto, no togglear
+    const id = String(puzzle.id || "").toUpperCase();
+    if (solvedMap && solvedMap[id]) return;
+    // esto gestiona campaña: progreso + volver a tablero + pasar turno
+    toggleSolvedCurrentPuzzle();
+  } else {
+    setAnswerFeedback("❌ Incorrecto. Se consume 1 intento y se aplica penalización.", "bad");
+    applyWrongAnswerPenalty();
+    if (answerInput) answerInput.select();
+  }
+}
+
+if (answerBar && appMode === "player") {
+  answerBar.style.display = "none";
+}
+
+if (verifyAnswerBtn) verifyAnswerBtn.addEventListener("click", verifyCurrentAnswer);
+if (answerInput) {
+  answerInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      verifyCurrentAnswer();
+    }
+  });
+}
+if (manualCorrectBtn) {
+  manualCorrectBtn.addEventListener("click", () => {
+    if (appMode === "player") return;
+    // Marca como resuelto usando el flujo existente
+    const puzzle = getCurrentPuzzleSafe();
+    if (!puzzle || !puzzle.id) return;
+    const id = String(puzzle.id || "").toUpperCase();
+    if (solvedMap && solvedMap[id]) {
+      setAnswerFeedback("Ya estaba resuelto.", "ok");
+      return;
+    }
+    setAnswerFeedback("✅ Marcado correcto (manual).", "ok");
+    toggleSolvedCurrentPuzzle();
+  });
+}
+
+
+if (sinCarousel) {
+	  sinCarousel.addEventListener("click", (ev) => {
+		const card = ev.target.closest(".sin-card");
+		if (!card || !sinSelectionPlayerId) return;
+		if (card.classList.contains("sin-card--taken")) return;
+
+		const chosenSin = card.dataset.sin;
+		const player = campaignState.players.find(p => p.id === sinSelectionPlayerId);
+		if (!player) return;
+
+		player.sin = chosenSin;
+		sinSelectionPlayerId = null;
+		sinOverlay.classList.add("sin-overlay--hidden");
+		renderPlayersSummary();
+	  });
+	}
+
+	if (sinOverlayClose) {
+	  sinOverlayClose.addEventListener("click", () => {
+		sinSelectionPlayerId = null;
+		sinOverlay.classList.add("sin-overlay--hidden");
+	  });
+	}
+
+  if (homeLogo) {
+    homeLogo.addEventListener("click", showHome);
+  }
+
+  if (startBtn) {
+    startBtn.addEventListener("click", showCampaignSetup);
+  }
+
+	rolesToBoardBtn.addEventListener("click", () => {
+	  // aquí puedes guardar campaignState en localStorage si quieres
+	  showCampaignBoardSection();
+	});
+
+	rolesCancelBtn.addEventListener("click", () => {
+	  campaignState = null;
+	  rolesSection.style.display = "none";
+	  // volver a la portada
+	  showHome(); // o la función que ya uses
+	});
+
+  if (exploreBtn) {
+    exploreBtn.addEventListener("click", () => {
+      gameMode = "free";
+      loadRoom("origen", 0);
+    });
+  }
+
+  if (rulesBtn) {
+    rulesBtn.addEventListener("click", showRules);
+  }
+
+  if (rulesBackBtn) {
+    rulesBackBtn.addEventListener("click", showHome);
+  }
+
+	function createCampaignState() {
+	  const numPlayers = Math.max(1, Math.min(7, parseInt(playersCountInput.value, 10) || 1));
+	  const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
+
+	  const names = (playersNamesInput.value || "")
+		.split(",").map(n => n.trim()).filter(Boolean);
+
+	  const shuffledCmds = shuffle(COMMANDMENTS);
+
+	  const players = [];
+	  for (let i = 0; i < numPlayers; i++) {
+		const name = names[i] || `Jugador ${i + 1}`;
+		const cmdKey = shuffledCmds[i % shuffledCmds.length];
+
+		players.push({
+		  id: i + 1,
+		  name,
+		  commandment: cmdKey,
+		  sin: null,
+		  solved: 0
+		});
+	  }
+
+	  const state = {
+		puzzlesPerRoom,
+		players,
+
+		activePlayerIndex: 0,
+		roomSolvedTotals: {},
+		solvedAttribution: {},
+		lastLoadedCode: null,
+		lastLoadedRoomKey: null,
+
+		autoPassTurn: true,     // ✅ coma
+
+		timeLimitSec: 180,
+		timerEnabled: true,
+		timerRemaining: 180,
+		timerIntervalId: null
+	  };
+
+	  // ✅ ahora sí existe
+	  state.timerRemaining = state.timeLimitSec;
+	  return state;
+	}
+
+
+
+  
+
+
+});
+</script>
