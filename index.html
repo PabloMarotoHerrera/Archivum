@@ -1988,7 +1988,7 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
             <div class="controls" style="display:flex; flex-direction:column; gap:10px;">
               <button class="action" id="playerUnlockHint2Btn" type="button">Gastar símbolo: desbloquear Pista 2</button>
               <button class="action primary" id="playerUseCommandmentPowerBtn" type="button">Gastar símbolo: activar mi Mandamiento</button>
-              <button class="action secondary" id="playerUseSinPowerBtn" type="button" style="display:none;">Gastar símbolo: activar mi Pecado</button>
+              <button class="action secondary" id="playerUseSinPowerBtn" type="button">Gastar símbolo: activar mi Pecado</button>
             </div>
           </div>
 
@@ -2305,26 +2305,9 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
 		if (campaignState) {
-          campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
-          campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
-        }
-
-        // Campaña (host): publica acertijo activo para móviles
-        if (multiplayer.roomRef && appMode !== "player" && campaignState) {
-          const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
-            ? campaignState.players[campaignState.activePlayerIndex].id
-            : (campaignState.activePlayerIndex + 1);
-          multiplayer.roomRef.update({
-            activeSeatNumber: activeSeat,
-            currentPuzzleCode: result.code,
-            currentRoomKey: result.roomKey,
-            hint2Unlocked: false,
-            turnTokenUsed: false
-          }).catch(()=>{});
-          campaignState.hint2Unlocked = false;
-          campaignState.turnTokenUsed = false;
-        }
-
+		  campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
+		  campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
+		}
       gameMode = "campaign-room";
       loadRoom(result.roomKey, result.index);
     });
@@ -2345,24 +2328,23 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!result) {
         if (puzzleCodeMessage) {
           puzzleCodeMessage.textContent = "No se ha encontrado ese código.";
+
         }
         return;
       }
 
-      
-      // Campaña (host): publica acertijo activo para que el jugador tenga botón de símbolo
-      if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player" && campaignState) {
+
+      // Campaña (host): publica acertijo activo para el turno
+      if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
         multiplayer.roomRef.update({
           currentPuzzleCode: result.code,
           currentRoomKey: result.roomKey,
           hint2Unlocked: false,
           turnTokenUsed: false
         }).catch(()=>{});
-        campaignState.hint2Unlocked = false;
-        campaignState.turnTokenUsed = false;
       }
 
-// Si el código pertenece a la sala actual, cambiamos solo el acertijo (sin transición)
+      // Si el código pertenece a la sala actual, cambiamos solo el acertijo (sin transición)
       if (result.roomKey === currentRoomKey) {
         currentPuzzleIndex = result.index;
         loadPuzzle();
@@ -2394,6 +2376,19 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       setCampaignStatus("");
       hint1El.classList.toggle("visible");
+      // Bendición M1: al ABRIR Pista 1, +10s (1 vez por acertijo)
+      if (gameMode === "campaign-room" && campaignState) {
+        const isVisible = hint1El.classList.contains("visible");
+        if (isVisible && campaignState.turnFlags && !campaignState.turnFlags.openedHint1) {
+          campaignState.turnFlags.openedHint1 = true;
+          if (campaignState.activeCmdKey === "No tendrás otros dioses") {
+            campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) + 10);
+            updateTimerUI();
+            setCampaignStatus("✨ Bendición (M1): +10s al abrir Pista 1.");
+          }
+        }
+      }
+
     });
   }
 if (hint2Btn && hint2El) {
@@ -2503,10 +2498,6 @@ if (solutionBtn && solutionEl) {
   let currentRoomKey = null;
 
 // --- INICIO ---
-  // Al abrir el juego en modo host, reiniciamos progreso local para evitar arrastres entre partidas.
-  if (appMode !== "player") {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-  }
   loadSolvedFromStorage();
   updateSidebarRoomCounters();
   updateGlobalSolvedSummary();
@@ -2538,6 +2529,7 @@ if (solutionBtn && solutionEl) {
     roomUnsub: null,
     actionsUnsub: null,
     latestRoom: null,
+    publishedPuzzleCode: null,
     playerListUnsub: null,
     playerList: [],
     isReady: false,
@@ -2937,35 +2929,50 @@ function hideView(el) {
       }
 
       if (room.phase === "playing") {
-        // entrar al tablero (host)
+        // Entrar al tablero (host) — IMPORTANTE: no re-inicializar en cada cambio del doc
         multiplayer.isReady = true;
-        // Construye un campaignState mínimo público
-        const players = (multiplayer.hostPlayers || []).slice()
-          .sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0))
-          .map(p => ({ id: p.seatNumber, name: p.name, solved: p.solved || 0, sinChosen: !!p.sinKey }));
-        campaignState = {
-          players,
-          activePlayerIndex: 0,
-          hideSecretsOnHost: true,
-          phase: "playing",
-          puzzlesPerRoom: room.puzzlesPerRoom || 3,
-          roomSolvedTotals: {},
-          solvedAttribution: {},
-          lastLoadedCode: null,
-          lastLoadedRoomKey: null,
-          autoPassTurn: true,
-          attemptsMax: 2,
-          attemptsRemaining: 2,
-          hint2Unlocked: false,
-          turnTokenUsed: false,
-          ignoreNextTimePenaltyOnce: false,
-          blockHint1Until: 0,
-          timeLimitSec: 180,
-          timerEnabled: true,
-          timerRemaining: 180,
-          timerIntervalId: null,
-        };
-        showBoard();
+
+        if (!multiplayer._bootstrappedPlaying) {
+          multiplayer._bootstrappedPlaying = true;
+
+          // Construye un campaignState mínimo público (solo 1 vez al entrar en playing)
+          const players = (multiplayer.hostPlayers || []).slice()
+            .sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0))
+            .map(p => ({ id: p.seatNumber, name: p.name, solved: p.solved || 0, sinChosen: !!p.sinKey }));
+
+          campaignState = {
+            players,
+            activePlayerIndex: 0,
+            hideSecretsOnHost: true,
+            phase: "playing",
+            puzzlesPerRoom: room.puzzlesPerRoom || 3,
+            roomSolvedTotals: {},
+            solvedAttribution: {},
+            lastLoadedCode: null,
+            lastLoadedRoomKey: null,
+            autoPassTurn: true,
+            attemptsMax: 2,
+            attemptsRemaining: 2,
+            hint2Unlocked: false,
+            turnTokenUsed: false,
+            ignoreNextTimePenaltyOnce: false,
+            blockHint1Until: 0,
+            timeLimitSec: 180,
+            timerEnabled: true,
+            timerRemaining: 180,
+            timerIntervalId: null,
+          };
+        } else {
+          // Mantén config en sync si el host cambia puzzlesPerRoom
+          if (campaignState) {
+            campaignState.puzzlesPerRoom = room.puzzlesPerRoom || campaignState.puzzlesPerRoom;
+          }
+        }
+
+        // No forzar vuelta al tablero si el host está dentro del acertijo
+        if (appMode !== "player" && gameMode !== "campaign-room") {
+          showBoard();
+        }
       }
     });
 
@@ -3093,20 +3100,30 @@ function hideView(el) {
       }
 
       playerCommandmentDesc.innerHTML = cmdInfo ? (
-        `<strong>${cmdInfo.short || ""}</strong><br>` +
-        `${cmdInfo.vow ? `<em>${cmdInfo.vow.title}:</em> ${cmdInfo.vow.text}<br>` : ""}` +
-        `${cmdInfo.power ? `<em>${cmdInfo.power.title}:</em> ${cmdInfo.power.text}` : ""}`
+        `${cmdInfo.blessing ? `<strong>Bendición:</strong> ${cmdInfo.blessing}<br>` : ""}` +
+        `${cmdInfo.vow ? `<strong>${cmdInfo.vow.title}:</strong> ${cmdInfo.vow.text}<br>` : ""}` +
+        `${cmdInfo.power ? `<strong>${cmdInfo.power.title}:</strong> ${cmdInfo.power.text}` : ""}`
       ) : "—";
 
       if (multiplayer.player.sinKey) {
         const sinInfo = SIN_META[multiplayer.player.sinKey] || null;
         playerSinName.textContent = sinInfo ? sinInfo.key : multiplayer.player.sinKey;
+
+        // Mostrar siempre que ya hay pecado elegido (aunque falte metadata).
+        playerSinBody.style.display = "flex";
         if (sinInfo) {
-          playerSinBody.style.display = "flex";
+          playerSinImg.style.display = "";
           playerSinImg.src = sinInfo.img;
           playerSinImg.alt = sinInfo.key;
-          playerSinDesc.innerHTML = `<strong>${sinInfo.short}</strong><br>${sinInfo.effect}` + (sinInfo.temptation ? `<br><em>${sinInfo.temptation.title}:</em> ${sinInfo.temptation.text}` : "");
+          playerSinDesc.innerHTML =
+            `${sinInfo.advantage ? `<strong>Ventaja:</strong> ${sinInfo.advantage}<br>` : ""}` +
+            `${sinInfo.cost ? `<strong>Coste:</strong> ${sinInfo.cost}<br>` : ""}` +
+            `${sinInfo.temptation ? `<strong>${sinInfo.temptation.title}:</strong> ${sinInfo.temptation.text}` : ""}`;
+        } else {
+          playerSinImg.style.display = "none";
+          playerSinDesc.textContent = "—";
         }
+
         playerSinHint.style.display = "none";
         playerOpenSinPickerBtn.style.display = "none";
       } else {
@@ -3156,22 +3173,12 @@ function hideView(el) {
         const isMyTurn = (activeSeat != null && multiplayer.player.seatNumber != null && Number(activeSeat) === Number(multiplayer.player.seatNumber));
         const canAct = isMyTurn && puzzleCode && !tokenUsed;
 
-        if (turnCard) turnCard.style.display = (isMyTurn && puzzleCode) ? "" : "none";
+        if (turnCard) turnCard.style.display = (multiplayer.player && multiplayer.player.seatNumber) ? "" : "none";
         if (turnStatus) {
-          const notice = room.turnNotice || null;
-          const showNotice = !!(notice && isMyTurn && Number(notice.seat) === Number(multiplayer.player.seatNumber));
-          if (!puzzleCode) {
-            turnStatus.textContent = "Aún no hay un acertijo activo en el host.";
-          } else if (!isMyTurn) {
-            turnStatus.textContent = `Turno del jugador ${activeSeat}.`;
-          } else if (showNotice) {
-            const title = notice.title ? (notice.title + " ") : "";
-            turnStatus.textContent = `⚠️ ${title}${notice.text || ""}`.trim();
-          } else if (tokenUsed) {
-            turnStatus.textContent = "Tu símbolo ya se ha gastado este turno.";
-          } else {
-            turnStatus.textContent = "Tienes 1 símbolo este turno. Elige: Pista 2 o activar poder.";
-          }
+          if (!puzzleCode) turnStatus.textContent = "Aún no hay un acertijo activo en el host.";
+          else if (!isMyTurn) turnStatus.textContent = `Turno del jugador ${activeSeat}.`;
+          else if (tokenUsed) turnStatus.textContent = "Tu símbolo ya se ha gastado este turno.";
+          else turnStatus.textContent = "Tienes 1 símbolo este turno. Elige: Pista 2 o activar poder.";
         }
 
         if (btnHint2) btnHint2.disabled = !canAct;
@@ -3352,7 +3359,26 @@ showPlayerMode();
           taken = new Set();
         }
 
-        sinCarousel.innerHTML = "";
+        
+        function buildSinPickerText(meta){
+          if (!meta) return "";
+          const parts = [];
+          if (meta.advantage) parts.push(`<strong>Ventaja:</strong> ${meta.advantage}`);
+          if (meta.cost) parts.push(`<strong>Coste:</strong> ${meta.cost}`);
+          const tempt = meta.temptation;
+          if (tempt) {
+            if (typeof tempt === "string") parts.push(`<strong>Tentación:</strong> ${tempt}`);
+            else if (tempt.text) parts.push(`<strong>${tempt.title || "Tentación"}:</strong> ${tempt.text}`);
+          }
+          if (!parts.length) {
+            const s = meta.short || "";
+            const e = meta.effect || "";
+            return [s,e].filter(Boolean).join("<br>");
+          }
+          return parts.join("<br>");
+        }
+
+sinCarousel.innerHTML = "";
         Object.values(SIN_META).forEach(meta => {
           const takenByOther = taken.has(meta.key);
           const card = document.createElement("button");
@@ -3371,9 +3397,7 @@ showPlayerMode();
               <img src="${meta.img}" alt="${meta.key}">
               <div class="sin-card-title">${meta.key}</div>
               <div class="sin-card-text">
-                ${meta.advantage ? `<strong>Ventaja:</strong> ${meta.advantage}<br>` : ""}
-                ${meta.cost ? `<strong>Coste:</strong> ${meta.cost}<br>` : ""}
-                ${meta.temptation ? `<strong>${meta.temptation.title}:</strong> ${meta.temptation.text}` : ""}
+                ${buildSinPickerText(meta)}
               </div>
             `;
           }
@@ -3445,13 +3469,6 @@ showPlayerMode();
         }
         const playersMax = Math.max(1, Math.min(7, parseInt(playersCountInput.value, 10) || 1));
         const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
-
-        // Reset de estado local al iniciar una campaña nueva
-        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-        solvedMap = {};
-        campaignState = null;
-        updateSidebarRoomCounters();
-        updateGlobalSolvedSummary();
 
         const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom });
         const joinUrl = computeJoinUrl(code);
@@ -3584,9 +3601,7 @@ showPlayerMode();
 		  <img src="${meta.img}" alt="${meta.key}">
 		  <div class="sin-card-title">${meta.key}</div>
 		  <div class="sin-card-text">
-			${meta.advantage ? `<strong>Ventaja:</strong> ${meta.advantage}<br>` : ""}
-			${meta.cost ? `<strong>Coste:</strong> ${meta.cost}<br>` : ""}
-			${meta.temptation ? `<strong>${meta.temptation.title}:</strong> ${meta.temptation.text}` : ""}
+			<strong>${meta.short}</strong><br>${meta.effect}
 		  </div>
 		`;
 
@@ -3769,7 +3784,7 @@ showPlayerMode();
     const cmdName = hideSecretsHost ? "Secreto" : (p.commandment || "—");
     const cmdImgHtml = cmdInfo ? `<img src="${cmdInfo.image}" alt="${cmdName}">` : "";
     const cmdDesc = cmdInfo
-      ? cmdInfo.short
+      ? (cmdInfo.blessing || cmdInfo.short || "")
       : (hideSecretsHost ? "Oculto para el host." : "Bendición especial para este jugador.");
 
     const sinInfo = (!hideSecretsHost && p.sin) ? (SIN_META[p.sin] || null) : null;
@@ -4001,9 +4016,10 @@ showPlayerMode();
 
 	
 	
-  async function hostHandleAction(db, a) {
+  
+async function hostHandleAction(db, a) {
     if (!multiplayer.roomRef || appMode === "player") return;
-    if (!campaignState || gameMode !== "campaign-room") return;
+    if (!campaignState) return; // permitir en tablero y en sala
 
     const room = multiplayer.latestRoom || {};
     const activeSeat = room.activeSeatNumber || null;
@@ -4015,49 +4031,199 @@ showPlayerMode();
     if (tokenUsed || campaignState.turnTokenUsed) return;
     if ((room.turnCounter || 0) !== (a.turnCounter || 0)) return; // acción de turno viejo
 
+    const getSeatRoles = (seat) => {
+      const p = (multiplayer && multiplayer.playerList)
+        ? (multiplayer.playerList.find(x => x.seatNumber === seat) || {})
+        : {};
+      return {
+        cmdKey: p.commandmentKey || p.commandment || p.mandamiento || null,
+        sinKey: p.sinKey || p.sin || p.pecado || null
+      };
+    };
+    const roles = getSeatRoles(activeSeat);
+    const activeCmdKey = roles.cmdKey;
+    const activeSinKey = roles.sinKey;
+
     if (a.type === "HINT2_UNLOCK") {
+      // Restricciones / votos
+      if (campaignState.hint2HardLocked) {
+        setCampaignStatus("⛔ Pista 2 está bloqueada este turno.");
+        return;
+      }
+      if (activeCmdKey === "No tendrás otros dioses" && (campaignState.timerRemaining || 0) > 120) {
+        setCampaignStatus("⛓️ Voto (M1): Pista 2 bloqueada hasta que el reloj baje de 120s.");
+        return;
+      }
+      if (activeCmdKey === "No robarás") {
+        const lastMap = room.lastUsedHint2BySeat || {};
+        if (lastMap[String(activeSeat)]) {
+          setCampaignStatus("⛓️ Voto (M7): no puedes usar Pista 2 dos turnos seguidos.");
+          return;
+        }
+      }
+
       campaignState.hint2Unlocked = true;
+
+      // Coste P2 (Avaricia): si desbloqueas Pista 2, -15s
+      if (activeSinKey === "Avaricia") {
+        campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - 15);
+        updateTimerUI();
+      }
+
       campaignState.turnTokenUsed = true;
+      if (campaignState.turnFlags) campaignState.turnFlags.usedHint2Unlock = true;
+
       setCampaignStatus("✅ Pista 2 desbloqueada por el jugador activo.");
-      refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
-      await multiplayer.roomRef.update({ hint2Unlocked: true, turnTokenUsed: true });
+      if (gameMode === "campaign-room") {
+        refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+      }
+
+      const map = Object.assign({}, room.lastUsedHint2BySeat || {});
+      map[String(activeSeat)] = true;
+
+      await multiplayer.roomRef.update({
+        hint2Unlocked: true,
+        turnTokenUsed: true,
+        lastTokenType: "hint2",
+        lastUsedHint2BySeat: map
+      });
       return;
     }
 
     if (a.type === "POWER") {
-      // consumir símbolo
-      campaignState.turnTokenUsed = true;
-      await multiplayer.roomRef.update({ turnTokenUsed: true });
-
       if (a.role === "commandment") {
         const key = a.key;
         const meta = key ? COMMANDMENT_META[key] : null;
-        const eff = meta && meta.power && meta.power.effect ? meta.power.effect : {};
+        if (!meta || !meta.power) return;
+
+        // Votos que bloquean Milagro
+        if (key === "Honrarás a tu padre y madre" && campaignState.hint2Unlocked) {
+          setCampaignStatus("⛓️ Voto (M4): no puedes usar Milagro si ya desbloqueaste Pista 2.");
+          return;
+        }
+        if (key === "No matarás" && (campaignState.attemptsRemaining || 0) <= 1) {
+          setCampaignStatus("⛓️ Voto (M5): con 1 intento no puedes gastar símbolo en poderes.");
+          return;
+        }
+        if (key === "No codiciarás bienes ajenos" && campaignState.turnFlags && !campaignState.turnFlags.spentAttempt && !(campaignState.turnFlags.hasVerified)) {
+          setCampaignStatus("⛓️ Voto (M9): primero debes intentar (verificar o gastar 1 intento).");
+          return;
+        }
+
+        // Límite de uso por partida
+        if (meta.power.uses && meta.power.uses.per === "game") {
+          const used = (room.usedMiraclesGame && room.usedMiraclesGame[String(activeSeat)] && room.usedMiraclesGame[String(activeSeat)][key]) ? true : false;
+          if (used) {
+            setCampaignStatus("⛔ Ya has usado este Milagro en la partida.");
+            return;
+          }
+        }
+
+        // Consumir símbolo
+        campaignState.turnTokenUsed = true;
+        if (campaignState.turnFlags) campaignState.turnFlags.usedPower = true;
+
+        // Guardar uso si es 1/partida
+        let updatePayload = { turnTokenUsed: true, lastTokenType: "power" };
+        if (meta.power.uses && meta.power.uses.per === "game") {
+          const usedAll = Object.assign({}, room.usedMiraclesGame || {});
+          const usedSeat = Object.assign({}, usedAll[String(activeSeat)] || {});
+          usedSeat[key] = true;
+          usedAll[String(activeSeat)] = usedSeat;
+          updatePayload.usedMiraclesGame = usedAll;
+        }
+        await multiplayer.roomRef.update(updatePayload);
+
+        const eff = meta.power.effect || {};
+
+        // Efectos de Milagro
         if (eff.addTimeSec) {
           campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) + eff.addTimeSec);
           updateTimerUI();
         }
         if (eff.addAttempts) {
-          campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) + eff.addAttempts);
+          const cap = (eff.maxAttempts != null) ? eff.maxAttempts : (eff.capAttempts != null ? eff.capAttempts : null);
+          let next = Math.max(0, (campaignState.attemptsRemaining || 0) + eff.addAttempts);
+          if (cap != null) next = Math.min(cap, next);
+          campaignState.attemptsRemaining = next;
           updateAttemptsUI();
         }
-        if (eff.ignoreNextTimePenaltyOnce) {
-          campaignState.ignoreNextTimePenaltyOnce = true;
+        if (eff.freezeTimeSec) {
+          campaignState.freezeUntilTs = Date.now() + (eff.freezeTimeSec * 1000);
         }
-        setCampaignStatus(`✨ Poder activado (Mandamiento): ${meta?.power?.text || "OK"}`);
+        if (eff.restoreAttemptOnWrongOnce) {
+          campaignState.restoreAttemptOnWrongOnce = true;
+        }
+        if (eff.setTimeToSecIfBelow != null) {
+          const thr = eff.thresholdBelowSec != null ? eff.thresholdBelowSec : 0;
+          if ((campaignState.timerRemaining || 0) < thr) {
+            campaignState.timerRemaining = eff.setTimeToSecIfBelow;
+            updateTimerUI();
+          }
+        }
+        if (eff.revealKeyword) {
+          const pz = getCurrentPuzzleSafe();
+          const kw = pz && pz.keyword ? pz.keyword : null;
+          setCampaignStatus(kw ? `🔎 Palabra clave: ${kw}` : "🔎 Palabra clave no disponible en este acertijo.");
+        }
+        if (eff.clearActivePenaltyOnce) {
+          const snap = campaignState.appliedPenaltySnapshot;
+          if (snap) {
+            if (snap.timeDelta) campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - snap.timeDelta);
+            if (snap.attemptsDelta) campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) - snap.attemptsDelta);
+            campaignState.hint2HardLocked = false;
+            campaignState.verifyLockedWhileRemainingAbove = null;
+            campaignState.wrongPenaltyOverrideSec = null;
+            campaignState.wrongExtraAttemptLoss = false;
+            campaignState.activePhysicalPenaltyText = null;
+            campaignState.appliedPenaltySnapshot = null;
+            updateTimerUI();
+            updateAttemptsUI();
+          }
+        }
+        if (eff.unlockHint2) {
+          campaignState.hint2Unlocked = true;
+          if (gameMode === "campaign-room") {
+        refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+      }
+          await multiplayer.roomRef.update({ hint2Unlocked: true });
+        }
+        if (eff.warmerColderOnce) {
+          const pz = getCurrentPuzzleSafe();
+          const ans = (pz && pz.answer) ? pz.answer : null;
+          const last = campaignState.lastEnteredAnswerNorm;
+          if (!ans || last == null) {
+            setCampaignStatus("⚖️ Veredicto: necesitas al menos una respuesta previa y una respuesta numérica para comparar.");
+          } else {
+            const truth = normalizeNumeric(ans);
+            const lastNum = normalizeNumeric(last);
+            const curRaw = answerInput ? answerInput.value : "";
+            const curNum = normalizeNumeric(curRaw);
+            if (!truth || !lastNum || !curNum) {
+              setCampaignStatus("⚖️ Veredicto: solo funciona con respuestas numéricas.");
+            } else {
+              const dLast = Math.abs(parseFloat(truth) - parseFloat(lastNum));
+              const dCur = Math.abs(parseFloat(truth) - parseFloat(curNum));
+              setCampaignStatus(dCur < dLast ? "⚖️ Veredicto: MÁS CERCA." : (dCur > dLast ? "⚖️ Veredicto: MÁS LEJOS." : "⚖️ Veredicto: IGUAL."));
+            }
+          }
+        }
+
+        setCampaignStatus(`✨ Milagro activado: ${meta.power.text || "OK"}`);
         return;
       }
 
       if (a.role === "sin") {
         const key = a.key;
         const meta = key ? SIN_META[key] : null;
-        const penBase = meta && meta.temptation && meta.temptation.targetPenalty ? meta.temptation.targetPenalty : null;
-        const pen = penBase ? Object.assign({}, penBase, {
-          _sinKey: key,
-          _notice: (meta && meta.temptation && meta.temptation.text) ? meta.temptation.text : ""
-        }) : null;
+        const pen = meta && meta.temptation && meta.temptation.targetPenalty ? meta.temptation.targetPenalty : null;
         const targetSeat = a.targetSeat;
         if (!targetSeat || !pen) return;
+
+        // Consumir símbolo
+        campaignState.turnTokenUsed = true;
+        if (campaignState.turnFlags) campaignState.turnFlags.usedPower = true;
+        await multiplayer.roomRef.update({ turnTokenUsed: true, lastTokenType: "power" });
 
         // Guardar penalización para el siguiente acertijo del objetivo
         await db.runTransaction(async (tx) => {
@@ -4088,7 +4254,7 @@ function updateAttemptsUI() {
 	}
 
 	function isHint2Locked() {
-	  return (gameMode === "campaign-room" && campaignState && !campaignState.hint2Unlocked);
+	  return (gameMode === "campaign-room" && campaignState && (!campaignState.hint2Unlocked || !!campaignState.hint2HardLocked));
 	}
 
 	function refreshHintButtonsUI(puzzle) {
@@ -4121,38 +4287,69 @@ function updateTimerUI() {
 
 	  updateTimerUI();
 	  campaignState.timerIntervalId = setInterval(() => {
-		campaignState.timerRemaining -= 1;
-		updateTimerUI();
+        // Congelación temporal (Mandamiento II)
+        const now = Date.now();
+        if (campaignState.freezeUntilTs && now < campaignState.freezeUntilTs) {
+          updateTimerUI();
+          return;
+        }
 
-		if (campaignState.timerRemaining <= 0) {
-		  stopCampaignTimer();
-		  failOrSkipCurrentPuzzle("timeout"); // se acabó el tiempo
-		}
-	  }, 1000);
-	}
+        campaignState.timerRemaining -= 1;
+        updateTimerUI();
 
-	function advanceTurnCampaign() {
+        // Voto M6: si desbloqueas Pista 2, debes verificar antes de 60s restantes
+        if (campaignState.activeCmdKey === "No cometerás adulterio" &&
+            campaignState.hint2Unlocked &&
+            !(campaignState.turnFlags && campaignState.turnFlags.hasVerified) &&
+            campaignState.timerRemaining <= 60) {
+          stopCampaignTimer();
+          setCampaignStatus("⛓️ Voto incumplido (M6): no verificaste antes de 60s. Pierdes el turno.");
+          failOrSkipCurrentPuzzle("vow_m6");
+          return;
+        }
+
+        if (campaignState.timerRemaining <= 0) {
+          stopCampaignTimer();
+          failOrSkipCurrentPuzzle("timeout"); // se acabó el tiempo
+        }
+      }, 1000);}
+
+	
+function advanceTurnCampaign() {
       if (!campaignState) return;
+
+      // asiento del jugador que TERMINA el turno (antes de avanzar)
+      const prevSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
+        ? campaignState.players[campaignState.activePlayerIndex].id
+        : (campaignState.activePlayerIndex + 1);
+
+      // Avanzar jugador activo
       campaignState.activePlayerIndex = (campaignState.activePlayerIndex + 1) % campaignState.players.length;
+
+      // asiento del jugador que EMPIEZA
+      const nextSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
+        ? campaignState.players[campaignState.activePlayerIndex].id
+        : (campaignState.activePlayerIndex + 1);
+
+      // Actualizar mapa “usó Pista 2 en su turno anterior” (para voto M7)
+      const room = multiplayer.latestRoom || {};
+      const map = Object.assign({}, room.lastUsedHint2BySeat || {});
+      map[String(prevSeat)] = !!(campaignState.turnFlags && campaignState.turnFlags.usedHint2Unlock);
 
       // Publicar turno en Firestore (host)
       if (multiplayer.roomRef && appMode !== "player") {
-        const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
-          ? campaignState.players[campaignState.activePlayerIndex].id
-          : (campaignState.activePlayerIndex + 1);
-
         multiplayer.roomRef.update({
-          activeSeatNumber: activeSeat,
+          activeSeatNumber: nextSeat,
           turnTokenUsed: false,
           hint2Unlocked: false,
           currentPuzzleCode: null,
           currentRoomKey: null,
-          activePuzzleSeat: null,
-          turnNotice: null,
+          lastUsedHint2BySeat: map,
           turnCounter: firebase.firestore.FieldValue.increment(1)
         }).catch(()=>{});
       }
     }
+
 
 	function failOrSkipCurrentPuzzle(reason = "skip") {
 	  if (!campaignState) return;
@@ -4220,13 +4417,16 @@ function updateTimerUI() {
 		  const target = campaignState.puzzlesPerRoom || 3;
 		  const done = campaignState.roomSolvedTotals[rk] >= target;
 
-		  // 3) ✅ Pasar turno automáticamente (actualiza Firestore) y limpiar estado remoto
-          advanceTurnCampaign();
+		  // 3) ✅ Volver al tablero sí o sí
+		  showBoard();
 
-          // 4) ✅ Volver al tablero sí o sí (y sin acertijo activo)
-          showBoard();
+		  // 4) ✅ Pasar turno automático (opcional)
+		  if (campaignState.autoPassTurn) {
+			campaignState.activePlayerIndex =
+			  (campaignState.activePlayerIndex + 1) % campaignState.players.length;
+		  }
 
-// Actualiza el panel
+		  // Actualiza el panel
 		  renderPlayersSummary();
 
 		  // Mensaje opcional
@@ -4268,6 +4468,16 @@ function updateTimerUI() {
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
       
       setActiveRoomButton(null);
+
+      // ✅ (Host) Al volver al tablero, indicar que no hay acertijo activo.
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.publishedPuzzleCode = null;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
       if (appRoot) requestAnimationFrame(() => appRoot.classList.remove("booting"));
   });
 }
@@ -4298,18 +4508,7 @@ function updateTimerUI() {
       showView(boardSection);
       setRitualOverlay("", false);
       if (sidebar) sidebar.style.display = "none";
-
-      // Al volver al tablero, NO hay acertijo activo (bloquea acciones móviles)
-      if (multiplayer.roomRef && appMode !== "player") {
-        multiplayer.roomRef.update({
-          currentPuzzleCode: null,
-          currentRoomKey: null,
-          activePuzzleSeat: null,
-          hint2Unlocked: false,
-          turnTokenUsed: false
-        }).catch(()=>{});
-      }
-
+      
       stopAudio();
       playBackgroundMusic();
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
@@ -4434,6 +4633,22 @@ function showRoomSection() {
 
     const puzzle = puzzles[currentPuzzleIndex];
 
+    // ✅ (Host) Publicar acertijo activo en Firestore para que los móviles sepan que hay turno en curso.
+    // Solo cuando cambia de acertijo (evita resetear el estado si el host re-renderiza la UI).
+    if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
+      const newCode = (puzzle && puzzle.id) ? puzzle.id : null;
+      if (newCode && multiplayer.publishedPuzzleCode !== newCode) {
+        multiplayer.publishedPuzzleCode = newCode;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: newCode,
+          currentRoomKey: currentRoomKey,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
+    }
+
+
     if (puzzleIdEl) puzzleIdEl.textContent = puzzle.id || "--";
     if (puzzleDifficultyEl) puzzleDifficultyEl.textContent = puzzle.difficulty || "";
     if (puzzleTitleEl) puzzleTitleEl.textContent = puzzle.title || "";
@@ -4480,6 +4695,18 @@ function showRoomSection() {
       campaignState.turnTokenUsed = false;
       campaignState.ignoreNextTimePenaltyOnce = false;
       campaignState.blockHint1Until = 0;
+      campaignState.hint2HardLocked = false;
+      campaignState.turnFlags = { verifyCount: 0, hasVerified: false, spentAttempt: false, openedHint1: false, usedHint2Unlock: false, usedPower: false, firstWrongNoTimePenaltyUsed: false };
+      campaignState.wrongPenaltyOverrideSec = null;
+      campaignState.wrongExtraAttemptLoss = false;
+      campaignState.verifyLockedWhileRemainingAbove = null;
+      campaignState.activePhysicalPenaltyText = null;
+      campaignState.appliedPenaltySnapshot = null;
+      campaignState.freezeUntilTs = 0;
+      campaignState.restoreAttemptOnWrongOnce = false;
+      campaignState.warmerColderAvailable = false;
+      campaignState.lastEnteredAnswerNorm = null;
+
 
       // Reset timer y arrancar
       campaignState.timerRemaining = campaignState.timeLimitSec;
@@ -4489,36 +4716,85 @@ function showRoomSection() {
         ? campaignState.players[campaignState.activePlayerIndex].id
         : (campaignState.activePlayerIndex + 1);
 
-      const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.pendingPenalties)
+      
+      // Aplicar bonus pendientes (por roles) al jugador activo
+      const bonus = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.pendingBonuses)
+        ? multiplayer.latestRoom.pendingBonuses[String(activeSeat)]
+        : null;
+      if (bonus) {
+        if (bonus.timeDelta) campaignState.timerRemaining = Math.max(0, campaignState.timerRemaining + bonus.timeDelta);
+        if (bonus.attemptsDelta) campaignState.attemptsRemaining = Math.max(0, campaignState.attemptsRemaining + bonus.attemptsDelta);
+
+        // limpiar bonus en Firestore (host)
+        if (multiplayer.roomRef && appMode !== "player") {
+          const fieldB = `pendingBonuses.${activeSeat}`;
+          multiplayer.roomRef.update({ [fieldB]: firebase.firestore.FieldValue.delete() }).catch(()=>{});
+        }
+      }
+
+const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.pendingPenalties)
         ? multiplayer.latestRoom.pendingPenalties[String(activeSeat)]
         : null;
 
+      
       if (pending) {
+        // Guardar snapshot para posibles “clemencias”
+        campaignState.appliedPenaltySnapshot = Object.assign({}, pending);
+
         if (pending.timeDelta) campaignState.timerRemaining = Math.max(0, campaignState.timerRemaining + pending.timeDelta);
         if (pending.attemptsDelta) campaignState.attemptsRemaining = Math.max(0, campaignState.attemptsRemaining + pending.attemptsDelta);
-        if (pending.blockHint1) campaignState.blockHint1Until = Date.now() + 30000;
+
+        if (pending.blockHint1ForSecFromStart) {
+          campaignState.blockHint1Until = Date.now() + (pending.blockHint1ForSecFromStart * 1000);
+        }
+        if (pending.blockHint2ThisTurn) {
+          campaignState.hint2HardLocked = true;
+        }
+        if (pending.verifyLockedWhileRemainingAbove) {
+          campaignState.verifyLockedWhileRemainingAbove = pending.verifyLockedWhileRemainingAbove;
+        }
+        if (pending.wrongPenaltyOverrideSec) {
+          campaignState.wrongPenaltyOverrideSec = pending.wrongPenaltyOverrideSec;
+        }
+        if (pending.wrongExtraAttemptLoss) {
+          campaignState.wrongExtraAttemptLoss = true;
+        }
+        if (pending.physical) {
+          campaignState.activePhysicalPenaltyText = pending.physical;
+          setCampaignStatus(`⚠️ Restricción (próximo turno): ${pending.physical}`);
+        }
 
         // limpiar penalización en Firestore (host)
         if (multiplayer.roomRef && appMode !== "player") {
           const field = `pendingPenalties.${activeSeat}`;
-          const noticeText = (pending._notice && String(pending._notice).trim())
-            ? String(pending._notice).trim()
-            : "Te han aplicado una tentación.";
-          const noticeTitle = pending._sinKey ? `Te han aplicado ${pending._sinKey}.` : "Te han aplicado un pecado.";
-          multiplayer.roomRef.update({
-            [field]: firebase.firestore.FieldValue.delete(),
-            turnNotice: {
-              seat: activeSeat,
-              title: noticeTitle,
-              text: noticeText,
-              turnCounter: (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0,
-              ts: Date.now()
-            }
-          }).catch(()=>{});
+          multiplayer.roomRef.update({ [field]: firebase.firestore.FieldValue.delete() }).catch(()=>{});
         }
       }
 
-      updateTimerUI();
+      
+      // Aplicar bonus/malus de inicio de turno (por roles)
+      const _roomDoc = (multiplayer && multiplayer.latestRoom) ? multiplayer.latestRoom : {};
+      const _ap = (multiplayer && multiplayer.playerList) ? (multiplayer.playerList.find(p => p.seatNumber === activeSeat) || null) : null;
+      const activeCmdKey = _ap ? (_ap.commandmentKey || _ap.commandment || _ap.mandamiento) : null;
+      const activeSinKey = _ap ? (_ap.sinKey || _ap.sin || _ap.pecado) : null;
+
+      // Mandamiento IX: +10s si el anterior gastó símbolo en poder
+      if (activeCmdKey === "No codiciarás bienes ajenos" && _roomDoc.lastTokenType === "power") {
+        campaignState.timerRemaining = Math.max(0, campaignState.timerRemaining + 10);
+      }
+
+      // Pecados (inicio de turno)
+      if (activeSinKey === "Soberbia") {
+        campaignState.timerRemaining = Math.max(0, campaignState.timerRemaining + 10);
+      }
+      if (activeSinKey === "Pereza") {
+        campaignState.timerRemaining = Math.max(0, campaignState.timerRemaining - 10);
+      }
+
+      // Bloqueos por defecto
+      campaignState.activeCmdKey = activeCmdKey || null;
+      campaignState.activeSinKey = activeSinKey || null;
+updateTimerUI();
       updateAttemptsUI();
       startCampaignTimer();
       refreshHintButtonsUI(puzzle);
@@ -4569,6 +4845,23 @@ function showRoomSection() {
       updateRoomSolvedSummary();
       updateSidebarRoomCounters();
       updateGlobalSolvedSummary();
+
+      // Campaña (host): publica el acertijo activo en Firestore (para que el móvil sepa que está resolviendo)
+      if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
+        try {
+          const activeCode = (opts && opts.forcePuzzleCode) ? String(opts.forcePuzzleCode).toUpperCase() :
+            (room.puzzles && room.puzzles[currentPuzzleIndex] && room.puzzles[currentPuzzleIndex].id) ? String(room.puzzles[currentPuzzleIndex].id).toUpperCase() :
+            (campaignState && campaignState.lastLoadedCode) ? String(campaignState.lastLoadedCode).toUpperCase() : null;
+          if (activeCode) {
+            multiplayer.roomRef.update({
+              currentPuzzleCode: activeCode,
+              currentRoomKey: roomKey,
+              hint2Unlocked: false,
+              turnTokenUsed: false
+            }).catch(()=>{});
+          }
+        } catch (_) {}
+      }
 
       // Mostrar la sala ya dentro de la transición (evita “cambios antes del negro”)
       showRoomSectionImmediate();
@@ -4746,23 +5039,66 @@ function getCurrentPuzzleSafe() {
   return puzzles[currentPuzzleIndex] || null;
 }
 
+
 function applyWrongAnswerPenalty() {
   if (gameMode !== "campaign-room" || !campaignState) return;
-  campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) - 1);
+
+  if (!campaignState.turnFlags) {
+    campaignState.turnFlags = { verifyCount: 0, hasVerified: false, spentAttempt: false, openedHint1: false, usedHint2Unlock: false, usedPower: false, firstWrongNoTimePenaltyUsed: false };
+  }
+
+  // Consumir intentos
+  campaignState.turnFlags.spentAttempt = true;
+  let attemptLoss = 1;
+  if (campaignState.wrongExtraAttemptLoss) attemptLoss += 1;
+
+  campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) - attemptLoss);
   updateAttemptsUI();
 
-  const penalty = (GAME_RULES && GAME_RULES.wrongAttemptTimePenaltySec) ? GAME_RULES.wrongAttemptTimePenaltySec : 30;
-  if (campaignState.ignoreNextTimePenaltyOnce) {
-    campaignState.ignoreNextTimePenaltyOnce = false;
+  // Penalización de tiempo por fallo
+  const basePenalty = (GAME_RULES && GAME_RULES.wrongAttemptTimePenaltySec) ? GAME_RULES.wrongAttemptTimePenaltySec : 30;
+  const penalty = (campaignState.wrongPenaltyOverrideSec != null) ? campaignState.wrongPenaltyOverrideSec : basePenalty;
+
+  const cmd = campaignState.activeCmdKey;
+  const sin = campaignState.activeSinKey;
+
+  const skipTimePenaltyThisWrong =
+    ((cmd === "No tomarás el Nombre en vano") || (cmd === "No matarás")) &&
+    !campaignState.turnFlags.firstWrongNoTimePenaltyUsed;
+
+  if (skipTimePenaltyThisWrong) {
+    campaignState.turnFlags.firstWrongNoTimePenaltyUsed = true;
   } else {
     campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - penalty);
   }
+
+  // Coste P1 (Soberbia): -10s extra al fallar
+  if (sin === "Soberbia") {
+    campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) - 10);
+  }
+
+  // Bendición M7 (No robarás): +10s al primer fallo del turno
+  if (cmd === "No robarás") {
+    if (!campaignState.turnFlags.m7RefundUsed) {
+      campaignState.turnFlags.m7RefundUsed = true;
+      campaignState.timerRemaining = Math.max(0, (campaignState.timerRemaining || 0) + 10);
+    }
+  }
+
+  // Milagro M3: recuperar 1 intento tras fallar (solo una vez)
+  if (campaignState.restoreAttemptOnWrongOnce) {
+    campaignState.restoreAttemptOnWrongOnce = false;
+    campaignState.attemptsRemaining = Math.max(0, (campaignState.attemptsRemaining || 0) + 1);
+    updateAttemptsUI();
+  }
+
   updateTimerUI();
 
   if (campaignState.attemptsRemaining <= 0 || campaignState.timerRemaining <= 0) {
     failOrSkipCurrentPuzzle(campaignState.attemptsRemaining <= 0 ? "attempts" : "timeout");
   }
 }
+
 
 function verifyCurrentAnswer() {
   if (appMode === "player") return;
@@ -4780,6 +5116,37 @@ function verifyCurrentAnswer() {
     return;
   }
 
+  // Restricciones de verificación (Votos / Tentaciones)
+  if (campaignState && campaignState.turnFlags) {
+    // Tentación Pereza (P7): bloqueo hasta que el reloj baje de X
+    if (campaignState.verifyLockedWhileRemainingAbove != null &&
+        (campaignState.timerRemaining || 0) > campaignState.verifyLockedWhileRemainingAbove) {
+      setAnswerFeedback(`⛔ Verificación bloqueada hasta que el reloj baje de ${campaignState.verifyLockedWhileRemainingAbove}s.`, "bad");
+      return;
+    }
+
+    // Voto M2: no verificar con <20s
+    if (campaignState.activeCmdKey === "No tomarás el Nombre en vano" &&
+        (campaignState.timerRemaining || 0) < 20) {
+      setAnswerFeedback("⛓️ Voto (M2): no puedes verificar con menos de 20s.", "bad");
+      return;
+    }
+
+    // Voto M8: solo 1 verificación por turno
+    if (campaignState.activeCmdKey === "No darás falso testimonio" &&
+        (campaignState.turnFlags.verifyCount || 0) >= 1) {
+      setAnswerFeedback("⛓️ Voto (M8): solo puedes verificar 1 vez por turno.", "bad");
+      return;
+    }
+  }
+
+  // Registrar intento de verificación
+  if (campaignState && campaignState.turnFlags) {
+    campaignState.turnFlags.verifyCount = (campaignState.turnFlags.verifyCount || 0) + 1;
+    campaignState.turnFlags.hasVerified = true;
+  }
+
+
   const accepted = getAcceptedAnswersForPuzzle(puzzle);
   if (!accepted.length) {
     setAnswerFeedback("Este acertijo no tiene respuesta automática. Usa 'Marcar correcto' o 'Ver solución'.", "bad");
@@ -4787,22 +5154,73 @@ function verifyCurrentAnswer() {
   }
 
   // comparar (texto normalizado + numérico normalizado)
-  const enteredNorm = normalizeAnswer(entered);
+  const strictText = (campaignState && campaignState.activeCmdKey === "No codiciarás la pareja del prójimo" && campaignState.hint2Unlocked);
+
+  const normalizeLenient = (raw) => {
+    let s = normalizeAnswer(raw);
+    // tolera plural simple
+    if (!strictText) {
+      s = s.replace(/([a-zñ]{4,})es/g, "$1");
+      s = s.replace(/([a-zñ]{4,})s/g, "$1");
+    }
+    return s;
+  };
+
+  const enteredNorm = strictText ? normalizeAnswer(entered) : normalizeLenient(entered);
   const enteredNum = normalizeNumeric(entered);
 
   let ok = false;
   for (const a of accepted) {
-    const aNorm = normalizeAnswer(a);
+    const aNorm = strictText ? normalizeAnswer(a) : normalizeLenient(a);
     const aNum = normalizeNumeric(a);
     if (enteredNorm && aNorm && enteredNorm === aNorm) { ok = true; break; }
     if (enteredNum && aNum && enteredNum === aNum) { ok = true; break; }
   }
+
+  // Guardar última respuesta (para “más cerca/más lejos”)
+  if (campaignState) campaignState.lastEnteredAnswerNorm = entered;
 
   if (ok) {
     setAnswerFeedback("✅ Correcto. Acertijo resuelto.", "ok");
     // si ya estaba resuelto, no togglear
     const id = String(puzzle.id || "").toUpperCase();
     if (solvedMap && solvedMap[id]) return;
+    // Bonus/penalizaciones para tu PRÓXIMO turno (según roles)
+    if (multiplayer && multiplayer.roomRef && appMode !== "player") {
+      const seat = (multiplayer.latestRoom && multiplayer.latestRoom.activeSeatNumber) ? multiplayer.latestRoom.activeSeatNumber : null;
+      if (seat) {
+        const bonus = {};
+        // M3: guardar +10s si terminas con >60s
+        if (campaignState.activeCmdKey === "Santificarás el descanso" && (campaignState.timerRemaining || 0) > 60) {
+          bonus.timeDelta = (bonus.timeDelta || 0) + 10;
+        }
+        // M3 voto: si usaste Pista 2, siguiente turno -15s
+        if (campaignState.activeCmdKey === "Santificarás el descanso" && campaignState.turnFlags && campaignState.turnFlags.usedHint2Unlock) {
+          bonus.timeDelta = (bonus.timeDelta || 0) - 15;
+        }
+        // M6: si resuelves sin Pista 2, siguiente turno +1 intento
+        if (campaignState.activeCmdKey === "No cometerás adulterio" && !campaignState.hint2Unlocked) {
+          bonus.attemptsDelta = (bonus.attemptsDelta || 0) + 1;
+        }
+        // P4 (Envidia) coste: si aciertas, siguiente turno -10s
+        if (campaignState.activeSinKey === "Envidia") {
+          bonus.timeDelta = (bonus.timeDelta || 0) - 10;
+        }
+
+        if (Object.keys(bonus).length) {
+          firebase.firestore().runTransaction(async (tx) => {
+            const snap = await tx.get(multiplayer.roomRef);
+            if (!snap.exists) return;
+            const r = snap.data() || {};
+            const all = Object.assign({}, r.pendingBonuses || {});
+            const cur = Object.assign({}, all[String(seat)] || {});
+            all[String(seat)] = Object.assign(cur, bonus);
+            tx.update(multiplayer.roomRef, { pendingBonuses: all });
+          }).catch(()=>{});
+        }
+      }
+    }
+
     // esto gestiona campaña: progreso + volver a tablero + pasar turno
     toggleSolvedCurrentPuzzle();
   } else {
