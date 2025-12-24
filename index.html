@@ -4421,9 +4421,26 @@ function advanceTurnCampaign() {
 		  showBoard();
 
 		  // 4) ✅ Pasar turno automático (opcional)
+		  // IMPORTANTÍSIMO: si estamos en multijugador, el turno REAL vive en Firestore.
 		  if (campaignState.autoPassTurn) {
-			campaignState.activePlayerIndex =
-			  (campaignState.activePlayerIndex + 1) % campaignState.players.length;
+			advanceTurnCampaign(); // publica activeSeatNumber + resetea token/pistas en Firestore
+		  } else {
+			// Aunque no pases turno, deja el tablero en “sin acertijo activo” para bloquear acciones en móviles
+			if (multiplayer.roomRef && appMode !== "player") {
+			  multiplayer.roomRef.update({
+				currentPuzzleCode: null,
+				currentRoomKey: null,
+				hint2Unlocked: false,
+				turnTokenUsed: false
+			  }).catch(()=>{});
+			}
+			// Reseteo local para el siguiente acertijo
+			campaignState.attemptsRemaining = campaignState.attemptsMax || 2;
+			campaignState.hint2Unlocked = false;
+			campaignState.turnTokenUsed = false;
+			campaignState.turnFlags = {};
+			updateAttemptsUI();
+			refreshHintButtonsUI(null);
 		  }
 
 		  // Actualiza el panel
@@ -4474,6 +4491,7 @@ function advanceTurnCampaign() {
         multiplayer.publishedPuzzleCode = null;
         multiplayer.roomRef.update({
           currentPuzzleCode: null,
+          currentRoomKey: null,
           hint2Unlocked: false,
           turnTokenUsed: false
         }).catch(()=>{});
@@ -4497,6 +4515,17 @@ function advanceTurnCampaign() {
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
       setActiveRoomButton(null);
+
+      // ✅ (Host) En el tablero NO hay acertijo activo → bloquear acciones en móviles.
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.publishedPuzzleCode = null;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          currentRoomKey: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
   });
 }
 
@@ -4514,6 +4543,17 @@ function advanceTurnCampaign() {
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
       setActiveRoomButton(null);
+
+      // ✅ (Host) En el tablero NO hay acertijo activo → bloquear acciones en móviles.
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.publishedPuzzleCode = null;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          currentRoomKey: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
   });
 }
 
@@ -4530,6 +4570,17 @@ function advanceTurnCampaign() {
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
       setActiveRoomButton(null);
+
+      // ✅ (Host) En el tablero NO hay acertijo activo → bloquear acciones en móviles.
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.publishedPuzzleCode = null;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          currentRoomKey: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
   });
 }
 
