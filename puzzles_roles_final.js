@@ -1826,7 +1826,7 @@ const GAME_RULES = {
 // =========================
 const COMMANDMENT_META = {
   "No tendrás otros dioses": {
-    image: "m1.png",
+    image: "no-otros-dioses.png",
     tag: "Mandamiento I",
     blessing: "Al abrir Pista 1, ganas +10s (1 vez por acertijo).",
     vow: { title: "Voto", text: "No puedes desbloquear Pista 2 hasta que el temporizador baje de 120s." },
@@ -1838,7 +1838,7 @@ const COMMANDMENT_META = {
     }
   },
   "No tomarás el Nombre en vano": {
-    image: "m2.png",
+    image: "no-nombre-vano.png",
     tag: "Mandamiento II",
     blessing: "Tu primer fallo verificado del turno no penaliza -30s (solo -1 intento) (1 vez por acertijo).",
     vow: { title: "Voto", text: "No puedes verificar con menos de 20s restantes." },
@@ -1850,7 +1850,7 @@ const COMMANDMENT_META = {
     }
   },
   "Santificarás el descanso": {
-    image: "m3.png",
+    image: "santificar-fiestas.png",
     tag: "Mandamiento III",
     blessing: "Si terminas tu turno con >60s, guardas +10s para tu siguiente turno (1 vez por acertijo).",
     vow: { title: "Voto", text: "Si desbloqueas Pista 2, tu siguiente turno empieza con -15s." },
@@ -1862,7 +1862,7 @@ const COMMANDMENT_META = {
     }
   },
   "Honrarás a tu padre y madre": {
-    image: "m4.png",
+    image: "honrar-padres.png",
     tag: "Mandamiento IV",
     blessing: "1 vez por acertijo puedes pedir “Pista 1 mejorada” (un matiz extra) sin coste.",
     vow: { title: "Voto", text: "No puedes usar Milagro en un turno donde ya hayas desbloqueado Pista 2." },
@@ -1874,7 +1874,7 @@ const COMMANDMENT_META = {
     }
   },
   "No matarás": {
-    image: "m5.png",
+    image: "no-mataras.png",
     tag: "Mandamiento V",
     blessing: "Tu primer fallo del turno no aplica -30s (solo -1 intento) (1 vez por acertijo).",
     vow: { title: "Voto", text: "Si te queda 1 intento, no puedes gastar el símbolo en poderes: solo Pista 2 (o nada)." },
@@ -1886,7 +1886,7 @@ const COMMANDMENT_META = {
     }
   },
   "No cometerás adulterio": {
-    image: "m6.png",
+    image: "no-actos-impuros.png",
     tag: "Mandamiento VI",
     blessing: "Si resuelves sin desbloquear Pista 2, tu siguiente turno gana +1 intento (máx 3) (1 vez por acertijo).",
     vow: { title: "Voto", text: "Si desbloqueas Pista 2, debes verificar antes de que queden 60s o pierdes el turno." },
@@ -1898,7 +1898,7 @@ const COMMANDMENT_META = {
     }
   },
   "No robarás": {
-    image: "m7.png",
+    image: "no-robaras.png",
     tag: "Mandamiento VII",
     blessing: "Si fallas una verificación, recuperas +10s (solo la primera vez por turno) (1 vez por acertijo).",
     vow: { title: "Voto", text: "No puedes desbloquear Pista 2 dos turnos seguidos." },
@@ -1910,7 +1910,7 @@ const COMMANDMENT_META = {
     }
   },
   "No darás falso testimonio": {
-    image: "m8.png",
+    image: "no-falso-testimonio.png",
     tag: "Mandamiento VIII",
     blessing: "Al escribir una respuesta, el host muestra “✔ formato válido” (sin revelar si es correcta).",
     vow: { title: "Voto", text: "Solo puedes verificar 1 vez por turno." },
@@ -1922,7 +1922,7 @@ const COMMANDMENT_META = {
     }
   },
   "No codiciarás bienes ajenos": {
-    image: "m9.png",
+    image: "no-codiciar-bienes.png",
     tag: "Mandamiento IX",
     blessing: "Si el jugador anterior gastó el símbolo en un poder, tú ganas +10s al inicio de tu turno (1 vez por acertijo).",
     vow: { title: "Voto", text: "No puedes usar Milagro hasta haber hecho al menos 1 verificación (o consumido 1 intento) en tu turno." },
@@ -1934,7 +1934,7 @@ const COMMANDMENT_META = {
     }
   },
   "No codiciarás la pareja del prójimo": {
-    image: "m10.png",
+    image: "no-pensamientos-impuros.png",
     tag: "Mandamiento X",
     blessing: "Si la respuesta es texto, se aceptan variantes ortográficas extra (tildes, mayúsculas, espacios y plural) salvo que uses Pista 2.",
     vow: { title: "Voto", text: "Si desbloqueas Pista 2, tu respuesta debe ser exacta (canónica) (sin variantes)." },
