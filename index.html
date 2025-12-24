@@ -1444,6 +1444,22 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
       margin-top: 14px;
     }
 
+
+    /* Reglas: acordeones de roles */
+    .rules-detail{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .rules-detail summary{
+      cursor: pointer;
+      list-style: none;
+      outline: none;
+      font-weight: 700;
+    }
+    .rules-detail summary::-webkit-details-marker{ display:none; }
+    .rules-detail[open]{ background: rgba(255,255,255,0.06); }
 </style>
 </head>
 <body>
@@ -1632,8 +1648,175 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 		<li><strong>Pecado capital</strong>: ventaja + coste + tentación (ataque).</li>
 		<li>Los roles son <strong>privados</strong>: el host no ve mandamientos ni pecados.</li>
 	  </ul>
+	  <h3 class="rules-heading">3. Mandamientos y pecados — pasivas y activas</h3>
+	  <p class="rules-text">
+		<strong>Importante:</strong> tu rol es secreto (solo tú lo ves en tu móvil). Las <strong>pasivas</strong> se aplican automáticamente
+		(según la descripción) y la <strong>activa</strong> se dispara desde el móvil gastando el <strong>símbolo</strong> del turno.
+	  </p>
 
-	  <h3 class="rules-heading">3. Campaña y tablero físico</h3>
+	  <h4 class="rules-heading" style="font-size:1.1rem; margin-top:14px;">Mandamientos (Bendición + Voto + Milagro)</h4>
+	  <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento I</strong> — No tendrás otros dioses</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Al abrir Pista 1, ganas +10s (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes desbloquear Pista 2 hasta que el temporizador baje de 120s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> +1 intento extra en tu turno (máx 3) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento II</strong> — No tomarás el Nombre en vano</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Tu primer fallo verificado del turno no penaliza -30s (solo -1 intento) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes verificar con menos de 20s restantes.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Congela el tiempo 15s antes de verificar (1 vez por partida).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento III</strong> — Santificarás el descanso</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si terminas tu turno con &gt;60s, guardas +10s para tu siguiente turno (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si desbloqueas Pista 2, tu siguiente turno empieza con -15s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Reintento”: si fallas una verificación, recuperas +1 intento (una vez) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento IV</strong> — Honrarás a tu padre y madre</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> 1 vez por acertijo puedes pedir “Pista 1 mejorada” (un matiz extra) sin coste.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes usar Milagro en un turno donde ya hayas desbloqueado Pista 2.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Revela una “Palabra clave” del acertijo (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento V</strong> — No matarás</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Tu primer fallo del turno no aplica -30s (solo -1 intento) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si te queda 1 intento, no puedes gastar el símbolo en poderes: solo Pista 2 (o nada).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Clemencia”: cancela una penalización personal activa este turno (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento VI</strong> — No cometerás adulterio</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si resuelves sin desbloquear Pista 2, tu siguiente turno gana +1 intento (máx 3) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si desbloqueas Pista 2, debes verificar antes de que queden 60s o pierdes el turno.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Si tu reloj baja de 60s, lo sube a 90s (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento VII</strong> — No robarás</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si fallas una verificación, recuperas +10s (solo la primera vez por turno) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes desbloquear Pista 2 dos turnos seguidos.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Restituir”: recupera +1 intento perdido del turno (máx hasta 2) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento VIII</strong> — No darás falso testimonio</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Al escribir una respuesta, el host muestra “✔ formato válido” (sin revelar si es correcta).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Solo puedes verificar 1 vez por turno.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Veredicto”: el host te da “más cerca/más lejos” comparado con tu última respuesta (1 vez por partida).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento IX</strong> — No codiciarás bienes ajenos</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si el jugador anterior gastó el símbolo en un poder, tú ganas +10s al inicio de tu turno (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes usar Milagro hasta haber hecho al menos 1 verificación (o consumido 1 intento) en tu turno.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Desbloquea Pista 2 en tu turno. (Se considera el gasto del símbolo del turno.) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento X</strong> — No codiciarás la pareja del prójimo</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si la respuesta es texto, se aceptan variantes ortográficas (tildes, mayúsculas, espacios y plural) salvo que uses Pista 2.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si desbloqueas Pista 2, tu respuesta debe ser exacta (canónica) (sin variantes).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Inspiración”: añade +30s al reloj del turno (1 vez por acertijo).</p>
+          </div>
+        </details>
+	  </div>
+
+	  <h4 class="rules-heading" style="font-size:1.1rem; margin-top:18px;">Pecados capitales (Ventaja + Coste + Tentación)</h4>
+	  <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <details class="rules-detail">
+          <summary><strong>Soberbia</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> +10s al inicio de tu turno (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si fallas una verificación, pierdes -10s extra.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo empieza su próximo turno con -30s.</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Avaricia</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Si resuelves sin desbloquear Pista 2, guardas 1 “Moneda” (máx 1) → en otro turno te da +1 intento.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si desbloqueas Pista 2, pierdes -15s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede usar bolígrafo/notas en su próximo turno (solo mente/voz).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Lujuria</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> 1 vez por acertijo puedes resetear tu reloj a 120s si está por debajo.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si fallas una vez, el resto del turno no puedes pedir pistas.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede usar Pista 1 durante sus primeros 60s.</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Envidia</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Si el jugador anterior acertó, tú empiezas con +1 intento (máx 3).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si tú aciertas, tu siguiente turno empieza con -10s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede gastar símbolo en Pista 2 ese turno (Pista 2 bloqueada).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Gula</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Puedes ver Pista 1 sin consumir nada aunque el host aún no la muestre (privada) 1 vez por acertijo.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Cada pista que uses te cuesta -10s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo pierde -15s y su penalización por fallo es -45s (en vez de -30s) ese turno.</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Ira</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Cuando fallas, recuperas +1 intento (solo 1 vez por partida).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si te queda 1 intento, estás obligado a verificar antes de que queden 30s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> Si el objetivo falla una verificación, pierde -1 intento extra (castigo doble).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Pereza</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Si no usas pistas, terminas el turno con +15s guardados para el siguiente (máx +15).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Empiezas siempre con -10s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede verificar hasta que el reloj baje de 120s (primeros 60s bloqueado).</p>
+          </div>
+        </details>
+	  </div>
+
+
+	  <h3 class="rules-heading">4. Campaña y tablero físico</h3>
 	  <p class="rules-text">
 		El tablero físico marca el viaje por las 6 salas: Origen, Promesa, Libertad, Sabiduría, Sacrificio y Vida Nueva.
 		Cuando el tablero os dé un código (ej. <strong>OR-03</strong>), el host lo introduce y abre ese acertijo en la web.
@@ -1648,7 +1831,7 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 		<li>La <strong>Respuesta final</strong> se escribe y se verifica <strong>solo en el host</strong>.</li>
 	  </ul>
 
-	  <h3 class="rules-heading">5. Símbolo de turno y acciones del móvil</h3>
+	  <h3 class="rules-heading">6. Símbolo de turno y acciones del móvil</h3>
 	  <p class="rules-text">
 		En cada turno, el jugador activo tiene <strong>1 símbolo</strong> y debe escoger <strong>solo una</strong> acción:
 	  </p>
@@ -1661,13 +1844,13 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 		Una vez gastado el símbolo, los botones del móvil quedan bloqueados hasta el siguiente turno.
 	  </p>
 
-	  <h3 class="rules-heading">6. Tentaciones (pecados) y secreto del atacante</h3>
+	  <h3 class="rules-heading">7. Tentaciones (pecados) y secreto del atacante</h3>
 	  <p class="rules-text">
 		Cuando alguien te aplica un pecado, el host solo verá el mensaje de <strong>“Tentación recibida: [Pecado]”</strong>,
 		<strong>sin indicar quién lo ha lanzado</strong>. El efecto se aplica en el turno del objetivo (según la tentación concreta).
 	  </p>
 
-	  <h3 class="rules-heading">7. Errores, fallos y salto de acertijo</h3>
+	  <h3 class="rules-heading">8. Errores, fallos y salto de acertijo</h3>
 	  <ul class="rules-list">
 		<li>Si la respuesta es incorrecta: se consume un intento y puede aplicarse penalización de tiempo según el modo.</li>
 		<li>Con 0 intentos (o por decisión del host), se puede marcar <strong>fallo final</strong> y pasar al siguiente turno.</li>
