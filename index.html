@@ -3194,7 +3194,8 @@ function hideView(el) {
           btnHint2.addEventListener("click", async () => {
             try {
               const db = firebase.firestore();
-              await playerSendTurnAction(db, roomCode, { type: "HINT2_UNLOCK", turnCounter: room.turnCounter || 0 });
+              const tc = (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0;
+              await playerSendTurnAction(db, roomCode, { type: "HINT2_UNLOCK", turnCounter: tc });
             } catch (e) {
               alert("No se pudo enviar la acción.");
             }
@@ -3206,7 +3207,8 @@ function hideView(el) {
           btnCmd.addEventListener("click", async () => {
             try {
               const db = firebase.firestore();
-              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "commandment", key: multiplayer.player.commandmentKey, turnCounter: room.turnCounter || 0 });
+              const tc = (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0;
+              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "commandment", key: multiplayer.player.commandmentKey, turnCounter: tc });
             } catch (e) {
               alert("No se pudo enviar la acción.");
             }
@@ -3228,7 +3230,8 @@ function hideView(el) {
 
             try {
               const db = firebase.firestore();
-              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "sin", key: multiplayer.player.sinKey, targetSeat, turnCounter: room.turnCounter || 0 });
+              const tc = (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0;
+              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "sin", key: multiplayer.player.sinKey, targetSeat, turnCounter: tc });
             } catch (e) {
               alert("No se pudo enviar la acción.");
             }
@@ -4032,9 +4035,11 @@ async function hostHandleAction(db, a) {
     if ((room.turnCounter || 0) !== (a.turnCounter || 0)) return; // acción de turno viejo
 
     const getSeatRoles = (seat) => {
-      const p = (multiplayer && multiplayer.playerList)
-        ? (multiplayer.playerList.find(x => x.seatNumber === seat) || {})
-        : {};
+      // En host, la fuente fiable de roles es hostPlayers (no playerList).
+      const list = (multiplayer && Array.isArray(multiplayer.hostPlayers) && multiplayer.hostPlayers.length)
+        ? multiplayer.hostPlayers
+        : (multiplayer.playerList || []);
+      const p = list.find(x => Number(x.seatNumber) === Number(seat)) || {};
       return {
         cmdKey: p.commandmentKey || p.commandment || p.mandamiento || null,
         sinKey: p.sinKey || p.sin || p.pecado || null
@@ -4073,7 +4078,7 @@ async function hostHandleAction(db, a) {
       campaignState.turnTokenUsed = true;
       if (campaignState.turnFlags) campaignState.turnFlags.usedHint2Unlock = true;
 
-      setCampaignStatus("✅ Pista 2 desbloqueada por el jugador activo.");
+      /* (silenciado) */
       if (gameMode === "campaign-room") {
         refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
       }
@@ -4209,7 +4214,6 @@ async function hostHandleAction(db, a) {
           }
         }
 
-        setCampaignStatus(`✨ Milagro activado: ${meta.power.text || "OK"}`);
         return;
       }
 
@@ -4232,11 +4236,11 @@ async function hostHandleAction(db, a) {
           const r = snap.data() || {};
           const pending = Object.assign({}, r.pendingPenalties || {});
           const cur = Object.assign({}, pending[String(targetSeat)] || {});
-          pending[String(targetSeat)] = Object.assign(cur, pen);
+          pending[String(targetSeat)] = Object.assign(cur, pen, { sinKey: key });
           tx.update(multiplayer.roomRef, { pendingPenalties: pending });
         });
 
-        setCampaignStatus(`☠️ Tentación activada contra el jugador ${targetSeat}. Se aplicará en su próximo acertijo.`);
+        /* (silenciado) */
         return;
       }
     }
@@ -4711,6 +4715,9 @@ function showRoomSection() {
       // Reset timer y arrancar
       campaignState.timerRemaining = campaignState.timeLimitSec;
 
+      // Mensaje de inicio de turno (para mostrar tentaciones sin revelar autor)
+      let startMsg = "";
+
       // Aplicar penalizaciones pendientes (pecados) al jugador activo (solo 1 vez)
       const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
         ? campaignState.players[campaignState.activePlayerIndex].id
@@ -4759,10 +4766,14 @@ const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom
         if (pending.wrongExtraAttemptLoss) {
           campaignState.wrongExtraAttemptLoss = true;
         }
+        // Mostrar en host SOLO la tentación recibida (sin indicar quién la lanzó)
+        const msgParts = [];
+        if (pending.sinKey) msgParts.push(`☠️ Tentación recibida: ${pending.sinKey}.`);
         if (pending.physical) {
           campaignState.activePhysicalPenaltyText = pending.physical;
-          setCampaignStatus(`⚠️ Restricción (próximo turno): ${pending.physical}`);
+          msgParts.push(`⚠️ Restricción: ${pending.physical}`);
         }
+        if (msgParts.length) startMsg = msgParts.join(" ");
 
         // limpiar penalización en Firestore (host)
         if (multiplayer.roomRef && appMode !== "player") {
@@ -4774,7 +4785,10 @@ const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom
       
       // Aplicar bonus/malus de inicio de turno (por roles)
       const _roomDoc = (multiplayer && multiplayer.latestRoom) ? multiplayer.latestRoom : {};
-      const _ap = (multiplayer && multiplayer.playerList) ? (multiplayer.playerList.find(p => p.seatNumber === activeSeat) || null) : null;
+      const _listRoles = (multiplayer && Array.isArray(multiplayer.hostPlayers) && multiplayer.hostPlayers.length)
+        ? multiplayer.hostPlayers
+        : (multiplayer.playerList || []);
+      const _ap = (_listRoles && _listRoles.length) ? (_listRoles.find(p => Number(p.seatNumber) === Number(activeSeat)) || null) : null;
       const activeCmdKey = _ap ? (_ap.commandmentKey || _ap.commandment || _ap.mandamiento) : null;
       const activeSinKey = _ap ? (_ap.sinKey || _ap.sin || _ap.pecado) : null;
 
@@ -4798,7 +4812,7 @@ updateTimerUI();
       updateAttemptsUI();
       startCampaignTimer();
       refreshHintButtonsUI(puzzle);
-      setCampaignStatus("");
+      setCampaignStatus(startMsg);
     } else {
       refreshHintButtonsUI(puzzle);
     }
