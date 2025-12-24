@@ -2328,7 +2328,13 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!result) {
         if (puzzleCodeMessage) {
           puzzleCodeMessage.textContent = "No se ha encontrado ese código.";
-      // Campaña (host): publica acertijo activo para que el jugador tenga botón de símbolo
+
+        }
+        return;
+      }
+
+
+      // Campaña (host): publica acertijo activo para el turno
       if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
         multiplayer.roomRef.update({
           currentPuzzleCode: result.code,
@@ -2336,13 +2342,6 @@ window.addEventListener("DOMContentLoaded", () => {
           hint2Unlocked: false,
           turnTokenUsed: false
         }).catch(()=>{});
-        campaignState.hint2Unlocked = false;
-        campaignState.turnTokenUsed = false;
-        refreshHintButtonsUI(rooms[result.roomKey]?.puzzles?.[result.index] || null);
-      }
-
-        }
-        return;
       }
 
       // Si el código pertenece a la sala actual, cambiamos solo el acertijo (sin transición)
@@ -3155,7 +3154,7 @@ function hideView(el) {
         const puzzleCode = room.currentPuzzleCode || null;
         const tokenUsed = !!room.turnTokenUsed;
 
-        const isMyTurn = (activeSeat && multiplayer.player.seatNumber && activeSeat === multiplayer.player.seatNumber);
+        const isMyTurn = (activeSeat != null && multiplayer.player.seatNumber != null && Number(activeSeat) === Number(multiplayer.player.seatNumber));
         const canAct = isMyTurn && puzzleCode && !tokenUsed;
 
         if (turnCard) turnCard.style.display = (multiplayer.player && multiplayer.player.seatNumber) ? "" : "none";
@@ -4781,6 +4780,23 @@ updateTimerUI();
       updateRoomSolvedSummary();
       updateSidebarRoomCounters();
       updateGlobalSolvedSummary();
+
+      // Campaña (host): publica el acertijo activo en Firestore (para que el móvil sepa que está resolviendo)
+      if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
+        try {
+          const activeCode = (opts && opts.forcePuzzleCode) ? String(opts.forcePuzzleCode).toUpperCase() :
+            (room.puzzles && room.puzzles[currentPuzzleIndex] && room.puzzles[currentPuzzleIndex].id) ? String(room.puzzles[currentPuzzleIndex].id).toUpperCase() :
+            (campaignState && campaignState.lastLoadedCode) ? String(campaignState.lastLoadedCode).toUpperCase() : null;
+          if (activeCode) {
+            multiplayer.roomRef.update({
+              currentPuzzleCode: activeCode,
+              currentRoomKey: roomKey,
+              hint2Unlocked: false,
+              turnTokenUsed: false
+            }).catch(()=>{});
+          }
+        } catch (_) {}
+      }
 
       // Mostrar la sala ya dentro de la transición (evita “cambios antes del negro”)
       showRoomSectionImmediate();
