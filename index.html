@@ -2529,6 +2529,7 @@ if (solutionBtn && solutionEl) {
     roomUnsub: null,
     actionsUnsub: null,
     latestRoom: null,
+    publishedPuzzleCode: null,
     playerListUnsub: null,
     playerList: [],
     isReady: false,
@@ -4429,6 +4430,16 @@ function advanceTurnCampaign() {
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
       
       setActiveRoomButton(null);
+
+      // ✅ (Host) Al volver al tablero, indicar que no hay acertijo activo.
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.publishedPuzzleCode = null;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
       if (appRoot) requestAnimationFrame(() => appRoot.classList.remove("booting"));
   });
 }
@@ -4583,6 +4594,22 @@ function showRoomSection() {
     if (currentPuzzleIndex >= puzzles.length) currentPuzzleIndex = 0;
 
     const puzzle = puzzles[currentPuzzleIndex];
+
+    // ✅ (Host) Publicar acertijo activo en Firestore para que los móviles sepan que hay turno en curso.
+    // Solo cuando cambia de acertijo (evita resetear el estado si el host re-renderiza la UI).
+    if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
+      const newCode = (puzzle && puzzle.id) ? puzzle.id : null;
+      if (newCode && multiplayer.publishedPuzzleCode !== newCode) {
+        multiplayer.publishedPuzzleCode = newCode;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: newCode,
+          currentRoomKey: currentRoomKey,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
+    }
+
 
     if (puzzleIdEl) puzzleIdEl.textContent = puzzle.id || "--";
     if (puzzleDifficultyEl) puzzleDifficultyEl.textContent = puzzle.difficulty || "";
