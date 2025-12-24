@@ -2929,35 +2929,50 @@ function hideView(el) {
       }
 
       if (room.phase === "playing") {
-        // entrar al tablero (host)
+        // Entrar al tablero (host) — IMPORTANTE: no re-inicializar en cada cambio del doc
         multiplayer.isReady = true;
-        // Construye un campaignState mínimo público
-        const players = (multiplayer.hostPlayers || []).slice()
-          .sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0))
-          .map(p => ({ id: p.seatNumber, name: p.name, solved: p.solved || 0, sinChosen: !!p.sinKey }));
-        campaignState = {
-          players,
-          activePlayerIndex: 0,
-          hideSecretsOnHost: true,
-          phase: "playing",
-          puzzlesPerRoom: room.puzzlesPerRoom || 3,
-          roomSolvedTotals: {},
-          solvedAttribution: {},
-          lastLoadedCode: null,
-          lastLoadedRoomKey: null,
-          autoPassTurn: true,
-          attemptsMax: 2,
-          attemptsRemaining: 2,
-          hint2Unlocked: false,
-          turnTokenUsed: false,
-          ignoreNextTimePenaltyOnce: false,
-          blockHint1Until: 0,
-          timeLimitSec: 180,
-          timerEnabled: true,
-          timerRemaining: 180,
-          timerIntervalId: null,
-        };
-        showBoard();
+
+        if (!multiplayer._bootstrappedPlaying) {
+          multiplayer._bootstrappedPlaying = true;
+
+          // Construye un campaignState mínimo público (solo 1 vez al entrar en playing)
+          const players = (multiplayer.hostPlayers || []).slice()
+            .sort((a,b)=> (a.seatNumber||0)-(b.seatNumber||0))
+            .map(p => ({ id: p.seatNumber, name: p.name, solved: p.solved || 0, sinChosen: !!p.sinKey }));
+
+          campaignState = {
+            players,
+            activePlayerIndex: 0,
+            hideSecretsOnHost: true,
+            phase: "playing",
+            puzzlesPerRoom: room.puzzlesPerRoom || 3,
+            roomSolvedTotals: {},
+            solvedAttribution: {},
+            lastLoadedCode: null,
+            lastLoadedRoomKey: null,
+            autoPassTurn: true,
+            attemptsMax: 2,
+            attemptsRemaining: 2,
+            hint2Unlocked: false,
+            turnTokenUsed: false,
+            ignoreNextTimePenaltyOnce: false,
+            blockHint1Until: 0,
+            timeLimitSec: 180,
+            timerEnabled: true,
+            timerRemaining: 180,
+            timerIntervalId: null,
+          };
+        } else {
+          // Mantén config en sync si el host cambia puzzlesPerRoom
+          if (campaignState) {
+            campaignState.puzzlesPerRoom = room.puzzlesPerRoom || campaignState.puzzlesPerRoom;
+          }
+        }
+
+        // No forzar vuelta al tablero si el host está dentro del acertijo
+        if (appMode !== "player" && gameMode !== "campaign-room") {
+          showBoard();
+        }
       }
     });
 
@@ -3344,7 +3359,26 @@ showPlayerMode();
           taken = new Set();
         }
 
-        sinCarousel.innerHTML = "";
+        
+        function buildSinPickerText(meta){
+          if (!meta) return "";
+          const parts = [];
+          if (meta.advantage) parts.push(`<strong>Ventaja:</strong> ${meta.advantage}`);
+          if (meta.cost) parts.push(`<strong>Coste:</strong> ${meta.cost}`);
+          const tempt = meta.temptation;
+          if (tempt) {
+            if (typeof tempt === "string") parts.push(`<strong>Tentación:</strong> ${tempt}`);
+            else if (tempt.text) parts.push(`<strong>${tempt.title || "Tentación"}:</strong> ${tempt.text}`);
+          }
+          if (!parts.length) {
+            const s = meta.short || "";
+            const e = meta.effect || "";
+            return [s,e].filter(Boolean).join("<br>");
+          }
+          return parts.join("<br>");
+        }
+
+sinCarousel.innerHTML = "";
         Object.values(SIN_META).forEach(meta => {
           const takenByOther = taken.has(meta.key);
           const card = document.createElement("button");
@@ -3363,7 +3397,7 @@ showPlayerMode();
               <img src="${meta.img}" alt="${meta.key}">
               <div class="sin-card-title">${meta.key}</div>
               <div class="sin-card-text">
-                <strong>${meta.short}</strong><br>${meta.effect}
+                ${buildSinPickerText(meta)}
               </div>
             `;
           }
@@ -3985,7 +4019,7 @@ showPlayerMode();
   
 async function hostHandleAction(db, a) {
     if (!multiplayer.roomRef || appMode === "player") return;
-    if (!campaignState || gameMode !== "campaign-room") return;
+    if (!campaignState) return; // permitir en tablero y en sala
 
     const room = multiplayer.latestRoom || {};
     const activeSeat = room.activeSeatNumber || null;
@@ -4040,7 +4074,9 @@ async function hostHandleAction(db, a) {
       if (campaignState.turnFlags) campaignState.turnFlags.usedHint2Unlock = true;
 
       setCampaignStatus("✅ Pista 2 desbloqueada por el jugador activo.");
-      refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+      if (gameMode === "campaign-room") {
+        refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+      }
 
       const map = Object.assign({}, room.lastUsedHint2BySeat || {});
       map[String(activeSeat)] = true;
@@ -4147,7 +4183,9 @@ async function hostHandleAction(db, a) {
         }
         if (eff.unlockHint2) {
           campaignState.hint2Unlocked = true;
-          refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+          if (gameMode === "campaign-room") {
+        refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
+      }
           await multiplayer.roomRef.update({ hint2Unlocked: true });
         }
         if (eff.warmerColderOnce) {
