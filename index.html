@@ -1611,14 +1611,14 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 			</label>
 
 			<label>
-			  Dificultad de los acertijos <span style="opacity:.7;">(próximamente)</span>
-			  <select id="puzzleDifficultyInput" disabled>
-			    <option value="auto" selected>Automática</option>
-			    <option value="easy">Fácil</option>
-			    <option value="normal">Normal</option>
-			    <option value="hard">Difícil</option>
-			  </select>
-			  <small style="display:block; opacity:.75; margin-top:6px;">Por ahora no filtra el contenido; se usará en una actualización futura.</small>
+			  Dificultad de los acertijos
+				  <select id="puzzleDifficultyInput">
+				    <option value="auto" selected>Mixta (todas)</option>
+				    <option value="easy">Fácil (Fácil y Fácil–media)</option>
+				    <option value="normal">Media</option>
+				    <option value="hard">Difícil (Media–difícil)</option>
+				  </select>
+				  <small style="display:block; opacity:.75; margin-top:6px;">Filtra qué códigos de acertijo son válidos en esta campaña.</small>
 			</label>
 
 
@@ -2321,16 +2321,27 @@ const playersNamesInput = document.getElementById("playersNamesInput");
         alert("No se ha encontrado ese código.");
         return;
       }
-		if (campaignState) {
-		  campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
-		  campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
-		}
+
+      // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
+      const selDiff = getSelectedDifficulty();
+      const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
+        ? rooms[result.roomKey].puzzles[result.index]
+        : null;
+      if (!puzzleMatchesDifficulty(puzzle, selDiff)) {
+        const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
+        alert(`⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}. Elige otro código.`);
+        return;
+      }
+
+      if (campaignState) {
+        campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
+        campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
+      }
       gameMode = "campaign-room";
       loadRoom(result.roomKey, result.index);
     });
   }
-
-  if (endCampaignBtn) {
+if (endCampaignBtn) {
     endCampaignBtn.addEventListener("click", () => {
       campaignState = null;
   if (appMode !== "player") {
@@ -2350,6 +2361,22 @@ const playersNamesInput = document.getElementById("playersNamesInput");
         return;
       }
 
+      // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
+      if (gameMode === "campaign-room" || gameMode === "campaign-board") {
+        const selDiff = getSelectedDifficulty();
+        const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
+          ? rooms[result.roomKey].puzzles[result.index]
+          : null;
+        if (!puzzleMatchesDifficulty(puzzle, selDiff)) {
+          const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
+          if (puzzleCodeMessage) {
+            puzzleCodeMessage.textContent = `⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}.`;
+          } else {
+            alert(`⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}.`);
+          }
+          return;
+        }
+      }
 
       // Campaña (host): publica acertijo activo para el turno
       if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
@@ -2512,6 +2539,47 @@ if (solutionBtn && solutionEl) {
   let roomMusicMuted = false; // controla solo la música de las salas
 
   const rooms = ROOMS_DATA;
+
+// ---------------------------
+// Dificultad (filtrado campaña)
+// ---------------------------
+function getSelectedDifficulty() {
+  // Fuente de verdad: Firestore (room.difficulty). Fallback: estado local.
+  const d = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.difficulty)
+    ? multiplayer.latestRoom.difficulty
+    : (campaignState && campaignState.difficulty ? campaignState.difficulty : "auto");
+  return (d || "auto");
+}
+
+function normalizeDifficultyTag(s) {
+  if (!s) return "";
+  let t = String(s).trim().toLowerCase();
+  try { t = t.normalize("NFD").replace(/[̀-ͯ]/g, ""); } catch (_) {}
+  return t;
+}
+
+function puzzleMatchesDifficulty(puzzle, selected) {
+  const sel = normalizeDifficultyTag(selected || "auto");
+  if (!sel || sel === "auto") return true;
+
+  const d = normalizeDifficultyTag(puzzle && puzzle.difficulty ? puzzle.difficulty : "");
+
+  // Valores actuales en puzzles_roles_final.js:
+  // - "Fácil", "Fácil–media", "Media", "Media–difícil"
+  if (sel === "easy") return d.includes("facil");     // incluye "facil-media"
+  if (sel === "normal") return d === "media";
+  if (sel === "hard") return d.includes("dificil");   // incluye "media-dificil"
+  return true;
+}
+
+function difficultyLabel(sel) {
+  const s = String(sel || "auto");
+  if (s === "easy") return "Fácil";
+  if (s === "normal") return "Media";
+  if (s === "hard") return "Difícil";
+  return "Mixta";
+}
+
   let currentRoomKey = null;
 
 // --- INICIO ---
@@ -2991,6 +3059,8 @@ function hideView(el) {
             turnTokenUsed: false,
             ignoreNextTimePenaltyOnce: false,
             blockHint1Until: 0,
+            // Dificultad (filtra códigos válidos)
+            difficulty: (room.difficulty || "auto"),
             // Tiempo límite por acertijo (configurable en host)
             timeLimitSec: (room.timeLimitSec || 180),
             timerEnabled: true,
@@ -3001,6 +3071,8 @@ function hideView(el) {
           // Mantén config en sync si el host cambia puzzlesPerRoom
           if (campaignState) {
             campaignState.puzzlesPerRoom = room.puzzlesPerRoom || campaignState.puzzlesPerRoom;
+            campaignState.timeLimitSec = (room.timeLimitSec || campaignState.timeLimitSec || 180);
+            campaignState.difficulty = (room.difficulty || campaignState.difficulty || "auto");
           }
         }
 
@@ -4813,7 +4885,9 @@ function showRoomSection() {
     // --- Campaña: reset de intentos + bloqueo Pista 2 por símbolo ---
     if (gameMode === "campaign-room" && campaignState) {
       // defaults
-      campaignState.timeLimitSec = 180;
+      campaignState.timeLimitSec = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.timeLimitSec)
+        ? (multiplayer.latestRoom.timeLimitSec || 180)
+        : (campaignState.timeLimitSec || 180);
       campaignState.attemptsMax = 2;
       campaignState.attemptsRemaining = 2;
       campaignState.hint2Unlocked = false;
