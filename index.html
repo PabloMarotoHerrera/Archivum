@@ -1605,6 +1605,23 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 			  <input id="puzzlesPerRoomInput" type="number" min="1" max="10" value="3">
 			</label>
 
+			<label>
+			  Tiempo límite por acertijo (segundos)
+			  <input id="timeLimitSecInput" type="number" min="30" max="900" value="180">
+			</label>
+
+			<label>
+			  Dificultad de los acertijos <span style="opacity:.7;">(próximamente)</span>
+			  <select id="puzzleDifficultyInput" disabled>
+			    <option value="auto" selected>Automática</option>
+			    <option value="easy">Fácil</option>
+			    <option value="normal">Normal</option>
+			    <option value="hard">Difícil</option>
+			  </select>
+			  <small style="display:block; opacity:.75; margin-top:6px;">Por ahora no filtra el contenido; se usará en una actualización futura.</small>
+			</label>
+
+
 			<p class="home-text" style="margin-top:8px;">
 			  Los nombres se introducen desde el móvil al unirse a la partida.
 			</p>
@@ -2242,7 +2259,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const rulesBackBtn = document.getElementById("rulesBackBtn");
   const playersCountInput = document.getElementById("playersCountInput");
   const puzzlesPerRoomInput = document.getElementById("puzzlesPerRoomInput");
-  const playersNamesInput = document.getElementById("playersNamesInput");
+    const timeLimitSecInput = document.getElementById("timeLimitSecInput");
+  const puzzleDifficultyInput = document.getElementById("puzzleDifficultyInput");
+const playersNamesInput = document.getElementById("playersNamesInput");
   const startCampaignBtn = document.getElementById("startCampaignBtn");
   const campaignBackBtn = document.getElementById("campaignBackBtn");
   const playersSummaryEl = document.getElementById("playersSummary");
@@ -2788,7 +2807,7 @@ function hideView(el) {
   // Firestore schema:
   // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
   // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
-  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom }) {
+  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty }) {
     const code = genRoomCode(4);
     const pickQueue = shuffleLocal(Array.from({ length: playersMax }, (_, i) => i + 1));
 
@@ -2803,6 +2822,23 @@ function hideView(el) {
       pickCursor: 0,
       assignedPickNumbers: [],
       assignedCommandments: [],
+      // --- estado de partida (reseteado siempre al crear partida) ---
+      difficulty: difficulty || "auto",
+      timeLimitSec: (typeof timeLimitSec === "number" ? timeLimitSec : 180),
+      attemptsMax: 2,
+      // --- runtime (se inicia en "idle") ---
+      activeSeatNumber: null,
+      turnCounter: 0,
+      currentPuzzleCode: null,
+      currentRoomKey: null,
+      hint2Unlocked: false,
+      turnTokenUsed: false,
+      pendingPenalties: {},
+      roomSolvedTotals: {},
+      solvedAttribution: {},
+      lastSinApplied: null,
+      lastSinAppliedAt: null,
+
     });
 
     return { code, roomRef };
@@ -2955,9 +2991,9 @@ function hideView(el) {
             turnTokenUsed: false,
             ignoreNextTimePenaltyOnce: false,
             blockHint1Until: 0,
-            timeLimitSec: 180,
+            timeLimitSec: (r.timeLimitSec || 180),
             timerEnabled: true,
-            timerRemaining: 180,
+            timerRemaining: (room.timeLimitSec || 180),
             timerIntervalId: null,
           };
         } else {
@@ -3035,7 +3071,7 @@ function hideView(el) {
 
       const nextCursor = c + 1;
       if (nextCursor >= (r.playersMax || 0)) {
-        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: 180, attemptsMax: 2, pendingPenalties: {} });
+        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: (r.timeLimitSec || 180), attemptsMax: 2, pendingPenalties: {} });
       } else {
         tx.update(multiplayer.roomRef, { pickCursor: nextCursor });
       }
@@ -3541,8 +3577,23 @@ sinCarousel.innerHTML = "";
         }
         const playersMax = Math.max(1, Math.min(7, parseInt(playersCountInput.value, 10) || 1));
         const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
+        const timeLimitSec = Math.max(30, Math.min(900, parseInt((timeLimitSecInput && timeLimitSecInput.value) || "180", 10) || 180));
+        const difficulty = (puzzleDifficultyInput && puzzleDifficultyInput.value) ? puzzleDifficultyInput.value : "auto";
 
-        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom });
+        // Reset local progreso (modo antiguo) para evitar arrastre visual entre partidas
+        try { if (typeof solvedMap !== "undefined") { solvedMap = {}; saveSolvedToStorage(); } } catch (_) {}
+        try {
+          if (campaignState) {
+            campaignState.roomSolvedTotals = {};
+            campaignState.solvedAttribution = {};
+            campaignState.lastLoadedCode = null;
+            campaignState.lastLoadedRoomKey = null;
+            campaignState.hint2Unlocked = false;
+            campaignState.turnTokenUsed = false;
+          }
+        } catch (_) {}
+
+        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty });
         const joinUrl = computeJoinUrl(code);
 
         showJoinSectionHost(code, joinUrl, playersMax);
@@ -5437,9 +5488,9 @@ if (sinCarousel) {
 
 		autoPassTurn: true,     // ✅ coma
 
-		timeLimitSec: 180,
+		timeLimitSec: (r.timeLimitSec || 180),
 		timerEnabled: true,
-		timerRemaining: 180,
+		timerRemaining: (room.timeLimitSec || 180),
 		timerIntervalId: null
 	  };
 
