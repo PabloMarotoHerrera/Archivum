@@ -2991,7 +2991,8 @@ function hideView(el) {
             turnTokenUsed: false,
             ignoreNextTimePenaltyOnce: false,
             blockHint1Until: 0,
-            timeLimitSec: (r.timeLimitSec || 180),
+            // Tiempo límite por acertijo (configurable en host)
+            timeLimitSec: (room.timeLimitSec || 180),
             timerEnabled: true,
             timerRemaining: (room.timeLimitSec || 180),
             timerIntervalId: null,
@@ -3070,9 +3071,9 @@ function hideView(el) {
       if (curNum !== currentNumber) return; // ya cambió
 
       const nextCursor = c + 1;
-      if (nextCursor >= (r.playersMax || 0)) {
-        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: (r.timeLimitSec || 180), attemptsMax: 2, pendingPenalties: {} });
-      } else {
+	      if (nextCursor >= (r.playersMax || 0)) {
+	        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: (r.timeLimitSec || 180), attemptsMax: 2, pendingPenalties: {} });
+	      } else {
         tx.update(multiplayer.roomRef, { pickCursor: nextCursor });
       }
     });
@@ -5399,6 +5400,9 @@ if (sinCarousel) {
 		const card = ev.target.closest(".sin-card");
 		if (!card || !sinSelectionPlayerId) return;
 		if (card.classList.contains("sin-card--taken")) return;
+		// Evita errores si este bloque se dispara fuera del modo host
+		if (!campaignState || !campaignState.players) return;
+		if (appMode === "player") return;
 
 		const chosenSin = card.dataset.sin;
 		const player = campaignState.players.find(p => p.id === sinSelectionPlayerId);
@@ -5488,7 +5492,7 @@ if (sinCarousel) {
 
 		autoPassTurn: true,     // ✅ coma
 
-		timeLimitSec: (r.timeLimitSec || 180),
+			timeLimitSec: (room.timeLimitSec || 180),
 		timerEnabled: true,
 		timerRemaining: (room.timeLimitSec || 180),
 		timerIntervalId: null
