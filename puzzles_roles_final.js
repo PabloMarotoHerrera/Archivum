@@ -2044,16 +2044,16 @@ const SIN_META = {
 // === NUEVOS ACERTIJOS AÑADIDOS ===
 
 // ORIGEN
-ROOMS_DATA['origen'].puzzles.push({id:'OR-11', title:'La primera palabra', difficulty:'Facil', tags:'biblia', requiresBible:true, body:`¿Qué dijo Dios antes de que existiera todo?`, hint1:`Está en Génesis 1.`, hint2:`Dos palabras.`, solution:`Sea la luz`});
-ROOMS_DATA['origen'].puzzles.push({id:'OR-12', title:'Polvo y aliento', difficulty:'Facil-media', tags:'biblia', requiresBible:true, body:`¿De qué fue formado el primer hombre?`, hint1:`No es barro moderno.`, hint2:`Polvo del suelo.`, solution:`Polvo`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-11', title:'La primera palabra', difficulty:'Fácil', tags:'biblia', requiresBible:true, body:`¿Qué dijo Dios antes de que existiera todo?`, hint1:`Está en Génesis 1.`, hint2:`Dos palabras.`, solution:`Sea la luz`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-12', title:'Polvo y aliento', difficulty:'Fácil–media', tags:'biblia', requiresBible:true, body:`¿De qué fue formado el primer hombre?`, hint1:`No es barro moderno.`, hint2:`Polvo del suelo.`, solution:`Polvo`});
 ROOMS_DATA['origen'].puzzles.push({id:'OR-13', title:'El principio', difficulty:'Media', tags:'biblia', requiresBible:true, body:`¿Qué libro abre la Biblia?`, hint1:`Habla del inicio.`, hint2:`Empieza por G.`, solution:`Génesis`});
 ROOMS_DATA['origen'].puzzles.push({id:'OR-14', title:'Siete', difficulty:'Media', tags:'logica', requiresBible:false, body:`¿Cuántos días duró la creación?`, hint1:`Incluye el descanso.`, hint2:`Número completo.`, solution:`7`});
-ROOMS_DATA['origen'].puzzles.push({id:'OR-15', title:'La voz', difficulty:'Media-dificil', tags:'biblia', requiresBible:true, body:`Antes de la luz hubo una orden. ¿Qué fue?`, hint1:`No es un objeto.`, hint2:`Una palabra.`, solution:`La palabra`});
-ROOMS_DATA['origen'].puzzles.push({id:'OR-16', title:'El huerto', difficulty:'Facil', tags:'biblia', requiresBible:true, body:`¿Dónde fue puesto el hombre al inicio?`, hint1:`Un jardín.`, hint2:`Empieza por E.`, solution:`Edén`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-15', title:'La voz', difficulty:'Media–difícil', tags:'biblia', requiresBible:true, body:`Antes de la luz hubo una orden. ¿Qué fue?`, hint1:`No es un objeto.`, hint2:`Una palabra.`, solution:`La palabra`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-16', title:'El huerto', difficulty:'Fácil', tags:'biblia', requiresBible:true, body:`¿Dónde fue puesto el hombre al inicio?`, hint1:`Un jardín.`, hint2:`Empieza por E.`, solution:`Edén`});
 ROOMS_DATA['origen'].puzzles.push({id:'OR-17', title:'Comienzo y fin', difficulty:'Media', tags:'logica', requiresBible:false, body:`Soy principio y final. ¿Qué letra soy?`, hint1:`Griega.`, hint2:`Primera.`, solution:`Alfa`});
-ROOMS_DATA['origen'].puzzles.push({id:'OR-18', title:'La costilla', difficulty:'Facil-media', tags:'biblia', requiresBible:true, body:`¿De qué fue creada Eva?`, hint1:`Parte del hombre.`, hint2:`No es hueso largo.`, solution:`Costilla`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-18', title:'La costilla', difficulty:'Fácil–media', tags:'biblia', requiresBible:true, body:`¿De qué fue creada Eva?`, hint1:`Parte del hombre.`, hint2:`No es hueso largo.`, solution:`Costilla`});
 ROOMS_DATA['origen'].puzzles.push({id:'OR-19', title:'La caída', difficulty:'Media', tags:'biblia', requiresBible:true, body:`¿Qué acción rompió el orden?`, hint1:`Tiene que ver con un fruto.`, hint2:`Desobedecer.`, solution:`Pecar`});
-ROOMS_DATA['origen'].puzzles.push({id:'OR-20', title:'Reposo', difficulty:'Facil', tags:'biblia', requiresBible:true, body:`¿Qué hizo Dios el séptimo día?`, hint1:`No creó.`, hint2:`Descansó.`, solution:`Descansar`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-20', title:'Reposo', difficulty:'Fácil', tags:'biblia', requiresBible:true, body:`¿Qué hizo Dios el séptimo día?`, hint1:`No creó.`, hint2:`Descansó.`, solution:`Descansar`});
 
 
 // === NUEVOS ACERTIJOS (2ª tanda: 10 por sala restante) ===
@@ -2117,3 +2117,43 @@ ROOMS_DATA['vida'].puzzles.push({id:'VI-17', title:'La luz del mundo', difficult
 ROOMS_DATA['vida'].puzzles.push({id:'VI-18', title:'Primera comunidad', difficulty:'Media', tags:'Hechos', requiresBible:true, body:`En Hechos, los creyentes perseveraban en la enseñanza, comunión, partir el pan y…`, hint1:`Una palabra.`, hint2:`Se relaciona con Dios.`, solution:`Oración`});
 ROOMS_DATA['vida'].puzzles.push({id:'VI-19', title:'Nombre del libro', difficulty:'Fácil', tags:'Biblia', requiresBible:true, body:`¿Qué libro narra el inicio de la Iglesia tras la resurrección?`, hint1:`Después de los Evangelios.`, hint2:`Empieza por H.`, solution:`Hechos`});
 ROOMS_DATA['vida'].puzzles.push({id:'VI-20', title:'El final prometido', difficulty:'Media–difícil', tags:'Apocalipsis', requiresBible:true, body:`En Apocalipsis, la ciudad final se llama ‘Nueva…’`, hint1:`No es ‘Roma’.`, hint2:`Nombre bíblico.`, solution:`Jerusalén`});
+
+
+// === BALANCE PATCH: +25 acertijos SIN BIBLIA (15 fáciles, 10 media–difíciles) ===
+
+// ORIGEN
+ROOMS_DATA['origen'].puzzles.push({id:'OR-21', title:'La primera letra', difficulty:'Fácil', tags:'logica', requiresBible:false, body:`Antes de todo, soy la primera. Sin mí no hay principio. ¿Qué soy?`, hint1:`No es un número.`, hint2:`La encuentras al inicio del alfabeto.`, solution:`A`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-22', title:'Sin peso, sin forma', difficulty:'Fácil–media', tags:'logica', requiresBible:false, body:`Me ves cuando hay luz, pero no me puedes atrapar. Si corro, tú corres. ¿Qué soy?`, hint1:`Nace de ti.`, hint2:`No es reflejo.`, solution:`Sombra`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-23', title:'Comienzo oculto', difficulty:'Fácil', tags:'observacion', requiresBible:false, body:`En la palabra **ORIGEN** hay algo que empieza y algo que termina. ¿Qué letra empieza y qué letra termina?`, hint1:`Dos letras.`, hint2:`O y N`, solution:`ON`});
+ROOMS_DATA['origen'].puzzles.push({id:'OR-24', title:'El eco del inicio', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`Si me dices una vez, me oyes dos. No soy persona ni objeto. ¿Qué soy?`, hint1:`Sucede en montañas o salas vacías.`, hint2:`Repite tu voz.`, solution:`Eco`});
+
+// PROMESA
+ROOMS_DATA['promesa'].puzzles.push({id:'PR-21', title:'Señal en el cielo', difficulty:'Fácil', tags:'palabra', requiresBible:false, body:`Aparezco tras la tormenta y parezco un puente de colores. ¿Qué soy?`, hint1:`No es una nube.`, hint2:`Suele salir con sol y lluvia.`, solution:`Arcoiris`});
+ROOMS_DATA['promesa'].puzzles.push({id:'PR-22', title:'Lo que se espera', difficulty:'Fácil–media', tags:'logica', requiresBible:false, body:`No se puede guardar en una caja, pero sostiene a quien camina en oscuridad. ¿Qué es?`, hint1:`No es fe (aunque se le parece).`, hint2:`También es lo último que se pierde.`, solution:`Esperanza`});
+ROOMS_DATA['promesa'].puzzles.push({id:'PR-23', title:'La promesa más corta', difficulty:'Fácil', tags:'palabra', requiresBible:false, body:`Una promesa de una sola palabra: cuando alguien dice que lo hará, responde con…`, hint1:`Se usa en juramentos sencillos.`, hint2:`Empieza por 'si'.`, solution:`Sí`});
+ROOMS_DATA['promesa'].puzzles.push({id:'PR-24', title:'Tres letras, mil promesas', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`Tengo 3 letras. Si me quitas la primera, me convierto en una pregunta. ¿Qué palabra soy?`, hint1:`Empieza por 'q'.`, hint2:`Sin la primera letra queda 'ué'.`, solution:`Qué`});
+ROOMS_DATA['promesa'].puzzles.push({id:'PR-25', title:'El pacto invisible', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`No es papel, pero te ata. No es cadena, pero te obliga. ¿Qué es?`, hint1:`Se hace entre dos.`, hint2:`Puede romperse.`, solution:`Compromiso`});
+
+// LIBERTAD
+ROOMS_DATA['libertad'].puzzles.push({id:'LI-21', title:'La salida', difficulty:'Fácil', tags:'logica', requiresBible:false, body:`No soy puerta, pero te saco de la prisión. No soy arma, pero rompo cadenas. ¿Qué soy?`, hint1:`Cabe en la mano.`, hint2:`Abre cerraduras.`, solution:`Llave`});
+ROOMS_DATA['libertad'].puzzles.push({id:'LI-22', title:'Sin barrotes', difficulty:'Fácil–media', tags:'palabra', requiresBible:false, body:`Completa la frase: “Yo soy ____”. (La palabra que define libertad en una sola.)`, hint1:`No es “suelo”.`, hint2:`Empieza por 'li'.`, solution:`Libre`});
+ROOMS_DATA['libertad'].puzzles.push({id:'LI-23', title:'El paso final', difficulty:'Fácil', tags:'logica', requiresBible:false, body:`Para ser libre necesitas dar este paso: dejar atrás lo que te retiene. ¿Qué acción es?`, hint1:`Es un verbo.`, hint2:`No es luchar.`, solution:`Soltar`});
+ROOMS_DATA['libertad'].puzzles.push({id:'LI-24', title:'La jaula de oro', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`¿Qué es lo único que una jaula de oro no puede comprar?`, hint1:`No es dinero.`, hint2:`Tiene que ver con decidir.`, solution:`Libertad`});
+ROOMS_DATA['libertad'].puzzles.push({id:'LI-25', title:'Sin nombre, sin cadenas', difficulty:'Media–difícil', tags:'observacion', requiresBible:false, body:`Escribe la palabra **LIBERTAD** sin su primera y sin su última letra. ¿Qué queda?`, hint1:`Quita dos letras.`, hint2:`Empieza por I y termina por A.`, solution:`IBERTA`});
+
+// SABIDURIA
+ROOMS_DATA['sabiduria'].puzzles.push({id:'SA-21', title:'Más que hablar', difficulty:'Fácil', tags:'logica', requiresBible:false, body:`La sabiduría entra por los oídos. ¿Qué verbo describe eso?`, hint1:`No es mirar.`, hint2:`Es lo contrario de interrumpir.`, solution:`Escuchar`});
+ROOMS_DATA['sabiduria'].puzzles.push({id:'SA-22', title:'La llave del porqué', difficulty:'Fácil–media', tags:'palabra', requiresBible:false, body:`La pregunta que abre muchas respuestas: ¿____?`, hint1:`Una sola palabra.`, hint2:`Empieza por P.`, solution:`Por qué`});
+ROOMS_DATA['sabiduria'].puzzles.push({id:'SA-23', title:'Verdad en dos sílabas', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`Si me dices con prisa, soy excusa. Si me dices con calma, soy verdad. ¿Qué palabra soy?`, hint1:`Dos sílabas.`, hint2:`Empieza por 'pe'.`, solution:`Perdón`});
+
+// SACRIFICIO
+ROOMS_DATA['sacrificio'].puzzles.push({id:'SC-21', title:'Lo que entregas', difficulty:'Fácil', tags:'palabra', requiresBible:false, body:`En un sacrificio, lo más importante es lo que estás dispuesto a…`, hint1:`Verbo.`, hint2:`No es “guardar”.`, solution:`Dar`});
+ROOMS_DATA['sacrificio'].puzzles.push({id:'SC-22', title:'El precio', difficulty:'Fácil–media', tags:'logica', requiresBible:false, body:`Todo sacrificio tiene un ____.`, hint1:`No es castigo.`, hint2:`Se paga por algo valioso.`, solution:`Precio`});
+ROOMS_DATA['sacrificio'].puzzles.push({id:'SC-23', title:'La elección difícil', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`Si eliges el bien cuando nadie mira, ¿cómo se llama esa fuerza interior?`, hint1:`No es miedo.`, hint2:`Se parece a 'valor'.`, solution:`Coraje`});
+ROOMS_DATA['sacrificio'].puzzles.push({id:'SC-24', title:'Sin ver, pero cierto', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`Un sacrificio real duele antes de verse. ¿Qué palabra resume eso?`, hint1:`No es sangre.`, hint2:`Es renunciar.`, solution:`Renuncia`});
+
+// VIDA
+ROOMS_DATA['vida'].puzzles.push({id:'VI-21', title:'Lo invisible que te llena', difficulty:'Fácil', tags:'logica', requiresBible:false, body:`Me necesitas cada segundo, pero casi nunca me miras. ¿Qué soy?`, hint1:`No es agua.`, hint2:`Entra y sale.`, solution:`Aire`});
+ROOMS_DATA['vida'].puzzles.push({id:'VI-22', title:'Una vida en una palabra', difficulty:'Fácil–media', tags:'palabra', requiresBible:false, body:`Completa: “La vida se abre paso y vuelve a ____.”`, hint1:`Verbo.`, hint2:`No es “parar”.`, solution:`Crecer`});
+ROOMS_DATA['vida'].puzzles.push({id:'VI-23', title:'Latido', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`Sin mí no hay vida, pero no soy órgano. Marco el ritmo. ¿Qué soy?`, hint1:`Se mide.`, hint2:`Puede acelerarse.`, solution:`Pulso`});
+ROOMS_DATA['vida'].puzzles.push({id:'VI-24', title:'El final que empieza', difficulty:'Media–difícil', tags:'logica', requiresBible:false, body:`¿Qué palabra significa a la vez “final” y “comienzo” en historias?`, hint1:`No es “muerte”.`, hint2:`También se usa en libros.`, solution:`Epílogo`});
