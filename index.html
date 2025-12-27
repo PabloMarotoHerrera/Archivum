@@ -2402,31 +2402,52 @@ function showCodexReward(roomKey){
 
     const overlay = document.getElementById("codexRewardOverlay");
     const img = document.getElementById("codexRewardImg");
-    const title = document.getElementById("codexRewardTitle");
-    const subtitle = document.getElementById("codexRewardSubtitle");
-    if (!overlay || !img || !title || !subtitle) return;
+    const hint = document.getElementById("codexRewardHint");
+    const btn = document.getElementById("codexRewardBtn");
+    if (!overlay || !img || !hint || !btn) return;
 
     const key = normalizeRoomKey(roomKey);
-    const src = CODex_IMAGE_BY_ROOM[key];
+    const src = (CODex_IMAGE_BY_ROOM && CODex_IMAGE_BY_ROOM[key]) ? CODex_IMAGE_BY_ROOM[key] : null;
 
-    title.textContent = "Fragmento del Códice";
-    subtitle.textContent = roomKey ? `Sala completada: ${roomKey}` : "Sala completada";
-
-    // Always fade in, even if image missing
+    // Always show overlay (even if image missing)
     overlay.classList.add("show");
-    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
 
-    if (!src){
+    // Default text
+    const pretty = (key || "desconocida").toUpperCase();
+    hint.textContent = `Fragmento del Códice obtenido: ${pretty}`;
+
+    // Close handler
+    const close = () => {
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
+      btn.removeEventListener("click", close);
+      overlay.removeEventListener("click", onBg);
+      document.removeEventListener("keydown", onKey);
+    };
+    const onBg = (e) => { if (e.target === overlay) close(); };
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+
+    btn.addEventListener("click", close);
+    overlay.addEventListener("click", onBg);
+    document.addEventListener("keydown", onKey);
+
+    // Try load image if we have a src
+    if (src){
+      img.style.display = "block";
+      img.src = src;
+      img.onerror = () => {
+        img.style.display = "none";
+        hint.textContent = `Fragmento del Códice obtenido: ${pretty} (imagen no encontrada)`;
+      };
+    } else {
       img.style.display = "none";
-      subtitle.textContent = (roomKey ? `Sala completada: ${roomKey}. ` : "") + "Imagen no encontrada.";
-      return;
+      hint.textContent = `Fragmento del Códice obtenido: ${pretty} (imagen no encontrada)`;
     }
 
-    img.style.display = "block";
-    img.onerror = () => {
-      img.style.display = "none";
-      subtitle.textContent = (roomKey ? `Sala completada: ${roomKey}. ` : "") + "Imagen no encontrada.";
-    };
+    // Focus button to avoid aria-hidden focus warning
+    try{ btn.focus({preventScroll:true}); }catch(e){}
+  };
     img.onload = () => {};
     img.src = src;
     img.alt = `Códice: ${roomKey || "fragmento"}`;
