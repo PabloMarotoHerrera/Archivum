@@ -2295,18 +2295,35 @@ function normalizeRoomKeyForCodex(roomKey){
 function showCodexReward(roomKey){
   try{
     if (appMode !== "host") return;
-    const k = normalizeRoomKeyForCodex(roomKey);
-    const src = CODEX_REWARD_IMAGES[k];
-    if (!src) {
-      // si no hay asset, no bloqueamos el flujo
-      return;
-    }
+
     const overlay = document.getElementById("codexRewardOverlay");
     const img = document.getElementById("codexRewardImg");
+    const hint = document.getElementById("codexRewardHint");
     const btn = document.getElementById("codexRewardBtn");
-    if (!overlay || !img || !btn) return;
+    if (!overlay || !img || !btn || !hint) return;
 
-    img.src = src;
+    const k = normalizeRoomKeyForCodex(roomKey);
+    const src = CODEX_REWARD_IMAGES[k];
+
+    // Estado por defecto
+    hint.textContent = "Fragmento del Códice obtenido";
+    img.style.display = "";
+    img.onerror = null;
+
+    // Si no hay imagen o falla la carga, mostramos placeholder (pero el fundido ocurre igual)
+    const setMissing = () => {
+      img.style.display = "none";
+      hint.textContent = `Fragmento desbloqueado (${roomKey}). Imagen no encontrada.`;
+    };
+
+    if (src) {
+      img.src = src;
+      img.onerror = setMissing;
+    } else {
+      img.src = "";
+      setMissing();
+    }
+
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden","false");
 
@@ -2328,10 +2345,15 @@ function showCodexReward(roomKey){
     document.addEventListener("keydown", onKey);
     overlay.addEventListener("click", onBg);
     btn.addEventListener("click", close);
-  } catch(e){
-    // no-op
+
+    // Enfocar el botón para evitar warnings de aria-hidden/focus al cambiar de vista
+    setTimeout(() => { try { btn.focus({ preventScroll:true }); } catch(_){} }, 30);
+
+  } catch (e){
+    console.warn("showCodexReward error", e);
   }
 }
+
 
 </script>
 
@@ -4748,9 +4770,9 @@ function advanceTurnCampaign() {
 // Actualiza el panel
 		  renderPlayersSummary();
 
-		  // Mensaje opcional
+		  // 🎁 Recompensa visual por sala (solo host)
 		  if (done) {
-			alert(`✅ Sala completada (${target}/${target}). Volved al tablero y girad la sala.`);
+			showCodexReward(rk);
 		  }
 		} else {
 		  // Ya estaba atribuido: igualmente vuelve al tablero para ritmo
