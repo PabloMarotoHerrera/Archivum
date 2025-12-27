@@ -1473,7 +1473,7 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   z-index:9999;
   padding:24px;
 
-  /* fade in/out */
+  /* fade in/out (fondo negro inmediato) */
   opacity:0;
   visibility:hidden;
   pointer-events:none;
@@ -1485,14 +1485,20 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   pointer-events:auto;
   transition:opacity .35s ease;
 }
+
+/* El contenido del códice aparece con retraso (overlay ya en negro) */
 #codexRewardCard{
   max-width:min(520px, 92vw);
   width:100%;
   text-align:center;
-  transform:translateY(24px);
+  transform:translateY(18px);
   opacity:0;
-  transition:transform .55s ease, opacity .55s ease;
+  transition:transform 1.05s ease, opacity 1.05s ease;
   position:relative;
+}
+#codexRewardOverlay.show.reveal #codexRewardCard{
+  transform:translateY(0);
+  opacity:1;
 }
 
 #codexRewardCard::after{
@@ -1504,7 +1510,7 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   opacity:0;
   box-shadow:0 0 0 rgba(224,182,107,0);
 }
-#codexRewardOverlay.show #codexRewardCard::after{
+#codexRewardOverlay.show.reveal #codexRewardCard::after{
   animation:codexGlow .9s ease-out 1;
 }
 @keyframes codexGlow{
@@ -1513,23 +1519,18 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   100%{opacity:0; box-shadow:0 0 0 rgba(224,182,107,0), 0 0 0 rgba(224,182,107,0);}
 }
 
-#codexRewardOverlay.show #codexRewardCard{
-  transform:translateY(0);
-  opacity:1;
-}
 #codexRewardImg{
   width:100%;
   height:auto;
-  display:none; /* shown when loaded */
+  display:none; /* se muestra cuando carga */
   filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
   opacity:0;
-  transform:scale(.94);
-  transition:opacity .45s ease, transform .45s ease;
+  transition:opacity 1.25s ease;
 }
-#codexRewardOverlay.show #codexRewardImg.loaded{
+#codexRewardOverlay.show.reveal #codexRewardImg.loaded{
   opacity:1;
-  transform:scale(1);
 }
+
 #codexRewardHint{
   margin-top:14px;
   font-size:14px;
@@ -2401,7 +2402,15 @@ function showCodexReward(roomKey){
 
     // Always show overlay (even if image missing)
     overlay.classList.add("show");
+    overlay.classList.remove("reveal");
     overlay.setAttribute("aria-hidden","false");
+
+    // Retraso para que primero se vea el fundido a negro y luego el códice (lento)
+    const delayMs = (opts && typeof opts.delayMs === "number") ? opts.delayMs : 1400;
+    try { if (overlay.__codexRevealTimer) clearTimeout(overlay.__codexRevealTimer); } catch(_){ }
+    overlay.__codexRevealTimer = setTimeout(() => {
+      try { overlay.classList.add("reveal"); } catch(e){}
+    }, Math.max(0, delayMs));
 
     const pretty = (key || "desconocida").toUpperCase();
     hint.textContent = `Fragmento del Códice obtenido: ${pretty}`;
@@ -2416,6 +2425,8 @@ function showCodexReward(roomKey){
     // Close handler
     const close = () => {
       overlay.classList.remove("show");
+      overlay.classList.remove("reveal");
+      try { if (overlay.__codexRevealTimer) { clearTimeout(overlay.__codexRevealTimer); overlay.__codexRevealTimer = null; } } catch(_){ }
       overlay.setAttribute("aria-hidden","true");
 
       img.classList.remove("loaded");
