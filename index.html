@@ -2307,10 +2307,12 @@ function showCodexReward(roomKey){
     const k = normalizeRoomKeyForCodex(roomKey);
     const src = CODEX_REWARD_IMAGES[k];
 
-    // Estado por defecto
+    // Estado por defecto (evita "flash" del reward anterior)
     hint.textContent = "Fragmento del Códice obtenido";
-    img.style.display = "";
     img.onerror = null;
+    img.onload = null;
+    img.style.display = "none";
+    img.removeAttribute("src"); // limpia el src anterior inmediatamente
 
     // Si no hay imagen o falla la carga, mostramos placeholder (pero el fundido ocurre igual)
     const setMissing = () => {
@@ -2318,24 +2320,32 @@ function showCodexReward(roomKey){
       hint.textContent = `Fragmento desbloqueado (${roomKey}). Imagen no encontrada.`;
     };
 
-    if (src) {
-      img.src = src;
-      img.onerror = setMissing;
-    } else {
-      img.src = "";
-      setMissing();
-    }
-
+    // Mostrar overlay ya (fundido a negro), aunque la imagen tarde en cargar
+    overlay.style.display = "flex";
+    // forzar reflow para reiniciar la animación
+    void overlay.offsetWidth;
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden","false");
+
+    if (src) {
+      // Precargar para que no se vea el reward anterior ni un "parpadeo"
+      const pre = new Image();
+      pre.onload = () => {
+        img.src = src;
+        img.style.display = "";
+      };
+      pre.onerror = setMissing;
+      pre.src = src;
+    } else {
+      setMissing();
+    }
 
     const close = () => {
       overlay.classList.remove("show");
       overlay.setAttribute("aria-hidden","true");
-      overlay.style.display = "none";
       // reflow hack to allow next show to animate
-      void overlay.offsetHeight;
-      overlay.style.display = "";
+      void overlay.offsetWidth;
+      overlay.style.display = "none";
       document.removeEventListener("keydown", onKey);
       overlay.removeEventListener("click", onBg);
       btn.removeEventListener("click", close);
@@ -2348,7 +2358,6 @@ function showCodexReward(roomKey){
     overlay.addEventListener("click", onBg);
     btn.addEventListener("click", close);
 
-    // Enfocar el botón para evitar warnings de aria-hidden/focus al cambiar de vista
     setTimeout(() => { try { btn.focus({ preventScroll:true }); } catch(_){} }, 30);
 
   } catch (e){
