@@ -2943,6 +2943,11 @@ function transitionTo(actionFn, opts){
 
 function hideView(el) {
     if (!el) return;
+    // Evita warnings de accesibilidad: si algo dentro tiene el foco, lo quitamos antes de ocultar.
+    try {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && el.contains(ae)) ae.blur();
+    } catch (e) {}
     el.style.display = 'none';
     el.setAttribute('aria-hidden', 'true');
     el.classList.add('view-hidden');
@@ -5701,7 +5706,8 @@ if (sinCarousel) {
 
 
 });
-</script
+</script>
+
 <!-- Overlay recompensa: fragmento del códice -->
 <div id="codexRewardOverlay" aria-hidden="true">
   <div id="codexRewardCard" role="dialog" aria-modal="true">
@@ -5711,4 +5717,5 @@ if (sinCarousel) {
   </div>
 </div>
 
->
+</body>
+</html>
