@@ -1513,15 +1513,18 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 			  <input id="puzzlesPerRoomInput" type="number" min="1" max="10" value="3">
 			</label>
 
+			
 			<label>
-			  ¿Permitir acertijos que requieran estrictamente la Biblia?
-			  <select id="allowBibleRequiredInput">
-			    <option value="yes" selected>Sí</option>
-			    <option value="no">No (jugar sin Biblia)</option>
+			  Dificultad de los acertijos
+			  <select id="difficultyModeInput">
+			    <option value="mixed" selected>Mixta (todas)</option>
+			    <option value="easy">Fácil</option>
+			    <option value="medium">Media</option>
+			    <option value="hard">Difícil</option>
 			  </select>
 			</label>
 
-			<p class="home-text" style="margin-top:8px;">
+<p class="home-text" style="margin-top:8px;">
 			  Los nombres se introducen desde el móvil al unirse a la partida.
 			</p>
 			<input id="playersNamesInput" type="hidden" value="">
@@ -2311,19 +2314,33 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!result) {
         alert("No se ha encontrado ese código.");
         return;
-      }
-		
-      // Filtro: si se juega sin Biblia, bloquea acertijos marcados como requiresBible
+
+      // Filtro: dificultad elegida en configuración (host)
       try {
         const roomCfg = (multiplayer && multiplayer.latestRoom) ? multiplayer.latestRoom : null;
-        const allowBible = !(roomCfg && roomCfg.allowBibleRequired === false);
-        const puzzle = (result && ROOMS_DATA && ROOMS_DATA[result.roomKey] && ROOMS_DATA[result.roomKey].puzzles) ? ROOMS_DATA[result.roomKey].puzzles[result.index] : null;
-        if (!allowBible && puzzle && puzzle.requiresBible) {
-          alert("Este modo está configurado para jugar sin Biblia. El acertijo que has elegido requiere Biblia.");
-          return;
+        const mode = (roomCfg && roomCfg.difficultyMode) ? roomCfg.difficultyMode : "mixed";
+        const puzzle = (result && ROOMS_DATA && ROOMS_DATA[result.roomKey] && ROOMS_DATA[result.roomKey].puzzles)
+          ? ROOMS_DATA[result.roomKey].puzzles[result.index]
+          : null;
+
+        if (mode !== "mixed" && puzzle && puzzle.difficulty) {
+          const d = String(puzzle.difficulty).toLowerCase();
+          const isEasyMid = d.includes("fácil") || d.includes("facil"); // Fácil y Fácil–media
+          const isMedium = d.startsWith("media") && !d.includes("difícil") && !d.includes("dificil");
+          const isHard = d.includes("difícil") || d.includes("dificil");
+          let ok = true;
+          if (mode === "easy") ok = isEasyMid;
+          if (mode === "medium") ok = isMedium;
+          if (mode === "hard") ok = isHard;
+          if (!ok) {
+            alert("Este acertijo no coincide con la dificultad elegida en la configuración.");
+            return;
+          }
         }
-      } catch(e) { /* no-op */ }
-if (campaignState) {
+      } catch (e) { /* no-op */ }
+
+      }
+		if (campaignState) {
 		  campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
 		  campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
 		}
@@ -2809,7 +2826,7 @@ function hideView(el) {
   // Firestore schema:
   // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
   // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
-  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, allowBibleRequired = true }) {
+  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, difficultyMode = "mixed" }) {
     const code = genRoomCode(4);
     const pickQueue = shuffleLocal(Array.from({ length: playersMax }, (_, i) => i + 1));
 
@@ -2819,7 +2836,7 @@ function hideView(el) {
       phase: "joining",
       playersMax,
       puzzlesPerRoom,
-      allowBibleRequired,
+      difficultyMode,
       seatsTaken: 0,
       pickQueue,
       pickCursor: 0,
@@ -3489,10 +3506,10 @@ sinCarousel.innerHTML = "";
         }
         const playersMax = Math.max(1, Math.min(7, parseInt(playersCountInput.value, 10) || 1));
         const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
-        const allowBibleRequiredEl = document.getElementById("allowBibleRequiredInput");
-        const allowBibleRequired = (allowBibleRequiredEl ? allowBibleRequiredEl.value : "yes") !== "no";
+        const difficultyEl = document.getElementById("difficultyModeInput");
+        const difficultyMode = (difficultyEl ? difficultyEl.value : "mixed");
 
-        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, allowBibleRequired });
+        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, difficultyMode });
         const joinUrl = computeJoinUrl(code);
 
         showJoinSectionHost(code, joinUrl, playersMax);
