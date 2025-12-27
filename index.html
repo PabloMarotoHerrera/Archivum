@@ -2276,7 +2276,9 @@ const CODEX_REWARD_IMAGES = {
   sabiduria: "sabiduria_codice.png",
   sacrificio: "sacrificio_codice.png",
   vida: "vida_codice.png",
-  vidanueva: "vida_codice.png"
+  vidanueva: "vida_codice.png",
+  "vida-nueva": "vida_codice.png",
+  "vida_nueva": "vida_codice.png"
 };
 
 function normalizeRoomKeyForCodex(roomKey){
@@ -2394,11 +2396,13 @@ function showCodexReward(roomKey){
       .replace(/[^a-z0-9_-]/g,"");
   }
 
-  window.showCodexReward = function(roomKey){
+  window.showCodexReward = function(roomKey, opts){
     // Host only: if URL says mode=player, do nothing
     const params = new URLSearchParams(location.search);
     const mode = (params.get("mode") || "").toLowerCase();
     if (mode === "player") return;
+
+    const onContinue = (opts && typeof opts.onContinue === "function") ? opts.onContinue : null;
 
     const overlay = document.getElementById("codexRewardOverlay");
     const img = document.getElementById("codexRewardImg");
@@ -2424,6 +2428,7 @@ function showCodexReward(roomKey){
       btn.removeEventListener("click", close);
       overlay.removeEventListener("click", onBg);
       document.removeEventListener("keydown", onKey);
+      if (onContinue) { try { onContinue(); } catch(e){} }
     };
     const onBg = (e) => { if (e.target === overlay) close(); };
     const onKey = (e) => { if (e.key === "Escape") close(); };
@@ -4842,22 +4847,30 @@ function advanceTurnCampaign() {
 		  const target = campaignState.puzzlesPerRoom || 3;
 		  const done = campaignState.roomSolvedTotals[rk] >= target;
 
-		  // 3) ✅ Volver al tablero sí o sí
-		  showBoard();
-
-		  // 4) ✅ Pasar turno automático (opcional)
-		  // IMPORTANTÍSIMO: en multijugador, el turno REAL vive en Firestore.
-		  if (campaignState.autoPassTurn) {
-			advanceTurnCampaign(); // publica activeSeatNumber + resetea token/pistas en Firestore
-		  }
-// Actualiza el panel
-		  renderPlayersSummary();
-
-		  // 🎁 Recompensa visual por sala (solo host)
+		  // 3) 🎁 Si la sala se completa, muestra el códice AQUÍ (en la sala).
+		  // Al pulsar "Continuar", entonces sí volvemos al tablero y (si procede) pasamos turno.
 		  if (done) {
-			window.showCodexReward && window.showCodexReward(rk);
+			window.showCodexReward && window.showCodexReward(rk, {
+			  onContinue: () => {
+				showBoard();
+				// 4) ✅ Pasar turno automático (opcional)
+				// IMPORTANTÍSIMO: en multijugador, el turno REAL vive en Firestore.
+				if (campaignState.autoPassTurn) {
+				  advanceTurnCampaign(); // publica activeSeatNumber + resetea token/pistas en Firestore
+				}
+				renderPlayersSummary();
+			  }
+			});
+		  } else {
+			// 3) ✅ Si no se completa la sala, volver al tablero inmediatamente
+			showBoard();
+			// 4) ✅ Pasar turno automático (opcional)
+			if (campaignState.autoPassTurn) {
+			  advanceTurnCampaign();
+			}
+			renderPlayersSummary();
 		  }
-		} else {
+} else {
 		  // Ya estaba atribuido: igualmente vuelve al tablero para ritmo
 		  showBoard();
 		  renderPlayersSummary();
