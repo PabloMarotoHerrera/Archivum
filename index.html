@@ -1492,7 +1492,27 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   transform:translateY(24px);
   opacity:0;
   transition:transform .55s ease, opacity .55s ease;
+  position:relative;
 }
+
+#codexRewardCard::after{
+  content:"";
+  position:absolute;
+  inset:-10px;
+  border-radius:22px;
+  pointer-events:none;
+  opacity:0;
+  box-shadow:0 0 0 rgba(224,182,107,0);
+}
+#codexRewardOverlay.show #codexRewardCard::after{
+  animation:codexGlow .9s ease-out 1;
+}
+@keyframes codexGlow{
+  0%{opacity:0; box-shadow:0 0 0 rgba(224,182,107,0), 0 0 0 rgba(224,182,107,0);}
+  25%{opacity:1; box-shadow:0 0 28px rgba(224,182,107,.55), 0 0 90px rgba(224,182,107,.22);}
+  100%{opacity:0; box-shadow:0 0 0 rgba(224,182,107,0), 0 0 0 rgba(224,182,107,0);}
+}
+
 #codexRewardOverlay.show #codexRewardCard{
   transform:translateY(0);
   opacity:1;
@@ -2313,75 +2333,8 @@ function normalizeRoomKeyForCodex(roomKey){
 }
 
 function showCodexReward(roomKey){
-  try{
-    if (appMode !== "host") return;
-
-    const overlay = document.getElementById("codexRewardOverlay");
-    const img = document.getElementById("codexRewardImg");
-    const hint = document.getElementById("codexRewardHint");
-    const btn = document.getElementById("codexRewardBtn");
-    if (!overlay || !img || !btn || !hint) return;
-
-    const k = normalizeRoomKeyForCodex(roomKey);
-    const src = CODEX_REWARD_IMAGES[k];
-
-    // Estado por defecto (evita "flash" del reward anterior)
-    hint.textContent = "Fragmento del Códice obtenido";
-    img.onerror = null;
-    img.onload = null;
-    img.style.display = "none";
-    img.removeAttribute("src"); // limpia el src anterior inmediatamente
-
-    // Si no hay imagen o falla la carga, mostramos placeholder (pero el fundido ocurre igual)
-    const setMissing = () => {
-      img.classList.remove("loaded");
-      img.style.display = "none";
-      hint.textContent = `Fragmento desbloqueado (${roomKey}). Imagen no encontrada.`;
-    };
-
-    // Mostrar overlay ya (fundido a negro), aunque la imagen tarde en cargar
-    img.classList.remove("loaded");
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden","false");
-
-    if (src) {
-      // Precargar para que no se vea el reward anterior ni un "parpadeo"
-      const pre = new Image();
-      pre.onload = () => {
-        img.classList.remove("loaded");
-        img.src = src;
-        img.style.display = "block";
-        requestAnimationFrame(() => img.classList.add("loaded"));
-      };
-      pre.onerror = setMissing;
-      pre.src = src;
-    } else {
-      setMissing();
-    }
-
-    const close = () => {
-      overlay.classList.remove("show");
-      overlay.setAttribute("aria-hidden","true");
-      img.classList.remove("loaded");
-      img.style.display = "none";
-      img.removeAttribute("src");
-      document.removeEventListener("keydown", onKey);
-      overlay.removeEventListener("click", onBg);
-      btn.removeEventListener("click", close);
-    };
-
-    const onKey = (e) => { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") close(); };
-    const onBg = (e) => { if (e.target === overlay) close(); };
-
-    document.addEventListener("keydown", onKey);
-    overlay.addEventListener("click", onBg);
-    btn.addEventListener("click", close);
-
-    setTimeout(() => { try { btn.focus({ preventScroll:true }); } catch(_){} }, 30);
-
-  } catch (e){
-    console.warn("showCodexReward error", e);
-  }
+  // Delegamos al manejador global (con animación y precarga)
+  try{ if (window.showCodexReward) return window.showCodexReward(roomKey); }catch(_){ }
 }
 
 
@@ -2441,23 +2394,65 @@ function showCodexReward(roomKey){
     const key = normalizeRoomKey(roomKey);
     const src = (typeof CODEX_REWARD_IMAGES !== "undefined" && CODEX_REWARD_IMAGES[key]) ? CODEX_REWARD_IMAGES[key] : null;
 
+    // Estado base (anti-flash + animación)
+    img.classList.remove("loaded");
+    img.style.display = "none";
+    img.removeAttribute("src");
+
     // Always show overlay (even if image missing)
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden","false");
 
-    // Default text
     const pretty = (key || "desconocida").toUpperCase();
     hint.textContent = `Fragmento del Códice obtenido: ${pretty}`;
+
+    const setMissing = () => {
+      img.classList.remove("loaded");
+      img.style.display = "none";
+      img.removeAttribute("src");
+      hint.textContent = `Fragmento del Códice obtenido: ${pretty} (imagen no encontrada)`;
+    };
 
     // Close handler
     const close = () => {
       overlay.classList.remove("show");
       overlay.setAttribute("aria-hidden","true");
+
+      img.classList.remove("loaded");
+      img.style.display = "none";
+      img.removeAttribute("src");
+
       btn.removeEventListener("click", close);
       overlay.removeEventListener("click", onBg);
       document.removeEventListener("keydown", onKey);
+
       if (onContinue) { try { onContinue(); } catch(e){} }
     };
+    const onBg = (e) => { if (e.target === overlay) close(); };
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+
+    btn.addEventListener("click", close);
+    overlay.addEventListener("click", onBg);
+    document.addEventListener("keydown", onKey);
+
+    // Precarga: solo mostramos la imagen cuando esté lista (evita parpadeos)
+    if (src){
+      const pre = new Image();
+      pre.onload = () => {
+        img.classList.remove("loaded");
+        img.src = src;
+        img.style.display = "block";
+        requestAnimationFrame(() => img.classList.add("loaded"));
+      };
+      pre.onerror = setMissing;
+      pre.src = src;
+    } else {
+      setMissing();
+    }
+
+    // Focus button to avoid aria-hidden focus warning
+    try{ setTimeout(()=>btn.focus({preventScroll:true}), 30); }catch(e){}
+  };
     const onBg = (e) => { if (e.target === overlay) close(); };
     const onKey = (e) => { if (e.key === "Escape") close(); };
 
