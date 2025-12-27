@@ -1466,14 +1466,25 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 ----------------------------*/
 #codexRewardOverlay{
   position:fixed; inset:0;
-  display:none;
+  display:flex;
   align-items:center;
   justify-content:center;
   background:rgba(0,0,0,.92);
   z-index:9999;
   padding:24px;
+
+  /* fade in/out */
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .35s ease, visibility 0s linear .35s;
 }
-#codexRewardOverlay.show{ display:flex; }
+#codexRewardOverlay.show{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity .35s ease;
+}
 #codexRewardCard{
   max-width:min(520px, 92vw);
   width:100%;
@@ -1489,8 +1500,15 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 #codexRewardImg{
   width:100%;
   height:auto;
-  display:block;
+  display:none; /* shown when loaded */
   filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
+  opacity:0;
+  transform:scale(.94);
+  transition:opacity .45s ease, transform .45s ease;
+}
+#codexRewardOverlay.show #codexRewardImg.loaded{
+  opacity:1;
+  transform:scale(1);
 }
 #codexRewardHint{
   margin-top:14px;
@@ -1676,7 +1694,7 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 			<input id="playersNamesInput" type="hidden" value="">
 <p class="home-text" style="margin-top:8px;">
 			  Al iniciar la campaña, la app repartirá al azar los <strong>Mandamientos</strong>
-			  y los jugadores elegirán sus <strong>Pecados capitales</strong>.
+			  (ventajas) y los <strong>Pecados capitales</strong> (restricciones) entre los jugadores.
 			</p>
 
 			<div class="home-buttons">
@@ -2316,14 +2334,13 @@ function showCodexReward(roomKey){
 
     // Si no hay imagen o falla la carga, mostramos placeholder (pero el fundido ocurre igual)
     const setMissing = () => {
+      img.classList.remove("loaded");
       img.style.display = "none";
       hint.textContent = `Fragmento desbloqueado (${roomKey}). Imagen no encontrada.`;
     };
 
     // Mostrar overlay ya (fundido a negro), aunque la imagen tarde en cargar
-    overlay.style.display = "flex";
-    // forzar reflow para reiniciar la animación
-    void overlay.offsetWidth;
+    img.classList.remove("loaded");
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden","false");
 
@@ -2331,8 +2348,10 @@ function showCodexReward(roomKey){
       // Precargar para que no se vea el reward anterior ni un "parpadeo"
       const pre = new Image();
       pre.onload = () => {
+        img.classList.remove("loaded");
         img.src = src;
-        img.style.display = "";
+        img.style.display = "block";
+        requestAnimationFrame(() => img.classList.add("loaded"));
       };
       pre.onerror = setMissing;
       pre.src = src;
@@ -2343,9 +2362,9 @@ function showCodexReward(roomKey){
     const close = () => {
       overlay.classList.remove("show");
       overlay.setAttribute("aria-hidden","true");
-      // reflow hack to allow next show to animate
-      void overlay.offsetWidth;
-      overlay.style.display = "none";
+      img.classList.remove("loaded");
+      img.style.display = "none";
+      img.removeAttribute("src");
       document.removeEventListener("keydown", onKey);
       overlay.removeEventListener("click", onBg);
       btn.removeEventListener("click", close);
