@@ -1460,6 +1460,54 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
     }
     .rules-detail summary::-webkit-details-marker{ display:none; }
     .rules-detail[open]{ background: rgba(255,255,255,0.06); }
+
+/* ---------------------------
+   Códice: recompensa por sala
+----------------------------*/
+#codexRewardOverlay{
+  position:fixed; inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.92);
+  z-index:9999;
+  padding:24px;
+}
+#codexRewardOverlay.show{ display:flex; }
+#codexRewardCard{
+  max-width:min(520px, 92vw);
+  width:100%;
+  text-align:center;
+  transform:translateY(24px);
+  opacity:0;
+  transition:transform .55s ease, opacity .55s ease;
+}
+#codexRewardOverlay.show #codexRewardCard{
+  transform:translateY(0);
+  opacity:1;
+}
+#codexRewardImg{
+  width:100%;
+  height:auto;
+  display:block;
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
+}
+#codexRewardHint{
+  margin-top:14px;
+  font-size:14px;
+  opacity:.85;
+}
+#codexRewardBtn{
+  margin-top:14px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  cursor:pointer;
+}
+#codexRewardBtn:hover{ background:rgba(255,255,255,.10); }
+
 </style>
 </head>
 <body>
@@ -2215,7 +2263,77 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-<script src="puzzles_roles_final.js"></script>
+<script src="puzzles_roles_final.js">
+// ---------------------------
+// Códice: mostrar recompensa por sala (HOST)
+// ---------------------------
+const CODEX_REWARD_IMAGES = {
+  origen: "origen_codice.png",
+  promesa: "promesa_codice.png",
+  libertad: "libertad_codice.png",
+  sabiduria: "sabiduria_codice.png",
+  sacrificio: "sacrificio_codice.png",
+  vida: "vida_codice.png",
+  vidanueva: "vida_codice.png",
+  "vida-nueva": "vida_codice.png",
+  "vida_nueva": "vida_codice.png"
+};
+
+function normalizeRoomKeyForCodex(roomKey){
+  return String(roomKey || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/[áàä]/g,"a")
+    .replace(/[éèë]/g,"e")
+    .replace(/[íìï]/g,"i")
+    .replace(/[óòö]/g,"o")
+    .replace(/[úùü]/g,"u")
+    .replace(/[^a-z0-9_-]/g,"");
+}
+
+function showCodexReward(roomKey){
+  try{
+    if (appMode !== "host") return;
+    const k = normalizeRoomKeyForCodex(roomKey);
+    const src = CODEX_REWARD_IMAGES[k];
+    if (!src) {
+      // si no hay asset, no bloqueamos el flujo
+      return;
+    }
+    const overlay = document.getElementById("codexRewardOverlay");
+    const img = document.getElementById("codexRewardImg");
+    const btn = document.getElementById("codexRewardBtn");
+    if (!overlay || !img || !btn) return;
+
+    img.src = src;
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+
+    const close = () => {
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
+      overlay.style.display = "none";
+      // reflow hack to allow next show to animate
+      void overlay.offsetHeight;
+      overlay.style.display = "";
+      document.removeEventListener("keydown", onKey);
+      overlay.removeEventListener("click", onBg);
+      btn.removeEventListener("click", close);
+    };
+
+    const onKey = (e) => { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") close(); };
+    const onBg = (e) => { if (e.target === overlay) close(); };
+
+    document.addEventListener("keydown", onKey);
+    overlay.addEventListener("click", onBg);
+    btn.addEventListener("click", close);
+  } catch(e){
+    // no-op
+  }
+}
+
+</script>
 
 
   <!-- Ritual overlay (suave, estilo ARCHIVUM) -->
@@ -3742,9 +3860,9 @@ sinCarousel.innerHTML = "";
 		campaignState.currentRoomKey = null;
 
 		// IMPORTANTE: aquí vuelves al tablero
-		showBoardScreen({
-		  toast: `Sala completada (${roomCounts[roomKey]}/${campaignState.perRoomTarget}). Vuelve al tablero y gira la sala.`,
-		});
+		showBoardScreen();
+		  // Recompensa: fragmento del Códice de la sala
+		  showCodexReward(roomKey);
 	  } else {
 		// si no ha completado sala, puedes:
 		// - volver al tablero igualmente (para meter siguiente código)
@@ -5583,4 +5701,14 @@ if (sinCarousel) {
 
 
 });
-</script>
+</script
+<!-- Overlay recompensa: fragmento del códice -->
+<div id="codexRewardOverlay" aria-hidden="true">
+  <div id="codexRewardCard" role="dialog" aria-modal="true">
+    <img id="codexRewardImg" alt="Fragmento del Códice" src="" />
+    <div id="codexRewardHint">Fragmento del Códice obtenido</div>
+    <button id="codexRewardBtn" type="button">Continuar</button>
+  </div>
+</div>
+
+>
