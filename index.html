@@ -2263,7 +2263,9 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-<script src="puzzles_roles_final.js">
+<script src="puzzles_roles_final.js"></script>
+<script>
+
 // ---------------------------
 // Códice: mostrar recompensa por sala (HOST)
 // ---------------------------
@@ -2407,7 +2409,7 @@ function showCodexReward(roomKey){
     if (!overlay || !img || !hint || !btn) return;
 
     const key = normalizeRoomKey(roomKey);
-    const src = (CODex_IMAGE_BY_ROOM && CODex_IMAGE_BY_ROOM[key]) ? CODex_IMAGE_BY_ROOM[key] : null;
+    const src = (typeof CODEX_REWARD_IMAGES !== "undefined" && CODEX_REWARD_IMAGES[key]) ? CODEX_REWARD_IMAGES[key] : null;
 
     // Always show overlay (even if image missing)
     overlay.classList.add("show");
@@ -2448,10 +2450,6 @@ function showCodexReward(roomKey){
     // Focus button to avoid aria-hidden focus warning
     try{ btn.focus({preventScroll:true}); }catch(e){}
   };
-    img.onload = () => {};
-    img.src = src;
-    img.alt = `Códice: ${roomKey || "fragmento"}`;
-
 })();
 window.addEventListener("DOMContentLoaded", () => {
 
