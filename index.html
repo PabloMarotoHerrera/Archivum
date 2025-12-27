@@ -2453,29 +2453,6 @@ function showCodexReward(roomKey){
     // Focus button to avoid aria-hidden focus warning
     try{ setTimeout(()=>btn.focus({preventScroll:true}), 30); }catch(e){}
   };
-    const onBg = (e) => { if (e.target === overlay) close(); };
-    const onKey = (e) => { if (e.key === "Escape") close(); };
-
-    btn.addEventListener("click", close);
-    overlay.addEventListener("click", onBg);
-    document.addEventListener("keydown", onKey);
-
-    // Try load image if we have a src
-    if (src){
-      img.style.display = "block";
-      img.src = src;
-      img.onerror = () => {
-        img.style.display = "none";
-        hint.textContent = `Fragmento del Códice obtenido: ${pretty} (imagen no encontrada)`;
-      };
-    } else {
-      img.style.display = "none";
-      hint.textContent = `Fragmento del Códice obtenido: ${pretty} (imagen no encontrada)`;
-    }
-
-    // Focus button to avoid aria-hidden focus warning
-    try{ btn.focus({preventScroll:true}); }catch(e){}
-  };
 })();
 window.addEventListener("DOMContentLoaded", () => {
 
