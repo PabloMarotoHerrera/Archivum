@@ -1524,6 +1524,15 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 			  </select>
 			</label>
 
+            <label>
+              ¿Permitir acertijos que requieran estrictamente la Biblia?
+              <select id="allowBibleRequiredInput">
+                <option value="yes" selected>Sí</option>
+                <option value="no">No (jugar sin Biblia)</option>
+              </select>
+            </label>
+
+
 <p class="home-text" style="margin-top:8px;">
 			  Los nombres se introducen desde el móvil al unirse a la partida.
 			</p>
@@ -2369,6 +2378,30 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // Validación (host campaña): dificultad y modo sin Biblia
+      if (gameMode === "campaign-room" && appMode !== "player") {
+        const roomDoc = multiplayer.latestRoom;
+        const puzzleObj = (ROOMS_DATA && ROOMS_DATA[result.roomKey]) ? ROOMS_DATA[result.roomKey].puzzles[result.index] : null;
+        if (puzzleObj) {
+          const check = puzzleAllowedByRoomSettings(puzzleObj, roomDoc);
+          if (!check.ok) {
+            if (puzzleCodeMessage) {
+              if (check.reason === "bible") {
+                puzzleCodeMessage.textContent = "Este acertijo requiere Biblia y la partida está configurada en modo sin Biblia.";
+              } else {
+                puzzleCodeMessage.textContent = "Este acertijo no coincide con la dificultad configurada para esta partida.";
+              }
+            } else {
+              alert(check.reason === "bible"
+                ? "Este acertijo requiere Biblia y la partida está configurada en modo sin Biblia."
+                : "Este acertijo no coincide con la dificultad configurada para esta partida.");
+            }
+            return;
+          }
+        }
+      }
+
+
 
       // Campaña (host): publica acertijo activo para el turno
       if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
@@ -2826,7 +2859,7 @@ function hideView(el) {
   // Firestore schema:
   // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
   // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
-  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, difficultyMode = "mixed" }) {
+  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, difficultyMode = "mixed", allowBibleRequired = true }) {
     const code = genRoomCode(4);
     const pickQueue = shuffleLocal(Array.from({ length: playersMax }, (_, i) => i + 1));
 
@@ -2837,6 +2870,7 @@ function hideView(el) {
       playersMax,
       puzzlesPerRoom,
       difficultyMode,
+      allowBibleRequired,
       seatsTaken: 0,
       pickQueue,
       pickCursor: 0,
@@ -3508,8 +3542,10 @@ sinCarousel.innerHTML = "";
         const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
         const difficultyEl = document.getElementById("difficultyModeInput");
         const difficultyMode = (difficultyEl ? difficultyEl.value : "mixed");
+        const bibleEl = document.getElementById("allowBibleRequiredInput");
+        const allowBibleRequired = (bibleEl ? bibleEl.value !== "no" : true);
 
-        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, difficultyMode });
+        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, difficultyMode, allowBibleRequired });
         const joinUrl = computeJoinUrl(code);
 
         showJoinSectionHost(code, joinUrl, playersMax);
@@ -4921,6 +4957,29 @@ updateTimerUI();
       if (idx !== -1) {
         return { roomKey: key, index: idx, code: normalized };
       }
+
+
+  function puzzleMatchesDifficulty(mode, diffLabel) {
+    const d = (diffLabel || "").toLowerCase();
+    if (mode === "mixed" || !mode) return true;
+    if (mode === "easy") return (d.includes("fácil") || d.includes("facil")) && !d.includes("media-dif");
+    if (mode === "medium") return d.includes("media") && !d.includes("dif");
+    if (mode === "hard") return d.includes("dif") || d.includes("difícil") || d.includes("dificil");
+    return true;
+  }
+
+  function puzzleAllowedByRoomSettings(puzzle, roomDoc) {
+    const difficultyMode = (roomDoc && roomDoc.difficultyMode) ? roomDoc.difficultyMode : "mixed";
+    const allowBibleRequired = (roomDoc && typeof roomDoc.allowBibleRequired === "boolean") ? roomDoc.allowBibleRequired : true;
+
+    if (!puzzleMatchesDifficulty(difficultyMode, puzzle.difficulty)) {
+      return { ok: false, reason: "difficulty", difficultyMode };
+    }
+    if (!allowBibleRequired && puzzle.requiresBible) {
+      return { ok: false, reason: "bible" };
+    }
+    return { ok: true };
+  }
     }
     return null;
   }
