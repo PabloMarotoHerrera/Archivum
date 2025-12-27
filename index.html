@@ -2367,7 +2367,73 @@ function showCodexReward(roomKey){
   </div>
 
 <script>
+/* ===== Codex Reward Overlay (global) ===== */
+(function(){
+  const CODex_IMAGE_BY_ROOM = {
+    "origen": "origen_codice.png",
+    "promesa": "promesa_codice.png",
+    "libertad": "libertad_codice.png",
+    "sabiduria": "sabiduria_codice.png",
+    "sacrificio": "sacrificio_codice.png",
+    "vidanueva": "vida_codice.png",
+    "vida-nueva": "vida_codice.png",
+    "vida_nueva": "vida_codice.png",
+    "vida": "vida_codice.png"
+  };
+
+  function normalizeRoomKey(roomKey){
+    return String(roomKey || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g,"")
+      .replace(/[áàä]/g,"a")
+      .replace(/[éèë]/g,"e")
+      .replace(/[íìï]/g,"i")
+      .replace(/[óòö]/g,"o")
+      .replace(/[úùü]/g,"u")
+      .replace(/[^a-z0-9_-]/g,"");
+  }
+
+  window.showCodexReward = function(roomKey){
+    // Host only: if URL says mode=player, do nothing
+    const params = new URLSearchParams(location.search);
+    const mode = (params.get("mode") || "").toLowerCase();
+    if (mode === "player") return;
+
+    const overlay = document.getElementById("codexRewardOverlay");
+    const img = document.getElementById("codexRewardImg");
+    const title = document.getElementById("codexRewardTitle");
+    const subtitle = document.getElementById("codexRewardSubtitle");
+    if (!overlay || !img || !title || !subtitle) return;
+
+    const key = normalizeRoomKey(roomKey);
+    const src = CODex_IMAGE_BY_ROOM[key];
+
+    title.textContent = "Fragmento del Códice";
+    subtitle.textContent = roomKey ? `Sala completada: ${roomKey}` : "Sala completada";
+
+    // Always fade in, even if image missing
+    overlay.classList.add("show");
+    overlay.style.display = "flex";
+
+    if (!src){
+      img.style.display = "none";
+      subtitle.textContent = (roomKey ? `Sala completada: ${roomKey}. ` : "") + "Imagen no encontrada.";
+      return;
+    }
+
+    img.style.display = "block";
+    img.onerror = () => {
+      img.style.display = "none";
+      subtitle.textContent = (roomKey ? `Sala completada: ${roomKey}. ` : "") + "Imagen no encontrada.";
+    };
+    img.onload = () => {};
+    img.src = src;
+    img.alt = `Códice: ${roomKey || "fragmento"}`;
+  };
+})();
 window.addEventListener("DOMContentLoaded", () => {
+
 
   const appRoot = document.getElementById("appRoot");
   const homeSection = document.getElementById("homeSection");
@@ -4772,7 +4838,7 @@ function advanceTurnCampaign() {
 
 		  // 🎁 Recompensa visual por sala (solo host)
 		  if (done) {
-			showCodexReward(rk);
+			window.showCodexReward && window.showCodexReward(rk);
 		  }
 		} else {
 		  // Ya estaba atribuido: igualmente vuelve al tablero para ritmo
