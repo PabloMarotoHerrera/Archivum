@@ -2553,6 +2553,10 @@ const playersNamesInput = document.getElementById("playersNamesInput");
   const toggleAdvancedCodeBtn = document.getElementById("toggleAdvancedCodeBtn");
   const advancedCodeBox = document.getElementById("advancedCodeBox");
 
+  // Inicializa el menú desplegable de acertijos (host)
+  setupPuzzleMenuDelegation();
+
+
   const endCampaignBtn = document.getElementById("endCampaignBtn");
   const roomButtons = document.querySelectorAll(".room-btn");
   const roomTitleEl = document.getElementById("roomTitle");
@@ -2610,46 +2614,7 @@ const playersNamesInput = document.getElementById("playersNamesInput");
 
   // --- Menú de acertijos disponibles (host) ---
   // Usamos delegación de eventos porque algunas vistas se re-renderizan y los nodos pueden recrearse.
-  (function setupPuzzleMenuDelegation(){
-    if (window.__puzzleMenuDelegationInstalled) return;
-    window.__puzzleMenuDelegationInstalled = true;
-
-    document.addEventListener("click", (ev) => {
-      const t = ev.target;
-      if (!t) return;
-      const id = t.id;
-
-      if (id === "toggleAdvancedCodeBtn") {
-        const box = document.getElementById("advancedCodeBox");
-        if (!box) return;
-        const isOpen = box.style.display !== "none";
-        box.style.display = isOpen ? "none" : "block";
-        return;
-      }
-
-      if (id === "openSelectedPuzzleBtn") {
-        const sel = document.getElementById("availablePuzzlesSelect");
-        if (!sel) return;
-        openPuzzleFromMenu(sel.value);
-        return;
-      }
-
-      if (id === "randomPuzzleBtn") {
-        const items = getAvailablePuzzlesByFilters();
-        if (!items.length) return;
-        const pick = items[Math.floor(Math.random() * items.length)];
-        openPuzzleFromMenu(pick.id);
-        return;
-      }
-    });
-
-    // Refrescar menú cuando cambian filtros
-    if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-    if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-
-    // Primer render
-    setTimeout(renderAvailablePuzzleMenu, 0);
-  })();
+  ;
 
 
       // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
@@ -2979,6 +2944,53 @@ function renderAvailablePuzzleMenu() {
     const first = availablePuzzlesSelect.querySelector("option");
     if (first) availablePuzzlesSelect.value = first.value || "";
   } catch(_){}
+}
+
+
+
+// --- Menú de acertijos disponibles (host) ---
+// Usamos delegación de eventos porque algunas vistas se re-renderizan y los nodos pueden recrearse.
+function setupPuzzleMenuDelegation(){
+  if (window.__puzzleMenuDelegationInstalled) return;
+  window.__puzzleMenuDelegationInstalled = true;
+
+  document.addEventListener("click", (ev) => {
+    const btn = ev && ev.target && ev.target.closest ? ev.target.closest("button") : null;
+    if (!btn) return;
+    const id = btn.id;
+
+    if (id === "toggleAdvancedCodeBtn") {
+      const box = document.getElementById("advancedCodeBox");
+      if (!box) return;
+      const isOpen = box.style.display !== "none";
+      box.style.display = isOpen ? "none" : "block";
+      return;
+    }
+
+    if (id === "openSelectedPuzzleBtn") {
+      const sel = document.getElementById("availablePuzzlesSelect");
+      if (!sel) return;
+      openPuzzleFromMenu(sel.value);
+      return;
+    }
+
+    if (id === "randomPuzzleBtn") {
+      const items = getAvailablePuzzlesByFilters();
+      if (!items.length) return;
+      const pick = items[Math.floor(Math.random() * items.length)];
+      openPuzzleFromMenu(pick.id);
+      return;
+    }
+  });
+
+  // Refrescar menú cuando cambian filtros (config de campaña)
+  const puzzleDifficultyInput = document.getElementById("puzzleDifficultyInput");
+  const bibleRequiredInput = document.getElementById("bibleRequiredInput");
+  if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+  if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+
+  // Primer render
+  setTimeout(renderAvailablePuzzleMenu, 0);
 }
 
 function openPuzzleFromMenu(code) {
