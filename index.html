@@ -2182,18 +2182,19 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 
 		  <div class="room-header-right">
 			<div class="puzzle-jump">
-			  <input
-				id="puzzleCodeInput"
-				type="text"
-				placeholder="OR-01"
-				autocomplete="off"
-			  />
-			  <button id="puzzleCodeBtn" class="action small">
-				Ir
-			  </button>
-			</div>
+              <select id="availablePuzzleSelect" class="action small" style="min-width:260px;">
+                <option value="">— Acertijos disponibles —</option>
+              </select>
+              <button id="openSelectedPuzzleBtn" class="action small primary">Abrir</button>
+              <button id="randomPuzzleBtn" class="action small">Aleatorio</button>
+              <button id="toggleAdvancedCodeBtn" class="action small" style="margin-left:auto;">Modo avanzado</button>
 
-			<div class="progress">
+              <div id="manualCodeWrap" style="display:none; width:100%; margin-top:8px; display:flex; gap:8px; align-items:center;">
+                <input id="puzzleCodeInput" type="text" placeholder="OR-01" autocomplete="off" style="flex:1;" />
+                <button id="puzzleCodeBtn" class="action small">Ir</button>
+              </div>
+            </div>
+<div class="progress">
 			  <span id="puzzleCounter">Acertijo 1 de 1</span>
 				<span id="roomSolvedSummary" class="room-solved-summary">
 				  Resueltos en esta sala: 0 de 0
@@ -2513,6 +2514,20 @@ window.addEventListener("DOMContentLoaded", () => {
     const timeLimitSecInput = document.getElementById("timeLimitSecInput");
   const puzzleDifficultyInput = document.getElementById("puzzleDifficultyInput");
   const bibleRequiredInput = document.getElementById("bibleRequiredInput");
+
+
+  // Refrescar menú de acertijos cuando cambian filtros (HOST)
+  if (puzzleDifficultyInput) {
+    puzzleDifficultyInput.addEventListener("change", () => {
+      // En campaña, el host guarda en Firestore al crear partida; aquí solo refrescamos UI local
+      refreshAvailablePuzzleMenu();
+    });
+  }
+  if (bibleRequiredInput) {
+    bibleRequiredInput.addEventListener("change", () => {
+      refreshAvailablePuzzleMenu();
+    });
+  }
 const playersNamesInput = document.getElementById("playersNamesInput");
   const startCampaignBtn = document.getElementById("startCampaignBtn");
   const campaignBackBtn = document.getElementById("campaignBackBtn");
@@ -2535,6 +2550,13 @@ const playersNamesInput = document.getElementById("playersNamesInput");
   const puzzleCodeInput = document.getElementById("puzzleCodeInput");
   const puzzleCodeBtn = document.getElementById("puzzleCodeBtn");
   const puzzleCodeMessage = document.getElementById("puzzleCodeMessage");
+
+  // --- Menú de acertijos disponibles (HOST) ---
+  const availablePuzzleSelect = document.getElementById("availablePuzzleSelect");
+  const openSelectedPuzzleBtn = document.getElementById("openSelectedPuzzleBtn");
+  const randomPuzzleBtn = document.getElementById("randomPuzzleBtn");
+  const toggleAdvancedCodeBtn = document.getElementById("toggleAdvancedCodeBtn");
+  const manualCodeWrap = document.getElementById("manualCodeWrap");
   const puzzleCardEl = document.querySelector(".puzzle-card");
   const puzzleStateEl = document.getElementById("puzzleState");
   const puzzleIdEl = document.getElementById("puzzleId");
@@ -2659,6 +2681,106 @@ if (endCampaignBtn) {
         loadRoom(result.roomKey, result.index);
       }
 
+    // ===== Menú de acertijos disponibles (HOST) =====
+    function getCampaignDifficultyMode() {
+      const r = multiplayer && multiplayer.latestRoom ? multiplayer.latestRoom : null;
+      if (r && typeof r.difficultyMode === "string") return r.difficultyMode;
+      if (puzzleDifficultyInput && puzzleDifficultyInput.value) return puzzleDifficultyInput.value;
+      return "auto";
+    }
+
+    function getCampaignAllowBibleRequired() {
+      const r = multiplayer && multiplayer.latestRoom ? multiplayer.latestRoom : null;
+      if (r && typeof r.allowBibleRequired === "boolean") return r.allowBibleRequired;
+      if (bibleRequiredInput && bibleRequiredInput.value) return bibleRequiredInput.value !== "no";
+      return true;
+    }
+
+    function puzzleMatchesBibleFilter(puzzle) {
+      const allow = getCampaignAllowBibleRequired();
+      if (allow) return true;
+      return !(puzzle && puzzle.requiresBible);
+    }
+
+    // Por defecto: solo no resueltos (para no repetir)
+    function isPuzzleSelectable(puzzle) {
+      if (!puzzle || !puzzle.id) return false;
+      const pid = String(puzzle.id || "").toUpperCase();
+      if (isPuzzleSolved(pid)) return false;
+      const dm = getCampaignDifficultyMode();
+      if (!puzzleMatchesDifficulty(puzzle, dm)) return false;
+      if (!puzzleMatchesBibleFilter(puzzle)) return false;
+      return true;
+    }
+
+    function refreshAvailablePuzzleMenu() {
+      if (appMode === "player") return;
+      if (!availablePuzzleSelect) return;
+
+      const roomKey = currentRoomKey;
+      const room = roomKey ? rooms[roomKey] : null;
+      const puzzles = room && room.puzzles ? room.puzzles : [];
+
+      const showMenu = (gameMode === "campaign-room");
+      availablePuzzleSelect.style.display = showMenu ? "" : "none";
+      if (openSelectedPuzzleBtn) openSelectedPuzzleBtn.style.display = showMenu ? "" : "none";
+      if (randomPuzzleBtn) randomPuzzleBtn.style.display = showMenu ? "" : "none";
+      if (toggleAdvancedCodeBtn) toggleAdvancedCodeBtn.style.display = showMenu ? "" : "none";
+
+      const prev = availablePuzzleSelect.value;
+      availablePuzzleSelect.innerHTML = "";
+
+      if (!roomKey || !room) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "— Selecciona una sala —";
+        availablePuzzleSelect.appendChild(opt);
+        return;
+      }
+
+      const valid = puzzles.filter(isPuzzleSelectable);
+
+      if (valid.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No hay acertijos disponibles con estos filtros";
+        availablePuzzleSelect.appendChild(opt);
+        return;
+      }
+
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "— Acertijos disponibles —";
+      availablePuzzleSelect.appendChild(opt0);
+
+      valid.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = String(p.id).toUpperCase();
+        const bibleTag = p.requiresBible ? "📖" : "sin Biblia";
+        const diff = p.difficulty ? p.difficulty : "";
+        opt.textContent = `${opt.value} — ${p.title || "Sin título"} (${diff} · ${bibleTag})`;
+        availablePuzzleSelect.appendChild(opt);
+      });
+
+      if (prev && Array.from(availablePuzzleSelect.options).some(o => o.value === prev)) {
+        availablePuzzleSelect.value = prev;
+      }
+    }
+
+    function openSelectedPuzzleFromMenu(code) {
+      if (!code) return;
+      puzzleCodeInput.value = code;
+      handleRoomCodeSearch();
+    }
+
+    function pickRandomPuzzleCode() {
+      if (!availablePuzzleSelect) return null;
+      const opts = Array.from(availablePuzzleSelect.options).map(o => o.value).filter(v => !!v);
+      if (opts.length === 0) return null;
+      return opts[Math.floor(Math.random() * opts.length)];
+    }
+
+
       puzzleCodeInput.value = result.code;
       if (puzzleCodeMessage) puzzleCodeMessage.textContent = "";
     }
@@ -2667,6 +2789,38 @@ if (endCampaignBtn) {
     puzzleCodeInput.addEventListener("keydown", ev => {
       if (ev.key === "Enter") handleRoomCodeSearch();
     });
+
+    // Listeners del menú (HOST)
+    if (toggleAdvancedCodeBtn && manualCodeWrap) {
+      toggleAdvancedCodeBtn.addEventListener("click", () => {
+        const open = manualCodeWrap.style.display !== "none";
+        manualCodeWrap.style.display = open ? "none" : "flex";
+      });
+    }
+
+    if (openSelectedPuzzleBtn && availablePuzzleSelect) {
+      openSelectedPuzzleBtn.addEventListener("click", () => {
+        const code = (availablePuzzleSelect.value || "").trim().toUpperCase();
+        if (!code) return;
+        openSelectedPuzzleFromMenu(code);
+      });
+    }
+
+    if (randomPuzzleBtn) {
+      randomPuzzleBtn.addEventListener("click", () => {
+        const code = pickRandomPuzzleCode();
+        if (!code) return;
+        if (availablePuzzleSelect) availablePuzzleSelect.value = code;
+        openSelectedPuzzleFromMenu(code);
+      });
+    }
+
+    if (availablePuzzleSelect) {
+      availablePuzzleSelect.addEventListener("change", () => {
+        if (puzzleCodeMessage) puzzleCodeMessage.textContent = "";
+      });
+    }
+
   }
 
   if (hint1Btn && hint1El) {
@@ -4924,6 +5078,8 @@ function advanceTurnCampaign() {
 	  updateSidebarRoomCounters();
 	  updateRoomSolvedSummary();
 	  updateGlobalSolvedSummary();
+    refreshAvailablePuzzleMenu();
+
 	}
 
 
@@ -5332,6 +5488,8 @@ updateTimerUI();
       setActiveRoomButton(roomKey);
       loadPuzzle();
       updateRoomSolvedSummary();
+      refreshAvailablePuzzleMenu();
+
       updateSidebarRoomCounters();
       updateGlobalSolvedSummary();
 
