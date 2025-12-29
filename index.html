@@ -1708,6 +1708,18 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 				  <small style="display:block; opacity:.75; margin-top:6px;">Filtra qué códigos de acertijo son válidos en esta campaña.</small>
 			</label>
 
+			<label>
+			  ¿Permitir acertijos que requieran estrictamente la Biblia?
+			  <select id="bibleRequiredInput">
+			    <option value="yes" selected>Sí (permitir)</option>
+			    <option value="no">No (jugar sin Biblia)</option>
+			  </select>
+			  <small style="display:block; opacity:.75; margin-top:6px;">
+			    Si eliges “No”, se bloquearán los acertijos marcados como <code>requiresBible: true</code>.
+			  </small>
+			</label>
+
+
 
 			<p class="home-text" style="margin-top:8px;">
 			  Los nombres se introducen desde el móvil al unirse a la partida.
@@ -2500,6 +2512,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const puzzlesPerRoomInput = document.getElementById("puzzlesPerRoomInput");
     const timeLimitSecInput = document.getElementById("timeLimitSecInput");
   const puzzleDifficultyInput = document.getElementById("puzzleDifficultyInput");
+  const bibleRequiredInput = document.getElementById("bibleRequiredInput");
 const playersNamesInput = document.getElementById("playersNamesInput");
   const startCampaignBtn = document.getElementById("startCampaignBtn");
   const campaignBackBtn = document.getElementById("campaignBackBtn");
@@ -2569,6 +2582,13 @@ const playersNamesInput = document.getElementById("playersNamesInput");
       if (!puzzleMatchesDifficulty(puzzle, selDiff)) {
         const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
         alert(`⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}. Elige otro código.`);
+        return;
+      }
+
+      // 📖 Biblia: si la campaña está en "sin Biblia", bloquea acertijos marcados como requiresBible
+      const allowBible = getAllowBibleRequired();
+      if (!allowBible && puzzle && puzzle.requiresBible) {
+        alert("⛔ Este acertijo requiere una Biblia física y la campaña está configurada como SIN BIBLIA.");
         return;
       }
 
@@ -2788,6 +2808,13 @@ function getSelectedDifficulty() {
     ? multiplayer.latestRoom.difficulty
     : (campaignState && campaignState.difficulty ? campaignState.difficulty : "auto");
   return (d || "auto");
+}
+
+function getAllowBibleRequired(){
+  const v = (multiplayer && multiplayer.latestRoom && typeof multiplayer.latestRoom.allowBibleRequired === "boolean")
+    ? multiplayer.latestRoom.allowBibleRequired
+    : true;
+  return v;
 }
 
 function normalizeDifficultyTag(s) {
@@ -3119,7 +3146,7 @@ function hideView(el) {
   // Firestore schema:
   // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
   // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
-  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty }) {
+  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty, allowBibleRequired }) {
     const code = genRoomCode(4);
     const pickQueue = shuffleLocal(Array.from({ length: playersMax }, (_, i) => i + 1));
 
@@ -3896,6 +3923,7 @@ sinCarousel.innerHTML = "";
         const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
         const timeLimitSec = Math.max(30, Math.min(900, parseInt((timeLimitSecInput && timeLimitSecInput.value) || "180", 10) || 180));
         const difficulty = (puzzleDifficultyInput && puzzleDifficultyInput.value) ? puzzleDifficultyInput.value : "auto";
+        const allowBibleRequired = !(bibleRequiredInput && bibleRequiredInput.value === "no");
 
         // Reset local progreso (modo antiguo) para evitar arrastre visual entre partidas
         try { if (typeof solvedMap !== "undefined") { solvedMap = {}; saveSolvedToStorage(); } } catch (_) {}
@@ -3910,7 +3938,7 @@ sinCarousel.innerHTML = "";
           }
         } catch (_) {}
 
-        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty });
+        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty, allowBibleRequired });
         const joinUrl = computeJoinUrl(code);
 
         showJoinSectionHost(code, joinUrl, playersMax);
