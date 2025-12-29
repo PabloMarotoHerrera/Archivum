@@ -2609,34 +2609,52 @@ const playersNamesInput = document.getElementById("playersNamesInput");
       }
 
   // --- Menú de acertijos disponibles (host) ---
-  if (toggleAdvancedCodeBtn && advancedCodeBox) {
-    toggleAdvancedCodeBtn.addEventListener("click", () => {
-      const isOpen = advancedCodeBox.style.display !== "none";
-      advancedCodeBox.style.display = isOpen ? "none" : "block";
+  // Usamos delegación de eventos porque algunas vistas se re-renderizan y los nodos pueden recrearse.
+  (function setupPuzzleMenuDelegation(){
+    if (window.__puzzleMenuDelegationInstalled) return;
+    window.__puzzleMenuDelegationInstalled = true;
+
+    document.addEventListener("click", (ev) => {
+      const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+      if (!btn) return;
+      const id = btn.id;
+      if (!id) return;
+      if (btn.disabled) return;
+      // Evita comportamientos raros si el click viene de dentro de un overlay
+      // (no afecta a otros handlers)
+      
+
+      if (id === "toggleAdvancedCodeBtn") {
+        const box = document.getElementById("advancedCodeBox");
+        if (!box) return;
+        const isOpen = box.style.display !== "none";
+        box.style.display = isOpen ? "none" : "block";
+        return;
+      }
+
+      if (id === "openSelectedPuzzleBtn") {
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (!sel) return;
+        openPuzzleFromMenu(sel.value);
+        return;
+      }
+
+      if (id === "randomPuzzleBtn") {
+        const items = getAvailablePuzzlesByFilters();
+        if (!items.length) return;
+        const pick = items[Math.floor(Math.random() * items.length)];
+        openPuzzleFromMenu(pick.id);
+        return;
+      }
     });
-  }
 
-  if (openSelectedPuzzleBtn && availablePuzzlesSelect) {
-    openSelectedPuzzleBtn.addEventListener("click", () => {
-      openPuzzleFromMenu(availablePuzzlesSelect.value);
-    });
-  }
+    // Refrescar menú cuando cambian filtros
+    if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
 
-  if (randomPuzzleBtn) {
-    randomPuzzleBtn.addEventListener("click", () => {
-      const items = getAvailablePuzzlesByFilters();
-      if (!items.length) return;
-      const pick = items[Math.floor(Math.random() * items.length)];
-      openPuzzleFromMenu(pick.id);
-    });
-  }
-
-  // Refrescar menú cuando cambian filtros (la verdad vive en Firestore, así que damos un tick)
-  if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-  if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-
-  // Primer render (host)
-  setTimeout(renderAvailablePuzzleMenu, 0);
+    // Primer render
+    setTimeout(renderAvailablePuzzleMenu, 0);
+  })();
 
 
       // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
@@ -2978,50 +2996,22 @@ function openPuzzleFromMenu(code) {
     return;
   }
 
-  // Validación por filtros (dificultad + biblia)
   const allowBible = getAllowBibleRequired();
   const diff = getSelectedDifficulty();
-  const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
-    ? rooms[result.roomKey].puzzles[result.index]
-    : null;
-
-  if (!allowBible && puzzle && puzzle.requiresBible) {
+  if (!allowBible && !!(result.puzzle && result.puzzle.requiresBible)) {
     alert("Este acertijo requiere Biblia y está desactivado en configuración.");
     return;
   }
-  if (!puzzleMatchesDifficulty(puzzle, diff)) {
-    const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
-    alert(`Este acertijo es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(diff)}.`);
+  if (!puzzleMatchesDifficulty(result.puzzle, diff)) {
+    alert(`Este acertijo no coincide con la dificultad seleccionada (${difficultyLabel(diff)}).`);
     return;
   }
 
-  // Campaña (host): publicar acertijo activo (para que móviles se sincronicen)
-  if ((gameMode === "campaign-room" || gameMode === "campaign-board") && multiplayer && multiplayer.roomRef && appMode !== "player") {
-    multiplayer.roomRef.update({
-      currentPuzzleCode: result.code,
-      currentRoomKey: result.roomKey,
-      hint2Unlocked: false,
-      turnTokenUsed: false
-    }).catch(()=>{});
-  }
-
-  // Abrir acertijo (igual que el flujo de código manual)
-  if (result.roomKey === currentRoomKey) {
-    currentPuzzleIndex = result.index;
-    loadPuzzle();
-    updateRoomSolvedSummary();
-    updateSidebarRoomCounters();
-    updateGlobalSolvedSummary();
+  if (typeof goToPuzzleFromCode === "function") {
+    goToPuzzleFromCode(result.code);
   } else {
-    loadRoom(result.roomKey, result.index);
+    loadRoom(result.roomKey, { forcePuzzleCode: result.code, fromCampaign: true });
   }
-
-  try {
-    if (typeof campaignState === "object" && campaignState) {
-      campaignState.lastLoadedCode = result.code;
-      campaignState.lastLoadedRoomKey = result.roomKey;
-    }
-  } catch(_){}
 }
 
 function normalizeDifficultyTag(s) {
