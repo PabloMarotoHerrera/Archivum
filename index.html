@@ -2609,34 +2609,47 @@ const playersNamesInput = document.getElementById("playersNamesInput");
       }
 
   // --- Menú de acertijos disponibles (host) ---
-  if (toggleAdvancedCodeBtn && advancedCodeBox) {
-    toggleAdvancedCodeBtn.addEventListener("click", () => {
-      const isOpen = advancedCodeBox.style.display !== "none";
-      advancedCodeBox.style.display = isOpen ? "none" : "block";
+  // Usamos delegación de eventos porque algunas vistas se re-renderizan y los nodos pueden recrearse.
+  (function setupPuzzleMenuDelegation(){
+    if (window.__puzzleMenuDelegationInstalled) return;
+    window.__puzzleMenuDelegationInstalled = true;
+
+    document.addEventListener("click", (ev) => {
+      const t = ev.target;
+      if (!t) return;
+      const id = t.id;
+
+      if (id === "toggleAdvancedCodeBtn") {
+        const box = document.getElementById("advancedCodeBox");
+        if (!box) return;
+        const isOpen = box.style.display !== "none";
+        box.style.display = isOpen ? "none" : "block";
+        return;
+      }
+
+      if (id === "openSelectedPuzzleBtn") {
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (!sel) return;
+        openPuzzleFromMenu(sel.value);
+        return;
+      }
+
+      if (id === "randomPuzzleBtn") {
+        const items = getAvailablePuzzlesByFilters();
+        if (!items.length) return;
+        const pick = items[Math.floor(Math.random() * items.length)];
+        openPuzzleFromMenu(pick.id);
+        return;
+      }
     });
-  }
 
-  if (openSelectedPuzzleBtn && availablePuzzlesSelect) {
-    openSelectedPuzzleBtn.addEventListener("click", () => {
-      openPuzzleFromMenu(availablePuzzlesSelect.value);
-    });
-  }
+    // Refrescar menú cuando cambian filtros
+    if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
 
-  if (randomPuzzleBtn) {
-    randomPuzzleBtn.addEventListener("click", () => {
-      const items = getAvailablePuzzlesByFilters();
-      if (!items.length) return;
-      const pick = items[Math.floor(Math.random() * items.length)];
-      openPuzzleFromMenu(pick.id);
-    });
-  }
-
-  // Refrescar menú cuando cambian filtros (la verdad vive en Firestore, así que damos un tick)
-  if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-  if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-
-  // Primer render (host)
-  setTimeout(renderAvailablePuzzleMenu, 0);
+    // Primer render
+    setTimeout(renderAvailablePuzzleMenu, 0);
+  })();
 
 
       // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
