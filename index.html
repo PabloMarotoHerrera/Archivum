@@ -1370,6 +1370,200 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 .answer-feedback.ok{ color:#bfffc1; }
 .answer-feedback.bad{ color:#ffbfbf; }
 
+
+    /* Modal (móvil): selector de objetivo para Pecado */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal-card {
+      width: min(520px, 100%);
+      background: rgba(0,0,0,0.92);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.7);
+    }
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .modal-subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+    .modal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .modal-target-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.16s ease-out;
+      text-align: left;
+    }
+    .modal-target-btn:hover {
+      background: var(--accent-soft);
+      border-color: rgba(224,182,107,0.55);
+      transform: translateY(-1px);
+    }
+    .modal-target-btn strong {
+      font-size: 1rem;
+    }
+    .modal-target-btn small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 2px;
+      letter-spacing: 0.04em;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
+
+    /* Reglas: acordeones de roles */
+    .rules-detail{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .rules-detail summary{
+      cursor: pointer;
+      list-style: none;
+      outline: none;
+      font-weight: 700;
+    }
+    .rules-detail summary::-webkit-details-marker{ display:none; }
+    .rules-detail[open]{ background: rgba(255,255,255,0.06); }
+
+/* ---------------------------
+   Códice: recompensa por sala
+----------------------------*/
+#codexRewardOverlay{
+  position:fixed; inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.92);
+  z-index:9999;
+  padding:24px;
+
+  /* fade in/out (fondo negro inmediato) */
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .35s ease, visibility 0s linear .35s;
+}
+#codexRewardOverlay.show{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity .35s ease;
+}
+
+/* El contenido del códice aparece con retraso (overlay ya en negro) */
+#codexRewardCard{
+  max-width:min(520px, 92vw);
+  width:100%;
+  text-align:center;
+  transform:translateY(18px);
+  opacity:0;
+  transition:transform 1.05s ease, opacity 1.05s ease;
+  position:relative;
+}
+#codexRewardOverlay.show.reveal #codexRewardCard{
+  transform:translateY(0);
+  opacity:1;
+}
+
+#codexRewardCard::after{
+  content:"";
+  position:absolute;
+  inset:-10px;
+  border-radius:22px;
+  pointer-events:none;
+  opacity:0;
+  box-shadow:0 0 0 rgba(224,182,107,0);
+}
+#codexRewardOverlay.show.reveal #codexRewardCard::after{
+  animation:codexGlow .9s ease-out 1;
+}
+@keyframes codexGlow{
+  0%{opacity:0; box-shadow:0 0 0 rgba(224,182,107,0), 0 0 0 rgba(224,182,107,0);}
+  25%{opacity:1; box-shadow:0 0 28px rgba(224,182,107,.55), 0 0 90px rgba(224,182,107,.22);}
+  100%{opacity:0; box-shadow:0 0 0 rgba(224,182,107,0), 0 0 0 rgba(224,182,107,0);}
+}
+
+#codexRewardImg{
+  width:100%;
+  height:auto;
+  display:none; /* se muestra cuando carga */
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
+  opacity:0;
+  transition:opacity 1.25s ease;
+}
+#codexRewardOverlay.show.reveal #codexRewardImg.loaded{
+  opacity:1;
+}
+
+#codexRewardHint{
+  margin-top:14px;
+  font-size:14px;
+  opacity:.85;
+}
+#codexRewardBtn{
+  margin-top:14px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  cursor:pointer;
+}
+#codexRewardBtn:hover{ background:rgba(255,255,255,.10); }
+
+
+    /* --- Menú de acertijos disponibles (host) --- */
+    #availablePuzzlesSelect{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--text);
+      outline: none;
+      font-size: 0.95rem;
+    }
+    /* En algunos navegadores las opciones heredan mal el color si el fondo es oscuro */
+    #availablePuzzlesSelect option, #availablePuzzlesSelect optgroup{
+      color: #111;
+    }
+    
 </style>
 </head>
 <body>
@@ -1456,7 +1650,7 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   <!-- Pantalla de inicio -->
 		<section id="homeSection" class="home">
 		  <h1 class="home-title">ARCHIVUM</h1>
-		  <p class="home-subtitle">Juego de acertijos bíblicos y filosóficos.</p>
+		  <p class="home-subtitle">Juego híbrido tablero + web, estilo Kahoot, con estética bíblica y misteriosa.</p>
 
 		  <h2 class="home-heading">Historia del Archivum</h2>
 		  <p class="home-text">
@@ -1475,11 +1669,13 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 
 		  <h2 class="home-heading">¿Cómo se juega?</h2>
 		  <ul class="home-list">
-			<li>Colocad el tablero físico sobre la mesa y situad las fichas en la sala inicial indicada.</li>
-			<li>Elegid si jugáis en <strong>Modo Campaña</strong> (recorriendo las salas en orden) o en <strong>Modo Libre</strong> (saltando a la sala que queráis).</li>
-			<li>Cuando caigáis en una casilla con código (por ejemplo <strong>OR-01</strong>), buscad ese código en la app y leed el acertijo correspondiente.</li>
-			<li>Podéis pedir pistas, consultar la Biblia y debatir. Cuando creáis tener la solución, reveladla en la app.</li>
-			<li>Si el acertijo está superado, avanzad por el tablero según indiquen las reglas de la partida (casillas, puntos o símbolos). Si no, podéis volver a intentarlo más adelante.</li>
+			<li><strong>Host (pantalla grande)</strong>: pulsa <em>Empezar partida</em>, elige nº de jugadores y acertijos por sala. Se mostrará un <strong>código</strong> y un <strong>QR</strong> para unirse.</li>
+			<li><strong>Jugadores (móvil)</strong>: entrad con el QR/código, escribid vuestro nombre y recibid un <strong>mandamiento</strong> y un <strong>número secreto</strong> de orden.</li>
+			<li>El host inicia la <strong>elección de pecados</strong>. Cuando diga “NÚMERO X, elige”, solo ese jugador podrá elegir su pecado en el móvil y marcar “listo”.</li>
+			<li>En campaña, el tablero físico marca la sala/código (ej. <strong>OR-03</strong>). El host abre ese acertijo en la web y controla el avance.</li>
+			<li>Cada acertijo tiene <strong>180s</strong> y <strong>2 intentos</strong>. La <strong>Pista 1</strong> es gratis; la <strong>Pista 2</strong> cuesta el <strong>símbolo</strong> del turno.</li>
+			<li>En tu turno (móvil) tienes <strong>1 símbolo</strong> y eliges <strong>solo una</strong>: desbloquear Pista 2, activar tu <strong>Mandamiento</strong> o activar tu <strong>Pecado</strong>.</li>
+			<li>La <strong>Respuesta final</strong> la introduce y verifica <strong>solo el host</strong>. Si falláis, se consumen intentos y puede haber penalización de tiempo según el modo.</li>
 		  </ul>
 
 			<div class="home-buttons">
@@ -1513,6 +1709,35 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 			  <input id="puzzlesPerRoomInput" type="number" min="1" max="10" value="3">
 			</label>
 
+			<label>
+			  Tiempo límite por acertijo (segundos)
+			  <input id="timeLimitSecInput" type="number" min="30" max="900" value="180">
+			</label>
+
+			<label>
+			  Dificultad de los acertijos
+				  <select id="puzzleDifficultyInput">
+				    <option value="auto" selected>Mixta (todas)</option>
+				    <option value="easy">Fácil (Fácil y Fácil–media)</option>
+				    <option value="normal">Media</option>
+				    <option value="hard">Difícil (Media–difícil)</option>
+				  </select>
+				  <small style="display:block; opacity:.75; margin-top:6px;">Filtra qué códigos de acertijo son válidos en esta campaña.</small>
+			</label>
+
+			<label>
+			  ¿Permitir acertijos que requieran estrictamente la Biblia?
+			  <select id="bibleRequiredInput">
+			    <option value="yes" selected>Sí (permitir)</option>
+			    <option value="no">No (jugar sin Biblia)</option>
+			  </select>
+			  <small style="display:block; opacity:.75; margin-top:6px;">
+			    Si eliges “No”, se bloquearán los acertijos marcados como <code>requiresBible: true</code>.
+			  </small>
+			</label>
+
+
+
 			<p class="home-text" style="margin-top:8px;">
 			  Los nombres se introducen desde el móvil al unirse a la partida.
 			</p>
@@ -1534,359 +1759,252 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 		</section>
 
 	<!-- REGLAS COMPLETAS -->
+	
+	<!-- REGLAS COMPLETAS (modo actual) -->
 	<section id="rulesSection" class="rules" style="display:none;">
-	  <h2 class="rules-title">REGLAS COMPLETAS DE ARCHIVUM</h2>
+	  <h2 class="rules-title">REGLAS DE ARCHIVUM — MODO KAHOOT (HOST + MÓVILES)</h2>
 
-	  <!-- 1. Ambientación -->
-	  <h3 class="rules-heading">1. Ambientación: el códice perdido</h3>
-	  <p class="rules-text">
-		Se cuenta que en un antiguo monasterio existía un códice llamado <strong>Archivum</strong>, una
-		recopilación de relatos bíblicos, símbolos y enigmas que ayudaban a comprender la historia de
-		la salvación.
-	  </p>
-	  <p class="rules-text">
-		Durante un incendio, muchas páginas se perdieron o quedaron ilegibles. Lo que tenéis delante
-		es el intento de reconstruir ese archivo. Cada sala del juego corresponde a una etapa de la
-		historia bíblica:
-	  </p>
+	  <h3 class="rules-heading">1. Preparación</h3>
 	  <ul class="rules-list">
-		<li><strong>Sala del Origen</strong> – Génesis, creación y primeros relatos.</li>
-		<li><strong>Sala de la Promesa</strong> – Abraham, patriarcas y bendición.</li>
-		<li><strong>Sala de la Libertad</strong> – Éxodo, desierto y combate interior.</li>
-		<li><strong>Sala de la Sabiduría</strong> – Salomón, profetas y parábolas.</li>
-		<li><strong>Sala del Sacrificio</strong> – Pasión y muerte de Jesús.</li>
-		<li><strong>Sala de la Vida Nueva</strong> – Resurrección y Pentecostés.</li>
+		<li><strong>Host (pantalla grande)</strong>: pulsa <em>Empezar partida</em>, configura jugadores y acertijos por sala.</li>
+		<li>La web mostrará un <strong>código</strong> y un <strong>QR</strong> para que los jugadores se unan desde el móvil.</li>
+		<li><strong>Jugadores (móvil)</strong>: abren el enlace, escriben su nombre y quedan conectados.</li>
 	  </ul>
 
+	  <h3 class="rules-heading">2. Identidades secretas</h3>
 	  <p class="rules-text">
-		Para recuperar los fragmentos perdidos tendréis que resolver acertijos de lógica,
-		matemáticas, arte, filosofía y escritura. Algunos necesitarán una Biblia física; otros se
-		resolverán con patrones, símbolos y números.
+		Al unirse, cada jugador recibe un <strong>Mandamiento</strong> (ventaja) y un <strong>número secreto</strong> de orden.
+		Ese número solo sirve para la fase de elección de pecados: el host dirá “NÚMERO X, elige ahora” y solo ese jugador podrá elegir.
+	  </p>
+	  <ul class="rules-list">
+		<li><strong>Mandamiento</strong>: bendición + (a veces) voto/milagro.</li>
+		<li><strong>Pecado capital</strong>: ventaja + coste + tentación (ataque).</li>
+		<li>Los roles son <strong>privados</strong>: el host no ve mandamientos ni pecados.</li>
+	  </ul>
+	  <h3 class="rules-heading">3. Mandamientos y pecados — pasivas y activas</h3>
+	  <p class="rules-text">
+		<strong>Importante:</strong> tu rol es secreto (solo tú lo ves en tu móvil). Las <strong>pasivas</strong> se aplican automáticamente
+		(según la descripción) y la <strong>activa</strong> se dispara desde el móvil gastando el <strong>símbolo</strong> del turno.
 	  </p>
 
-	  <!-- 2. Componentes -->
-	  <h3 class="rules-heading">2. Componentes</h3>
+	  <h4 class="rules-heading" style="font-size:1.1rem; margin-top:14px;">Mandamientos (Bendición + Voto + Milagro)</h4>
+	  <div style="display:flex; flex-direction:column; gap:10px;">
 
-	  <h4 class="rules-heading">Componentes físicos</h4>
+        <details class="rules-detail">
+          <summary><strong>Mandamiento I</strong> — No tendrás otros dioses</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Al abrir Pista 1, ganas +10s (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes desbloquear Pista 2 hasta que el temporizador baje de 120s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> +1 intento extra en tu turno (máx 3) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento II</strong> — No tomarás el Nombre en vano</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Tu primer fallo verificado del turno no penaliza -30s (solo -1 intento) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes verificar con menos de 20s restantes.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Congela el tiempo 15s antes de verificar (1 vez por partida).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento III</strong> — Santificarás el descanso</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si terminas tu turno con &gt;60s, guardas +10s para tu siguiente turno (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si desbloqueas Pista 2, tu siguiente turno empieza con -15s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Reintento”: si fallas una verificación, recuperas +1 intento (una vez) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento IV</strong> — Honrarás a tu padre y madre</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> 1 vez por acertijo puedes pedir “Pista 1 mejorada” (un matiz extra) sin coste.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes usar Milagro en un turno donde ya hayas desbloqueado Pista 2.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Revela una “Palabra clave” del acertijo (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento V</strong> — No matarás</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Tu primer fallo del turno no aplica -30s (solo -1 intento) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si te queda 1 intento, no puedes gastar el símbolo en poderes: solo Pista 2 (o nada).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Clemencia”: cancela una penalización personal activa este turno (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento VI</strong> — No cometerás adulterio</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si resuelves sin desbloquear Pista 2, tu siguiente turno gana +1 intento (máx 3) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si desbloqueas Pista 2, debes verificar antes de que queden 60s o pierdes el turno.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Si tu reloj baja de 60s, lo sube a 90s (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento VII</strong> — No robarás</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si fallas una verificación, recuperas +10s (solo la primera vez por turno) (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes desbloquear Pista 2 dos turnos seguidos.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Restituir”: recupera +1 intento perdido del turno (máx hasta 2) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento VIII</strong> — No darás falso testimonio</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Al escribir una respuesta, el host muestra “✔ formato válido” (sin revelar si es correcta).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Solo puedes verificar 1 vez por turno.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Veredicto”: el host te da “más cerca/más lejos” comparado con tu última respuesta (1 vez por partida).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento IX</strong> — No codiciarás bienes ajenos</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si el jugador anterior gastó el símbolo en un poder, tú ganas +10s al inicio de tu turno (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> No puedes usar Milagro hasta haber hecho al menos 1 verificación (o consumido 1 intento) en tu turno.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> Desbloquea Pista 2 en tu turno. (Se considera el gasto del símbolo del turno.) (1 vez por acertijo).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Mandamiento X</strong> — No codiciarás la pareja del prójimo</summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Bendición:</strong> Si la respuesta es texto, se aceptan variantes ortográficas (tildes, mayúsculas, espacios y plural) salvo que uses Pista 2.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Voto:</strong> Si desbloqueas Pista 2, tu respuesta debe ser exacta (canónica) (sin variantes).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Milagro (gasta símbolo):</strong> “Inspiración”: añade +30s al reloj del turno (1 vez por acertijo).</p>
+          </div>
+        </details>
+	  </div>
+
+	  <h4 class="rules-heading" style="font-size:1.1rem; margin-top:18px;">Pecados capitales (Ventaja + Coste + Tentación)</h4>
+	  <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <details class="rules-detail">
+          <summary><strong>Soberbia</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> +10s al inicio de tu turno (1 vez por acertijo).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si fallas una verificación, pierdes -10s extra.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo empieza su próximo turno con -30s.</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Avaricia</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Si resuelves sin desbloquear Pista 2, guardas 1 “Moneda” (máx 1) → en otro turno te da +1 intento.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si desbloqueas Pista 2, pierdes -15s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede usar bolígrafo/notas en su próximo turno (solo mente/voz).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Lujuria</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> 1 vez por acertijo puedes resetear tu reloj a 120s si está por debajo.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si fallas una vez, el resto del turno no puedes pedir pistas.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede usar Pista 1 durante sus primeros 60s.</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Envidia</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Si el jugador anterior acertó, tú empiezas con +1 intento (máx 3).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si tú aciertas, tu siguiente turno empieza con -10s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede gastar símbolo en Pista 2 ese turno (Pista 2 bloqueada).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Gula</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Puedes ver Pista 1 sin consumir nada aunque el host aún no la muestre (privada) 1 vez por acertijo.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Cada pista que uses te cuesta -10s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo pierde -15s y su penalización por fallo es -45s (en vez de -30s) ese turno.</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Ira</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Cuando fallas, recuperas +1 intento (solo 1 vez por partida).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Si te queda 1 intento, estás obligado a verificar antes de que queden 30s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> Si el objetivo falla una verificación, pierde -1 intento extra (castigo doble).</p>
+          </div>
+        </details>
+
+        <details class="rules-detail">
+          <summary><strong>Pereza</strong></summary>
+          <div class="rules-text" style="margin-top:10px;">
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Ventaja:</strong> Si no usas pistas, terminas el turno con +15s guardados para el siguiente (máx +15).</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Pasiva — Coste:</strong> Empiezas siempre con -10s.</p>
+            <p class="rules-text" style="margin:6px 0;"><strong>Activa — Tentación (gasta símbolo):</strong> El objetivo no puede verificar hasta que el reloj baje de 120s (primeros 60s bloqueado).</p>
+          </div>
+        </details>
+	  </div>
+
+
+	  <h3 class="rules-heading">4. Campaña y tablero físico</h3>
+	  <p class="rules-text">
+		El tablero físico marca el viaje por las 6 salas: Origen, Promesa, Libertad, Sabiduría, Sacrificio y Vida Nueva.
+		Cuando el tablero os dé un código (ej. <strong>OR-03</strong>), el host lo introduce y abre ese acertijo en la web.
+	  </p>
+
+	  <h3 class="rules-heading">4. Cómo funciona un acertijo</h3>
 	  <ul class="rules-list">
-		<li>Tablero de <strong>ARCHIVUM</strong> con el mapa y las seis salas marcadas (A–F).</li>
-		<li>Rueda o marcador de <strong>salas</strong> (A–F) y <strong>números romanos</strong> (I–X).</li>
-		<li>1 ficha por jugador (o equipo).</li>
-		<li>Papel y lápiz para anotaciones y cálculos.</li>
-		<li>Una Biblia física (recomendada).</li>
+		<li><strong>Tiempo</strong>: 180 segundos.</li>
+		<li><strong>Intentos</strong>: 2.</li>
+		<li><strong>Pista 1</strong> es gratis.</li>
+		<li><strong>Pista 2</strong> solo se desbloquea gastando el <strong>símbolo</strong> del turno del jugador activo.</li>
+		<li>La <strong>Respuesta final</strong> se escribe y se verifica <strong>solo en el host</strong>.</li>
 	  </ul>
 
-	  <h4 class="rules-heading">Componentes de la web / app</h4>
+	  <h3 class="rules-heading">6. Símbolo de turno y acciones del móvil</h3>
+	  <p class="rules-text">
+		En cada turno, el jugador activo tiene <strong>1 símbolo</strong> y debe escoger <strong>solo una</strong> acción:
+	  </p>
 	  <ul class="rules-list">
-		<li>
-		  Pantalla de <strong>Portada</strong>: explica la historia y permite elegir
-		  <em>Modo Campaña</em> o <em>Modo Libre</em>.
-		</li>
-		<li>
-		  Pantalla de <strong>Salas y acertijos</strong>: muestra ilustración, enunciado, pistas y
-		  solución.
-		</li>
-		<li>
-		  Pantalla de <strong>Campaña en curso</strong>:
-		  <ul>
-			<li>Número de jugadores.</li>
-			<li>Asignación automática de <strong>mandamientos</strong>.</li>
-			<li>Elección de <strong>pecados capitales</strong>.</li>
-			<li>Resumen de efectos y contadores de acertijos resueltos.</li>
-			<li>Campo para introducir el <strong>código del acertijo</strong> (ej. OR-03).</li>
-		  </ul>
-		</li>
-		<li>Música ambiental (tema general y temas de sala).</li>
-	  </ul>
-
-	  <!-- 3. Objetivo -->
-	  <h3 class="rules-heading">3. Objetivo del juego</h3>
-	  <p class="rules-text">
-		El objetivo es <strong>reconstruir el códice Archivum</strong> superando acertijos bíblicos,
-		matemáticos y filosóficos repartidos en las seis salas.
-	  </p>
-	  <p class="rules-text">Podéis jugar de forma:</p>
-	  <ul class="rules-list">
-		<li>
-		  <strong>Cooperativa</strong>: el grupo gana si todas las salas alcanzan el número de
-		  acertijos resueltos que hayáis fijado al inicio (por ejemplo, al menos 5 de 10 en cada sala).
-		</li>
-		<li>
-		  <strong>Semi–competitiva</strong>: cada jugador avanza su ficha; gana quien llegue antes a la
-		  última sala o quien haya resuelto más acertijos cuando se acabe el tiempo o la partida.
-		</li>
-	  </ul>
-
-	  <!-- 4. Preparación -->
-	  <h3 class="rules-heading">4. Preparación de la partida (Modo Campaña)</h3>
-	  <ol class="rules-list">
-		<li>Colocad el tablero en el centro de la mesa.</li>
-		<li>Cada jugador elige una ficha y la coloca en la casilla inicial o puerto de salida.</li>
-		<li>Abrid la web y, en la portada, pulsad <strong>“Campaña”</strong>.</li>
-	  </ol>
-	  <p class="rules-text">En la web:</p>
-	  <ol class="rules-list" start="4">
-		<li>
-		  Elegid <strong>número de jugadores</strong> (2–6 recomendado) y algunas
-		  <strong>opciones de partida</strong>:
-		  <ul class="rules-list">
-			<li>Número de acertijos necesarios para pasar de sala (p.ej. 3, 5 o 7).</li>
-			<li>Si jugáis con límite de tiempo por acertijo (p.ej. 8–10 minutos).</li>
-			<li>Qué salas vais a usar (todas o sólo algunas para partidas más cortas).</li>
-		  </ul>
-		</li>
-		<li>
-		  <strong>Reparto de mandamientos</strong>: la app asigna un mandamiento al azar a cada
-		  jugador. Aparece su icono, título y una breve explicación. Ese mandamiento actúa como
-		  “bendición personal”.
-		</li>
-		<li>
-		  <strong>Elección de pecados capitales</strong>: se abre el carrusel de cartas. Empezando por
-		  el Jugador 1, cada uno elige un pecado distinto haciendo clic en la imagen. Una vez elegido,
-		  no se puede cambiar durante esa campaña.
-		</li>
-		<li>
-		  Acordad las <strong>reglas de pistas</strong>:
-		  <ul class="rules-list">
-			<li>0 pistas = premio máximo.</li>
-			<li>1 pista = premio normal.</li>
-			<li>2 pistas = premio reducido.</li>
-			<li>
-			  Ver solución = no se cuenta como acertijo resuelto para avanzar, pero sirve para seguir la
-			  historia.
-			</li>
-		  </ul>
-		</li>
-		<li>Decidid el orden de turno (por edad, por sorteo, etc.) y comenzad.</li>
-	  </ol>
-
-	  <!-- 5. Turno -->
-	  <h3 class="rules-heading">5. Desarrollo del turno en campaña</h3>
-	  <ol class="rules-list">
-		<li>
-		  <strong>Movimiento en el tablero</strong><br />
-		  Tirad el dado y moved la ficha según las reglas que hayáis decidido. Si caéis en una casilla
-		  con código de sala y número (por ejemplo, OR-03, PR-05, SB-02…), será el acertijo que debéis
-		  resolver.<br />
-		  <em>Variante sencilla:</em> en lugar de casillas concretas, el jugador puede girar la rueda
-		  de salas (A–F) y la rueda de números romanos (I–X) para determinar al azar la sala y el número
-		  de acertijo.
-		</li>
-		<li>
-		  <strong>Introducir el código en la app</strong><br />
-		  En la pantalla de campaña, escribid el código (ej. <code>OR-03</code>) y pulsad
-		  <strong>“Ir al acertijo”</strong>. La app os llevará a la sala correspondiente.
-		</li>
-		<li>
-		  <strong>Leer y pensar el acertijo</strong><br />
-		  Leed el texto en voz alta, observad la ilustración y tomad notas. Si el acertijo lo indica,
-		  consultad el pasaje bíblico correspondiente.
-		</li>
-		<li>
-		  <strong>Uso de pistas</strong><br />
-		  Si os atascáis, podéis pedir Pista 1 y después Pista 2. Cada pista puede reducir la
-		  recompensa o añadir una pequeña penalización, según lo acordado.
-		</li>
-		<li>
-		  <strong>Dar la respuesta</strong><br />
-		  Cuando creáis tener la solución, el <strong>Host</strong> escribe una <strong>Respuesta final</strong> y pulsa <strong>“Verificar”</strong>.
-<ul>
-  <li>
-    Si es <strong>correcta</strong>, el acertijo se marca como resuelto automáticamente, se actualiza el progreso y se vuelve al tablero.
-  </li>
-  <li>
-    Si es <strong>incorrecta</strong>, consume <strong>–1 intento</strong> y aplica la penalización de tiempo del modo campaña.
-  </li>
-  <li>
-    Si un acertijo no tiene verificación automática (o la respuesta es equivalente), podéis usar <strong>“Marcar correcto”</strong> / <strong>“Marcar como resuelto”</strong> manualmente.
-  </li>
-</ul>
-</li>
-			<li>
-			  Si es incorrecta, podéis volver a intentarlo, usar pistas o dejar el acertijo “sin
-			  resolver” por el momento.
-			</li>
-		  </ul>
-		</li>
-		<li><strong>Fin del turno</strong>: pasa al siguiente jugador.</li>
-	  </ol>
-
-	  <!-- 6. Mandamientos -->
-	  <h3 class="rules-heading">6. Mandamientos: bendiciones y estilo de juego</h3>
-	  <p class="rules-text">
-		Los <strong>mandamientos</strong> no son castigos, sino pequeñas
-		<strong>bendiciones de estilo</strong> que dan color al modo de jugar de cada uno. Podéis
-		usarlos sólo como ambientación o con efectos más concretos, según el grupo.
-	  </p>
-	  <ol class="rules-list">
-		<li>
-		  <strong>No tendrás otros dioses frente a mí</strong><br />
-		  Prioridad de la misión común. Este jugador recibe pequeños bonus cuando ayuda al grupo o
-		  toma decisiones que favorecen a todos por encima de su ventaja personal.
-		</li>
-		<li>
-		  <strong>No tomarás el nombre de Dios en vano</strong><br />
-		  Cuidado al afirmar cosas con demasiada seguridad. Si “jura” estar totalmente seguro y acierta,
-		  perfecto; si falla, la penalización puede ser algo mayor (por ejemplo, perder el movimiento de
-		  ese turno).
-		</li>
-		<li>
-		  <strong>Santificarás las fiestas</strong><br />
-		  El descanso también ilumina. Una vez por sala, puede declarar un turno de “descanso”: usar una
-		  pista extra o repetir una tirada sin penalización, en lugar de afrontar un nuevo acertijo.
-		</li>
-		<li>
-		  <strong>Honrarás a tu padre y a tu madre</strong><br />
-		  Reconocer a quienes te sostienen. Una vez por partida, puede “honrar” a otro jugador
-		  ayudándole claramente. Más adelante, ese jugador estará obligado moralmente a devolver el
-		  favor.
-		</li>
-		<li>
-		  <strong>No matarás</strong><br />
-		  No cortar el camino del otro. Si existen reglas para enviar muy atrás a otro jugador, este
-		  jugador no puede usarlas; a cambio puede recibir alguna compensación cooperativa cuando decide
-		  no perjudicar.
-		</li>
-		<li>
-		  <strong>No cometerás actos impuros</strong><br />
-		  Juego limpio. Hace de “árbitro moral”: si detecta trampas evidentes, puede proponer correcciones
-		  o pequeñas penalizaciones (siempre con acuerdo del grupo).
-		</li>
-		<li>
-		  <strong>No robarás</strong><br />
-		  Compartir en lugar de apropiarse. Cuando comparte una pista o idea importante, ambos jugadores
-		  pueden recibir un pequeño bonus. Si intenta apropiarse de soluciones ajenas, puede perder ese
-		  bonus.
-		</li>
-		<li>
-		  <strong>No darás falso testimonio</strong><br />
-		  Palabra responsable. Si se arriesga a dar una respuesta clara sin pistas y acierta, recibe un
-		  bonus extra; si falla, puede quedar sin moverse ese turno.
-		</li>
-		<li>
-		  <strong>No consentirás pensamientos impuros</strong><br />
-		  Perseverancia interior. No puede rendirse al primer bloqueo. Si aguanta un poco más antes de
-		  pedir solución, el grupo puede premiarle con una pista sin penalización una vez por sala.
-		</li>
-		<li>
-		  <strong>No codiciarás los bienes ajenos</strong><br />
-		  Caminar tu propio camino. No puede limitarse a copiar recetas o rutas del jugador más
-		  adelantado. Cuando resuelve algo por sus propios medios, puede recibir un pequeño
-		  reconocimiento o punto extra.
-		</li>
-	  </ol>
-
-	  <!-- 7. Pecados -->
-	  <h3 class="rules-heading">7. Pecados capitales: debilidades y desafíos</h3>
-	  <p class="rules-text">
-		Cada jugador elige un <strong>pecado capital</strong> que actúa como debilidad personal. No
-		tienen por qué convertirse en castigos duros; pueden ser simplemente un toque de humor y
-		autoconocimiento sobre cómo afrontamos los retos.
-	  </p>
-	  <ol class="rules-list">
-		<li>
-		  <strong>Soberbia</strong> – Orgullo desmedido.<br />
-		  Tiende a sobreestimar sus respuestas. Si declara estar totalmente seguro y falla, la
-		  penalización puede ser mayor que para los demás; si acierta, no recibe más recompensa que el
-		  resto.
-		</li>
-		<li>
-		  <strong>Avaricia</strong> – Apego exagerado a lo que posee.<br />
-		  Le cuesta compartir pistas o ayudas. Cada vez que recibe una ayuda clara, queda “en deuda”
-		  hasta que la devuelva con otra ayuda equivalente.
-		</li>
-		<li>
-		  <strong>Pereza</strong> – Tendencia a posponer esfuerzos.<br />
-		  Una vez por sala puede “dormir” un turno sin resolver acertijo, pero más adelante estará
-		  obligado a afrontar un reto más difícil elegido por el grupo.
-		</li>
-		<li>
-		  <strong>Envidia</strong> – Compararte constantemente.<br />
-		  No puede simplemente copiar una solución sin entenderla. Si otro jugador resuelve, debe ser
-		  capaz de explicar el razonamiento antes de anotarlo como propio.
-		</li>
-		<li>
-		  <strong>Gula</strong> – Exceso de pistas o recursos.<br />
-		  Tiende a pedir demasiadas pistas. Podéis limitarle el número de pistas por sala o exigir
-		  que al menos otro jugador esté de acuerdo antes de pedirlas.
-		</li>
-		<li>
-		  <strong>Ira</strong> – Impulsividad y prisa.<br />
-		  Se precipita al responder. El grupo puede exigirle que deje hablar al menos a otra persona
-		  antes de formular una respuesta definitiva.
-		</li>
-		<li>
-		  <strong>Lujuria</strong> – Búsqueda impulsiva de placer.<br />
-		  Se deja llevar por la “solución rápida”. Cuando quiera responder muy rápido, tiene que
-		  argumentar mínimamente su razonamiento antes de que el grupo acepte la respuesta.
-		</li>
-	  </ol>
-
-	  <!-- 8. Biblia y pistas -->
-	  <h3 class="rules-heading">8. Uso de la Biblia y de las pistas</h3>
-	  <ul class="rules-list">
-		<li>
-		  Muchos acertijos están inspirados en textos bíblicos. Cuando veáis la etiqueta
-		  <strong>“Este acertijo puede requerir una Biblia física”</strong>, id al pasaje indicado:
-		  forma parte de la experiencia.
-		</li>
-		<li>
-		  Las pistas están pensadas para acompañar, no para sustituir el proceso. Procurad negociar
-		  como grupo cuándo usarlas y qué coste tienen.
-		</li>
-	  </ul>
-
-	  <!-- 9. Modos de juego -->
-	  <h3 class="rules-heading">9. Modos de juego</h3>
-
-	  <h4 class="rules-heading">Modo Campaña (con tablero)</h4>
-	  <p class="rules-text">
-		Usáis el tablero físico y la rueda de salas/números. La app sirve para asignar mandamientos y
-		pecados, llevar el registro de acertijos resueltos y mostrar ilustraciones, pistas y
-		soluciones. Es el modo “historia larga”: recorréis las seis salas como un viaje a través de la
-		Biblia.
-	  </p>
-
-	  <h4 class="rules-heading">Modo Libre (Explorar salas)</h4>
-	  <p class="rules-text">
-		Desde la portada, elegid <strong>“Explorar salas”</strong>. Podéis entrar en cualquier sala y
-		resolver los acertijos en el orden que queráis. Es ideal para sesiones cortas, para practicar
-		antes de la campaña o para trabajar sólo un tema concreto (por ejemplo, la Sala de la
-		Sabiduría).
-	  </p>
-
-	  <!-- 10. Fin de la partida -->
-	  <h3 class="rules-heading">10. Fin de la partida</h3>
-	  <p class="rules-text">Podéis elegir varias condiciones de final:</p>
-	  <ul class="rules-list">
-		<li>
-		  <strong>Cooperativa clásica</strong>: la partida termina cuando habéis resuelto al menos
-		  <em>N</em> acertijos en cada sala (por ejemplo, 5 de 10). Habéis recuperado lo esencial del
-		  códice Archivum.
-		</li>
-		<li>
-		  <strong>Carrera de campaña</strong>: gana el jugador que antes llega a la
-		  <strong>Sala de la Vida Nueva</strong> y ha resuelto un mínimo de acertijos (por ejemplo, 10
-		  en total).
-		</li>
-		<li>
-		  <strong>Contrarreloj</strong>: fijáis un tiempo total (p.ej. 60–90 minutos). Al término del
-		  tiempo, contáis acertijos resueltos por jugador y salas completadas por el grupo.
-		</li>
+		<li>Gastar símbolo para <strong>desbloquear Pista 2</strong>.</li>
+		<li>Gastar símbolo para activar el <strong>Milagro</strong> de su Mandamiento.</li>
+		<li>Gastar símbolo para activar la <strong>Tentación</strong> de su Pecado (elige un objetivo).</li>
 	  </ul>
 	  <p class="rules-text">
-		En cualquier caso, el espíritu del juego es que al final dediquéis un momento a comentar:
-		qué sala os ha gustado más, qué acertijos os han sorprendido, qué mandamientos y pecados
-		se han notado más en la forma de jugar.
+		Una vez gastado el símbolo, los botones del móvil quedan bloqueados hasta el siguiente turno.
 	  </p>
 
-	  <!-- Botón para volver al inicio -->
+	  <h3 class="rules-heading">7. Tentaciones (pecados) y secreto del atacante</h3>
+	  <p class="rules-text">
+		Cuando alguien te aplica un pecado, el host solo verá el mensaje de <strong>“Tentación recibida: [Pecado]”</strong>,
+		<strong>sin indicar quién lo ha lanzado</strong>. El efecto se aplica en el turno del objetivo (según la tentación concreta).
+	  </p>
+
+	  <h3 class="rules-heading">8. Errores, fallos y salto de acertijo</h3>
+	  <ul class="rules-list">
+		<li>Si la respuesta es incorrecta: se consume un intento y puede aplicarse penalización de tiempo según el modo.</li>
+		<li>Con 0 intentos (o por decisión del host), se puede marcar <strong>fallo final</strong> y pasar al siguiente turno.</li>
+		<li>Al volver al tablero no hay acertijo activo: nadie puede usar acciones hasta que el host abra el siguiente.</li>
+	  </ul>
+
+	  <h3 class="rules-heading">8. Explorar salas (modo libre)</h3>
+	  <p class="rules-text">
+		En <strong>Explorar salas</strong> podéis navegar por los acertijos sin campaña ni turnos. Útil para pruebas, preparación o sesiones cortas.
+	  </p>
+
+	  <h3 class="rules-heading">9. Fin de la partida</h3>
+	  <p class="rules-text">
+		La campaña termina cuando completáis el objetivo acordado (por ejemplo, <em>N</em> acertijos por sala o alcanzar la Sala de la Vida Nueva).
+	  </p>
+
 	  <div class="home-buttons" style="margin-top:14px;">
-		<button id="rulesBackBtn" class="action secondary">
-		  Volver al inicio
-		</button>
+		<button id="rulesBackBtn" class="action secondary">Volver al inicio</button>
 	  </div>
 	</section>
+
 
 		
 
@@ -1997,6 +2115,19 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 	  </div>
 	</section>
 
+
+	<!-- MODAL: elegir objetivo para Pecado (móvil) -->
+	<div id="targetPickerOverlay" class="modal-overlay" style="display:none;" aria-hidden="true">
+	  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="targetPickerTitle">
+		<div class="modal-title" id="targetPickerTitle">Elige objetivo</div>
+		<p class="modal-subtitle" id="targetPickerSubtitle">Selecciona a quién aplicar la tentación.</p>
+		<div id="targetPickerList" class="modal-list"></div>
+		<div class="modal-actions">
+		  <button id="targetPickerCancelBtn" class="action secondary" type="button">Cancelar</button>
+		</div>
+	  </div>
+	</div>
+
 	<!-- NUEVA PANTALLA: asignación de mandamientos y pecados -->
 	<section id="campaignRolesSection" style="display:none;">
 	  <h2 class="rules-heading">Campaña – Mandamientos y pecados</h2>
@@ -2038,10 +2169,21 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 		  </div>
 
 		<div class="board-controls" id="boardControls">
-		  <h3>Código del acertijo (ej: OR-03)</h3>
-		  <input type="text" id="codeInput" placeholder="Escribe el código que indica el tablero...">
-		  <button id="goToCodeBtn">Ir al acertijo</button>
-		</div>
+          <h3>Acertijo disponible</h3>
+          <select id="availablePuzzlesSelect" aria-label="Acertijos disponibles"></select>
+
+          <div class="controls" style="margin-top:10px;">
+            <button id="openSelectedPuzzleBtn" class="action primary" type="button">Abrir</button>
+            <button id="randomPuzzleBtn" class="action secondary" type="button">Aleatorio</button>
+            <button id="toggleAdvancedCodeBtn" class="action secondary" type="button">Modo avanzado</button>
+          </div>
+
+          <div id="advancedCodeBox" style="display:none; margin-top:12px;">
+            <h3 style="margin:0 0 8px 0;">Código manual (avanzado)</h3>
+            <input type="text" id="codeInput" placeholder="Escribe el código que indica el tablero...">
+            <button id="goToCodeBtn" class="action secondary" type="button">Ir al acertijo</button>
+          </div>
+        </div>
 
 		  <button id="endCampaignBtn" class="action secondary">
 			Terminar campaña y volver al inicio
@@ -2201,6 +2343,43 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script src="puzzles_roles_final.js"></script>
+<script>
+
+// ---------------------------
+// Códice: mostrar recompensa por sala (HOST)
+// ---------------------------
+const CODEX_REWARD_IMAGES = {
+  origen: "origen_codice.png",
+  promesa: "promesa_codice.png",
+  libertad: "libertad_codice.png",
+  sabiduria: "sabiduria_codice.png",
+  sacrificio: "sacrificio_codice.png",
+  vida: "vida_codice.png",
+  vidanueva: "vida_codice.png",
+  "vida-nueva": "vida_codice.png",
+  "vida_nueva": "vida_codice.png"
+};
+
+function normalizeRoomKeyForCodex(roomKey){
+  return String(roomKey || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/[áàä]/g,"a")
+    .replace(/[éèë]/g,"e")
+    .replace(/[íìï]/g,"i")
+    .replace(/[óòö]/g,"o")
+    .replace(/[úùü]/g,"u")
+    .replace(/[^a-z0-9_-]/g,"");
+}
+
+function showCodexReward(roomKey){
+  // Delegamos al manejador global (con animación y precarga)
+  try{ if (window.showCodexReward) return window.showCodexReward(roomKey); }catch(_){ }
+}
+
+
+</script>
 
 
   <!-- Ritual overlay (suave, estilo ARCHIVUM) -->
@@ -2212,7 +2391,122 @@ body.player-mode #roomMusicToggleContainer{ display:none !important; }
   </div>
 
 <script>
+/* ===== Codex Reward Overlay (global) ===== */
+(function(){
+  const CODex_IMAGE_BY_ROOM = {
+    "origen": "origen_codice.png",
+    "promesa": "promesa_codice.png",
+    "libertad": "libertad_codice.png",
+    "sabiduria": "sabiduria_codice.png",
+    "sacrificio": "sacrificio_codice.png",
+    "vidanueva": "vida_codice.png",
+    "vida-nueva": "vida_codice.png",
+    "vida_nueva": "vida_codice.png",
+    "vida": "vida_codice.png"
+  };
+
+  function normalizeRoomKey(roomKey){
+    return String(roomKey || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g,"")
+      .replace(/[áàä]/g,"a")
+      .replace(/[éèë]/g,"e")
+      .replace(/[íìï]/g,"i")
+      .replace(/[óòö]/g,"o")
+      .replace(/[úùü]/g,"u")
+      .replace(/[^a-z0-9_-]/g,"");
+  }
+
+  window.showCodexReward = function(roomKey, opts){
+    // Host only: if URL says mode=player, do nothing
+    const params = new URLSearchParams(location.search);
+    const mode = (params.get("mode") || "").toLowerCase();
+    if (mode === "player") return;
+
+    const onContinue = (opts && typeof opts.onContinue === "function") ? opts.onContinue : null;
+
+    const overlay = document.getElementById("codexRewardOverlay");
+    const img = document.getElementById("codexRewardImg");
+    const hint = document.getElementById("codexRewardHint");
+    const btn = document.getElementById("codexRewardBtn");
+    if (!overlay || !img || !hint || !btn) return;
+
+    const key = normalizeRoomKey(roomKey);
+    const src = (typeof CODEX_REWARD_IMAGES !== "undefined" && CODEX_REWARD_IMAGES[key]) ? CODEX_REWARD_IMAGES[key] : null;
+
+    // Estado base (anti-flash + animación)
+    img.classList.remove("loaded");
+    img.style.display = "none";
+    img.removeAttribute("src");
+
+    // Always show overlay (even if image missing)
+    overlay.classList.add("show");
+    overlay.classList.remove("reveal");
+    overlay.setAttribute("aria-hidden","false");
+
+    // Retraso para que primero se vea el fundido a negro y luego el códice (lento)
+    const delayMs = (opts && typeof opts.delayMs === "number") ? opts.delayMs : 1400;
+    try { if (overlay.__codexRevealTimer) clearTimeout(overlay.__codexRevealTimer); } catch(_){ }
+    overlay.__codexRevealTimer = setTimeout(() => {
+      try { overlay.classList.add("reveal"); } catch(e){}
+    }, Math.max(0, delayMs));
+
+    const pretty = (key || "desconocida").toUpperCase();
+    hint.textContent = `Fragmento del Códice obtenido: ${pretty}`;
+
+    const setMissing = () => {
+      img.classList.remove("loaded");
+      img.style.display = "none";
+      img.removeAttribute("src");
+      hint.textContent = `Fragmento del Códice obtenido: ${pretty} (imagen no encontrada)`;
+    };
+
+    // Close handler
+    const close = () => {
+      overlay.classList.remove("show");
+      overlay.classList.remove("reveal");
+      try { if (overlay.__codexRevealTimer) { clearTimeout(overlay.__codexRevealTimer); overlay.__codexRevealTimer = null; } } catch(_){ }
+      overlay.setAttribute("aria-hidden","true");
+
+      img.classList.remove("loaded");
+      img.style.display = "none";
+      img.removeAttribute("src");
+
+      btn.removeEventListener("click", close);
+      overlay.removeEventListener("click", onBg);
+      document.removeEventListener("keydown", onKey);
+
+      if (onContinue) { try { onContinue(); } catch(e){} }
+    };
+    const onBg = (e) => { if (e.target === overlay) close(); };
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+
+    btn.addEventListener("click", close);
+    overlay.addEventListener("click", onBg);
+    document.addEventListener("keydown", onKey);
+
+    // Precarga: solo mostramos la imagen cuando esté lista (evita parpadeos)
+    if (src){
+      const pre = new Image();
+      pre.onload = () => {
+        img.classList.remove("loaded");
+        img.src = src;
+        img.style.display = "block";
+        requestAnimationFrame(() => img.classList.add("loaded"));
+      };
+      pre.onerror = setMissing;
+      pre.src = src;
+    } else {
+      setMissing();
+    }
+
+    // Focus button to avoid aria-hidden focus warning
+    try{ setTimeout(()=>btn.focus({preventScroll:true}), 30); }catch(e){}
+  };
+})();
 window.addEventListener("DOMContentLoaded", () => {
+
 
   const appRoot = document.getElementById("appRoot");
   const homeSection = document.getElementById("homeSection");
@@ -2244,12 +2538,89 @@ window.addEventListener("DOMContentLoaded", () => {
   const rulesBackBtn = document.getElementById("rulesBackBtn");
   const playersCountInput = document.getElementById("playersCountInput");
   const puzzlesPerRoomInput = document.getElementById("puzzlesPerRoomInput");
-  const playersNamesInput = document.getElementById("playersNamesInput");
+    const timeLimitSecInput = document.getElementById("timeLimitSecInput");
+  const puzzleDifficultyInput = document.getElementById("puzzleDifficultyInput");
+  const bibleRequiredInput = document.getElementById("bibleRequiredInput");
+const playersNamesInput = document.getElementById("playersNamesInput");
   const startCampaignBtn = document.getElementById("startCampaignBtn");
   const campaignBackBtn = document.getElementById("campaignBackBtn");
   const playersSummaryEl = document.getElementById("playersSummary");
   const codeInput = document.getElementById("codeInput");
   const goToCodeBtn = document.getElementById("goToCodeBtn");
+  const availablePuzzlesSelect = document.getElementById("availablePuzzlesSelect");
+  const openSelectedPuzzleBtn = document.getElementById("openSelectedPuzzleBtn");
+  const randomPuzzleBtn = document.getElementById("randomPuzzleBtn");
+  const toggleAdvancedCodeBtn = document.getElementById("toggleAdvancedCodeBtn");
+  const advancedCodeBox = document.getElementById("advancedCodeBox");
+
+// --- Menú de acertijos disponibles (host) ---
+  // Usamos delegación de eventos porque algunas vistas se re-renderizan y los nodos pueden recrearse.
+  (function setupPuzzleMenuDelegation(){
+    if (window.__puzzleMenuDelegationInstalled) return;
+    window.__puzzleMenuDelegationInstalled = true;
+
+    document.addEventListener("click", (ev) => {
+      const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+      if (!btn) return;
+      const id = btn.id;
+      if (!id) return;
+      if (btn.disabled) return;
+      // Evita comportamientos raros si el click viene de dentro de un overlay
+      // (no afecta a otros handlers)
+      
+
+      if (id === "toggleAdvancedCodeBtn") {
+        const box = document.getElementById("advancedCodeBox");
+        if (!box) return;
+        const isOpen = box.style.display !== "none";
+        box.style.display = isOpen ? "none" : "block";
+        return;
+      }
+
+      if (id === "openSelectedPuzzleBtn") {
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (!sel) return;
+        const code = (sel.value || "").trim();
+        if (!code) return;
+
+        // Reutiliza el flujo probado del botón "Ir al acertijo" (código manual)
+        const ci = document.getElementById("codeInput");
+        const goBtn = document.getElementById("goToCodeBtn");
+        if (ci) ci.value = code;
+        if (goBtn) { goBtn.click(); return; }
+
+        // Fallback (por seguridad)
+        openPuzzleFromMenu(code);
+        return;
+      }
+
+      if (id === "randomPuzzleBtn") {
+        const items = getAvailablePuzzlesByFilters();
+        if (!items.length) return;
+        const pick = items[Math.floor(Math.random() * items.length)];
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (sel) sel.value = pick.id;
+
+        const ci = document.getElementById("codeInput");
+        const goBtn = document.getElementById("goToCodeBtn");
+        if (ci) ci.value = pick.id;
+        if (goBtn) { goBtn.click(); return; }
+
+        openPuzzleFromMenu(pick.id);(pick.id);
+        return;
+      }
+    });
+
+    // Refrescar menú cuando cambian filtros
+    if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+
+    // Primer render
+    setTimeout(renderAvailablePuzzleMenu, 0);
+  })();
+
+
+
   const endCampaignBtn = document.getElementById("endCampaignBtn");
   const roomButtons = document.querySelectorAll(".room-btn");
   const roomTitleEl = document.getElementById("roomTitle");
@@ -2304,16 +2675,37 @@ window.addEventListener("DOMContentLoaded", () => {
         alert("No se ha encontrado ese código.");
         return;
       }
-		if (campaignState) {
-		  campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
-		  campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
-		}
+
+  
+
+
+      // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
+      const selDiff = getSelectedDifficulty();
+      const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
+        ? rooms[result.roomKey].puzzles[result.index]
+        : null;
+      if (!puzzleMatchesDifficulty(puzzle, selDiff)) {
+        const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
+        alert(`⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}. Elige otro código.`);
+        return;
+      }
+
+      // 📖 Biblia: si la campaña está en "sin Biblia", bloquea acertijos marcados como requiresBible
+      const allowBible = getAllowBibleRequired();
+      if (!allowBible && puzzle && puzzle.requiresBible) {
+        alert("⛔ Este acertijo requiere una Biblia física y la campaña está configurada como SIN BIBLIA.");
+        return;
+      }
+
+      if (campaignState) {
+        campaignState.lastLoadedCode = result.code;        // ej: "OR-03"
+        campaignState.lastLoadedRoomKey = result.roomKey;  // ej: "origen"
+      }
       gameMode = "campaign-room";
       loadRoom(result.roomKey, result.index);
     });
   }
-
-  if (endCampaignBtn) {
+if (endCampaignBtn) {
     endCampaignBtn.addEventListener("click", () => {
       campaignState = null;
   if (appMode !== "player") {
@@ -2333,6 +2725,22 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
+      if (gameMode === "campaign-room" || gameMode === "campaign-board") {
+        const selDiff = getSelectedDifficulty();
+        const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
+          ? rooms[result.roomKey].puzzles[result.index]
+          : null;
+        if (!puzzleMatchesDifficulty(puzzle, selDiff)) {
+          const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
+          if (puzzleCodeMessage) {
+            puzzleCodeMessage.textContent = `⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}.`;
+          } else {
+            alert(`⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}.`);
+          }
+          return;
+        }
+      }
 
       // Campaña (host): publica acertijo activo para el turno
       if (gameMode === "campaign-room" && multiplayer.roomRef && appMode !== "player") {
@@ -2495,6 +2903,189 @@ if (solutionBtn && solutionEl) {
   let roomMusicMuted = false; // controla solo la música de las salas
 
   const rooms = ROOMS_DATA;
+
+// ---------------------------
+// Dificultad (filtrado campaña)
+// ---------------------------
+function getSelectedDifficulty() {
+  // Fuente de verdad: Firestore (room.difficulty). Fallback: estado local.
+  const d = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.difficulty)
+    ? multiplayer.latestRoom.difficulty
+    : (campaignState && campaignState.difficulty ? campaignState.difficulty : "auto");
+  return (d || "auto");
+}
+
+function getAllowBibleRequired(){
+  const v = (multiplayer && multiplayer.latestRoom && typeof multiplayer.latestRoom.allowBibleRequired === "boolean")
+    ? multiplayer.latestRoom.allowBibleRequired
+    : true;
+  return v;
+}
+
+
+// ---------------------------
+// Menú: acertijos disponibles (Host)
+// ---------------------------
+function getAvailablePuzzlesByFilters() {
+  const allowBible = getAllowBibleRequired();
+  const diff = getSelectedDifficulty();
+
+  const all = [];
+  Object.keys(rooms || {}).forEach(rk => {
+    const room = rooms[rk];
+    const list = (room && room.puzzles) ? room.puzzles : [];
+    list.forEach(p => {
+      if (!p || !p.id) return;
+
+      if (!allowBible && !!p.requiresBible) return;
+      if (!puzzleMatchesDifficulty(p, diff)) return;
+
+      const pid = String(p.id).toUpperCase();
+      if (isPuzzleSolved(pid)) return; // ocultar resueltos
+
+      all.push({
+        roomKey: rk,
+        roomName: room.name || rk,
+        id: pid,
+        title: p.title || pid,
+        difficulty: p.difficulty || "",
+        requiresBible: !!p.requiresBible
+      });
+    });
+  });
+
+  return all;
+}
+
+function renderAvailablePuzzleMenu() {
+  if (!availablePuzzlesSelect) return;
+  if (appMode === "player") return;
+
+  const items = getAvailablePuzzlesByFilters();
+  availablePuzzlesSelect.innerHTML = "";
+
+  if (!items.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No hay acertijos disponibles con estos filtros";
+    availablePuzzlesSelect.appendChild(opt);
+    availablePuzzlesSelect.disabled = true;
+    if (openSelectedPuzzleBtn) openSelectedPuzzleBtn.disabled = true;
+    if (randomPuzzleBtn) randomPuzzleBtn.disabled = true;
+    return;
+  }
+
+  availablePuzzlesSelect.disabled = false;
+  if (openSelectedPuzzleBtn) openSelectedPuzzleBtn.disabled = false;
+  if (randomPuzzleBtn) randomPuzzleBtn.disabled = false;
+
+  const byRoom = {};
+  items.forEach(it => {
+    (byRoom[it.roomKey] ||= []).push(it);
+  });
+
+  Object.keys(byRoom).forEach(rk => {
+    const og = document.createElement("optgroup");
+    og.label = (rooms[rk] && rooms[rk].name) ? rooms[rk].name : rk;
+
+    byRoom[rk]
+      .sort((a,b)=> a.id.localeCompare(b.id))
+      .forEach(it => {
+        const o = document.createElement("option");
+        o.value = it.id;
+        const bibleTxt = it.requiresBible ? "· 📖" : "· sin Biblia";
+        const diffTxt = it.difficulty || "Mixta";
+        o.textContent = `${it.id} — ${it.title} (${diffTxt} ${bibleTxt})`;
+        og.appendChild(o);
+      });
+
+    availablePuzzlesSelect.appendChild(og);
+  });
+
+  try {
+    const first = availablePuzzlesSelect.querySelector("option");
+    if (first) availablePuzzlesSelect.value = first.value || "";
+  } catch(_){}
+}
+
+function openPuzzleFromMenu(code) {
+  const c = String(code || "").trim().toUpperCase();
+  if (!c) return;
+
+  const result = findPuzzleByCode(c);
+  if (!result) {
+    alert("No se ha encontrado ese código.");
+    return;
+  }
+
+  const allowBible = getAllowBibleRequired();
+  const diff = getSelectedDifficulty();
+  if (!allowBible && !!(result.puzzle && result.puzzle.requiresBible)) {
+    alert("Este acertijo requiere Biblia y está desactivado en configuración.");
+    return;
+  }
+  if (!puzzleMatchesDifficulty(result.puzzle, diff)) {
+    alert(`Este acertijo no coincide con la dificultad seleccionada (${difficultyLabel(diff)}).`);
+    return;
+  }
+
+  // Abrir usando el mismo flujo que el buscador manual
+  // (loadRoom espera índice, no un objeto)
+  if (gameMode === "campaign-room" || gameMode === "campaign-board") {
+    gameMode = "campaign-room";
+  }
+  // Campaña (host): publica acertijo activo para sincronizar móviles
+  if (gameMode === "campaign-room" && multiplayer && multiplayer.roomRef && appMode !== "player") {
+    try {
+      multiplayer.roomRef.update({
+        currentPuzzleCode: result.code,
+        currentRoomKey: result.roomKey,
+        hint2Unlocked: false,
+        turnTokenUsed: false
+      }).catch(()=>{});
+    } catch(_){}
+  }
+
+  if (result.roomKey === currentRoomKey) {
+    currentPuzzleIndex = result.index;
+    loadPuzzle();
+    updateRoomSolvedSummary();
+    updateSidebarRoomCounters();
+    updateGlobalSolvedSummary();
+  } else {
+    loadRoom(result.roomKey, result.index);
+  }
+}
+
+function normalizeDifficultyTag(s) {
+  if (!s) return "";
+  let t = String(s).trim().toLowerCase();
+  try { t = t.normalize("NFD").replace(/[̀-ͯ]/g, ""); } catch (_) {}
+  return t;
+}
+
+function puzzleMatchesDifficulty(puzzle, selected) {
+  const sel = normalizeDifficultyTag(selected || "auto");
+  if (!sel || sel === "auto") return true;
+
+  const d = normalizeDifficultyTag(puzzle && puzzle.difficulty ? puzzle.difficulty : "");
+
+  // Valores actuales en puzzles_roles_final.js:
+  // - "Fácil", "Fácil–media", "Media", "Media–difícil"
+  if (sel === "easy") return d.includes("facil");     // incluye "facil-media"
+  if (sel === "normal") return d === "media";
+  if (sel === "hard") return d.includes("dificil");   // incluye "media-dificil"
+  return true;
+}
+
+function difficultyLabel(sel) {
+  const s = String(sel || "auto");
+  if (s === "easy") return "Fácil";
+  if (s === "normal") return "Media";
+  if (s === "hard") return "Difícil";
+  return "Mixta";
+}
+
   let currentRoomKey = null;
 
 // --- INICIO ---
@@ -2740,6 +3331,11 @@ function transitionTo(actionFn, opts){
 
 function hideView(el) {
     if (!el) return;
+    // Evita warnings de accesibilidad: si algo dentro tiene el foco, lo quitamos antes de ocultar.
+    try {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && el.contains(ae)) ae.blur();
+    } catch (e) {}
     el.style.display = 'none';
     el.setAttribute('aria-hidden', 'true');
     el.classList.add('view-hidden');
@@ -2790,7 +3386,7 @@ function hideView(el) {
   // Firestore schema:
   // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
   // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
-  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom }) {
+  async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty, allowBibleRequired }) {
     const code = genRoomCode(4);
     const pickQueue = shuffleLocal(Array.from({ length: playersMax }, (_, i) => i + 1));
 
@@ -2805,8 +3401,23 @@ function hideView(el) {
       pickCursor: 0,
       assignedPickNumbers: [],
       assignedCommandments: [],
-      assignedSins: [],
-      allowBibleRequired: (allowBibleRequired !== false),
+      // --- estado de partida (reseteado siempre al crear partida) ---
+      difficulty: difficulty || "auto",
+      timeLimitSec: (typeof timeLimitSec === "number" ? timeLimitSec : 180),
+      attemptsMax: 2,
+      // --- runtime (se inicia en "idle") ---
+      activeSeatNumber: null,
+      turnCounter: 0,
+      currentPuzzleCode: null,
+      currentRoomKey: null,
+      hint2Unlocked: false,
+      turnTokenUsed: false,
+      pendingPenalties: {},
+      roomSolvedTotals: {},
+      solvedAttribution: {},
+      lastSinApplied: null,
+      lastSinAppliedAt: null,
+
     });
 
     return { code, roomRef };
@@ -2959,15 +3570,20 @@ function hideView(el) {
             turnTokenUsed: false,
             ignoreNextTimePenaltyOnce: false,
             blockHint1Until: 0,
-            timeLimitSec: 180,
+            // Dificultad (filtra códigos válidos)
+            difficulty: (room.difficulty || "auto"),
+            // Tiempo límite por acertijo (configurable en host)
+            timeLimitSec: (room.timeLimitSec || 180),
             timerEnabled: true,
-            timerRemaining: 180,
+            timerRemaining: (room.timeLimitSec || 180),
             timerIntervalId: null,
           };
         } else {
           // Mantén config en sync si el host cambia puzzlesPerRoom
           if (campaignState) {
             campaignState.puzzlesPerRoom = room.puzzlesPerRoom || campaignState.puzzlesPerRoom;
+            campaignState.timeLimitSec = (room.timeLimitSec || campaignState.timeLimitSec || 180);
+            campaignState.difficulty = (room.difficulty || campaignState.difficulty || "auto");
           }
         }
 
@@ -3038,9 +3654,9 @@ function hideView(el) {
       if (curNum !== currentNumber) return; // ya cambió
 
       const nextCursor = c + 1;
-      if (nextCursor >= (r.playersMax || 0)) {
-        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: 180, attemptsMax: 2, pendingPenalties: {} });
-      } else {
+	      if (nextCursor >= (r.playersMax || 0)) {
+	        tx.update(multiplayer.roomRef, { pickCursor: nextCursor, phase: "playing", activeSeatNumber: 1, turnTokenUsed: false, hint2Unlocked: false, currentPuzzleCode: null, currentRoomKey: null, turnCounter: 1, timeLimitSec: (r.timeLimitSec || 180), attemptsMax: 2, pendingPenalties: {} });
+	      } else {
         tx.update(multiplayer.roomRef, { pickCursor: nextCursor });
       }
     });
@@ -3196,7 +3812,8 @@ function hideView(el) {
           btnHint2.addEventListener("click", async () => {
             try {
               const db = firebase.firestore();
-              await playerSendTurnAction(db, roomCode, { type: "HINT2_UNLOCK", turnCounter: room.turnCounter || 0 });
+              const tc = (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0;
+              await playerSendTurnAction(db, roomCode, { type: "HINT2_UNLOCK", turnCounter: tc });
             } catch (e) {
               alert("No se pudo enviar la acción.");
             }
@@ -3208,7 +3825,8 @@ function hideView(el) {
           btnCmd.addEventListener("click", async () => {
             try {
               const db = firebase.firestore();
-              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "commandment", key: multiplayer.player.commandmentKey, turnCounter: room.turnCounter || 0 });
+              const tc = (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0;
+              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "commandment", key: multiplayer.player.commandmentKey, turnCounter: tc });
             } catch (e) {
               alert("No se pudo enviar la acción.");
             }
@@ -3219,18 +3837,16 @@ function hideView(el) {
           btnSin.dataset.bound = "1";
           btnSin.addEventListener("click", async () => {
             if (!multiplayer.player.sinKey) return;
-            // elegir objetivo (por número de asiento)
+            // elegir objetivo (móvil)
             const others = (multiplayer.playerList || []).filter(p => p.seatNumber !== multiplayer.player.seatNumber);
             if (!others.length) { alert("No hay objetivo disponible."); return; }
-            const options = others.map(p => `${p.seatNumber} — ${p.name}`).join("\n");
-            const input = prompt(`Elige objetivo (escribe el número):\n${options}`);
-            if (!input) return;
-            const targetSeat = parseInt(input, 10);
-            if (!targetSeat || !others.some(p => p.seatNumber === targetSeat)) { alert("Objetivo inválido."); return; }
+            const targetSeat = await pickTargetSeatFromModal(others);
+            if (!targetSeat) return;
 
             try {
               const db = firebase.firestore();
-              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "sin", key: multiplayer.player.sinKey, targetSeat, turnCounter: room.turnCounter || 0 });
+              const tc = (multiplayer.latestRoom && multiplayer.latestRoom.turnCounter) ? multiplayer.latestRoom.turnCounter : 0;
+              await playerSendTurnAction(db, roomCode, { type: "POWER", role: "sin", key: multiplayer.player.sinKey, targetSeat, turnCounter: tc });
             } catch (e) {
               alert("No se pudo enviar la acción.");
             }
@@ -3241,7 +3857,81 @@ function hideView(el) {
   }
 
   
-  async function playerSendTurnAction(db, roomCode, payload) {
+  
+  // Móvil: selector de objetivo (sin prompts del navegador)
+  function pickTargetSeatFromModal(others) {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById("targetPickerOverlay");
+      const list = document.getElementById("targetPickerList");
+      const cancelBtn = document.getElementById("targetPickerCancelBtn");
+
+      // Fallback por si el modal no existe por algún motivo
+      if (!overlay || !list || !cancelBtn) {
+        const options = others.map(p => `${p.seatNumber} — ${p.name}`).join("\n");
+        const input = prompt(`Elige objetivo (escribe el número):\n${options}`);
+        if (!input) return resolve(null);
+        const targetSeat = parseInt(input, 10);
+        return resolve(Number.isFinite(targetSeat) ? targetSeat : null);
+      }
+
+      let closed = false;
+
+      const close = (value) => {
+        if (closed) return;
+        closed = true;
+        overlay.style.display = "none";
+        overlay.setAttribute("aria-hidden", "true");
+        list.innerHTML = "";
+        cancelBtn.onclick = null;
+        overlay.onclick = null;
+        document.removeEventListener("keydown", onKeyDown);
+        resolve(value ?? null);
+      };
+
+      const onKeyDown = (e) => {
+        if (e.key === "Escape") close(null);
+      };
+
+      overlay.setAttribute("aria-hidden", "false");
+      overlay.style.display = "flex";
+
+      // Construir lista
+      list.innerHTML = "";
+      others
+        .slice()
+        .sort((a,b)=> (a.seatNumber||0) - (b.seatNumber||0))
+        .forEach((p) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "modal-target-btn";
+
+          const left = document.createElement("div");
+          const nameEl = document.createElement("strong");
+          nameEl.textContent = p.name || `Jugador ${p.seatNumber}`;
+          const seatEl = document.createElement("small");
+          seatEl.textContent = `Jugador ${p.seatNumber}`;
+          left.appendChild(nameEl);
+          left.appendChild(seatEl);
+
+          const arrow = document.createElement("div");
+          arrow.textContent = "→";
+          arrow.style.opacity = "0.85";
+          arrow.style.fontWeight = "700";
+
+          btn.appendChild(left);
+          btn.appendChild(arrow);
+
+          btn.addEventListener("click", () => close(p.seatNumber));
+          list.appendChild(btn);
+        });
+
+      cancelBtn.onclick = () => close(null);
+      overlay.onclick = (e) => { if (e.target === overlay) close(null); };
+      document.addEventListener("keydown", onKeyDown);
+    });
+  }
+
+async function playerSendTurnAction(db, roomCode, payload) {
     const roomRef = db.collection("rooms").doc(roomCode);
     const data = Object.assign({}, payload, {
       seatNumber: multiplayer.player.seatNumber || null,
@@ -3253,25 +3943,8 @@ async function playerChooseSin(db, roomCode, sinKey) {
     const tokenKey = `archivum_player_${roomCode}`;
     const playerId = localStorage.getItem(tokenKey);
     if (!playerId) throw new Error("No estás unido a la partida.");
-
-    const roomRef = db.collection("rooms").doc(roomCode);
-    const playerRef = roomRef.collection("players").doc(playerId);
-
-    await db.runTransaction(async (tx) => {
-      const roomSnap = await tx.get(roomRef);
-      if (!roomSnap.exists) throw new Error("La sala ya no existe.");
-      const room = roomSnap.data() || {};
-      const taken = new Set(Array.isArray(room.assignedSins) ? room.assignedSins : []);
-      if (taken.has(sinKey)) throw new Error("Ese pecado ya está sellado por otro jugador.");
-
-      const playerSnap = await tx.get(playerRef);
-      if (!playerSnap.exists) throw new Error("No estás unido a la partida.");
-      const player = playerSnap.data() || {};
-      if (player.sinKey) throw new Error("Ya has elegido un pecado en esta partida.");
-
-      tx.update(playerRef, { sinKey });
-      tx.update(roomRef, { assignedSins: firebase.firestore.FieldValue.arrayUnion(sinKey) });
-    });
+    const playerRef = db.collection("rooms").doc(roomCode).collection("players").doc(playerId);
+    await playerRef.update({ sinKey });
   }
 
   // Host panel público (sin secretos)
@@ -3488,8 +4161,28 @@ sinCarousel.innerHTML = "";
         }
         const playersMax = Math.max(1, Math.min(7, parseInt(playersCountInput.value, 10) || 1));
         const puzzlesPerRoom = Math.max(1, Math.min(10, parseInt(puzzlesPerRoomInput.value, 10) || 3));
+        const timeLimitSec = Math.max(30, Math.min(900, parseInt((timeLimitSecInput && timeLimitSecInput.value) || "180", 10) || 180));
+        const difficulty = (puzzleDifficultyInput && puzzleDifficultyInput.value) ? puzzleDifficultyInput.value : "auto";
+        const allowBibleRequired = !(bibleRequiredInput && bibleRequiredInput.value === "no");
 
-        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom });
+        // Reset local progreso (modo antiguo) para evitar arrastre visual entre partidas
+        try { if (typeof solvedMap !== "undefined") { solvedMap = {}; saveSolvedToStorage();
+
+  // Refrescar menú de acertijos disponibles (host)
+  try { renderAvailablePuzzleMenu(); } catch(_) {}
+ } } catch (_) {}
+        try {
+          if (campaignState) {
+            campaignState.roomSolvedTotals = {};
+            campaignState.solvedAttribution = {};
+            campaignState.lastLoadedCode = null;
+            campaignState.lastLoadedRoomKey = null;
+            campaignState.hint2Unlocked = false;
+            campaignState.turnTokenUsed = false;
+          }
+        } catch (_) {}
+
+        const { code, roomRef } = await hostCreateRoom(db2, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty, allowBibleRequired });
         const joinUrl = computeJoinUrl(code);
 
         showJoinSectionHost(code, joinUrl, playersMax);
@@ -3565,9 +4258,9 @@ sinCarousel.innerHTML = "";
 		campaignState.currentRoomKey = null;
 
 		// IMPORTANTE: aquí vuelves al tablero
-		showBoardScreen({
-		  toast: `Sala completada (${roomCounts[roomKey]}/${campaignState.perRoomTarget}). Vuelve al tablero y gira la sala.`,
-		});
+		showBoardScreen();
+		  // Recompensa: fragmento del Códice de la sala
+		  showCodexReward(roomKey);
 	  } else {
 		// si no ha completado sala, puedes:
 		// - volver al tablero igualmente (para meter siguiente código)
@@ -4051,9 +4744,11 @@ async function hostHandleAction(db, a) {
     if ((room.turnCounter || 0) !== (a.turnCounter || 0)) return; // acción de turno viejo
 
     const getSeatRoles = (seat) => {
-      const p = (multiplayer && multiplayer.playerList)
-        ? (multiplayer.playerList.find(x => x.seatNumber === seat) || {})
-        : {};
+      // En host, la fuente fiable de roles es hostPlayers (no playerList).
+      const list = (multiplayer && Array.isArray(multiplayer.hostPlayers) && multiplayer.hostPlayers.length)
+        ? multiplayer.hostPlayers
+        : (multiplayer.playerList || []);
+      const p = list.find(x => Number(x.seatNumber) === Number(seat)) || {};
       return {
         cmdKey: p.commandmentKey || p.commandment || p.mandamiento || null,
         sinKey: p.sinKey || p.sin || p.pecado || null
@@ -4092,7 +4787,7 @@ async function hostHandleAction(db, a) {
       campaignState.turnTokenUsed = true;
       if (campaignState.turnFlags) campaignState.turnFlags.usedHint2Unlock = true;
 
-      setCampaignStatus("✅ Pista 2 desbloqueada por el jugador activo.");
+      /* (silenciado) */
       if (gameMode === "campaign-room") {
         refreshHintButtonsUI(rooms[currentRoomKey]?.puzzles?.[currentPuzzleIndex] || null);
       }
@@ -4228,7 +4923,6 @@ async function hostHandleAction(db, a) {
           }
         }
 
-        setCampaignStatus(`✨ Milagro activado: ${meta.power.text || "OK"}`);
         return;
       }
 
@@ -4251,11 +4945,11 @@ async function hostHandleAction(db, a) {
           const r = snap.data() || {};
           const pending = Object.assign({}, r.pendingPenalties || {});
           const cur = Object.assign({}, pending[String(targetSeat)] || {});
-          pending[String(targetSeat)] = Object.assign(cur, pen);
+          pending[String(targetSeat)] = Object.assign(cur, pen, { sinKey: key });
           tx.update(multiplayer.roomRef, { pendingPenalties: pending });
         });
 
-        setCampaignStatus(`☠️ Tentación activada contra el jugador ${targetSeat}. Se aplicará en su próximo acertijo.`);
+        /* (silenciado) */
         return;
       }
     }
@@ -4436,23 +5130,30 @@ function advanceTurnCampaign() {
 		  const target = campaignState.puzzlesPerRoom || 3;
 		  const done = campaignState.roomSolvedTotals[rk] >= target;
 
-		  // 3) ✅ Volver al tablero sí o sí
-		  showBoard();
-
-		  // 4) ✅ Pasar turno automático (opcional)
-		  if (campaignState.autoPassTurn) {
-			campaignState.activePlayerIndex =
-			  (campaignState.activePlayerIndex + 1) % campaignState.players.length;
-		  }
-
-		  // Actualiza el panel
-		  renderPlayersSummary();
-
-		  // Mensaje opcional
+		  // 3) 🎁 Si la sala se completa, muestra el códice AQUÍ (en la sala).
+		  // Al pulsar "Continuar", entonces sí volvemos al tablero y (si procede) pasamos turno.
 		  if (done) {
-			alert(`✅ Sala completada (${target}/${target}). Volved al tablero y girad la sala.`);
+			window.showCodexReward && window.showCodexReward(rk, {
+			  onContinue: () => {
+				showBoard();
+				// 4) ✅ Pasar turno automático (opcional)
+				// IMPORTANTÍSIMO: en multijugador, el turno REAL vive en Firestore.
+				if (campaignState.autoPassTurn) {
+				  advanceTurnCampaign(); // publica activeSeatNumber + resetea token/pistas en Firestore
+				}
+				renderPlayersSummary();
+			  }
+			});
+		  } else {
+			// 3) ✅ Si no se completa la sala, volver al tablero inmediatamente
+			showBoard();
+			// 4) ✅ Pasar turno automático (opcional)
+			if (campaignState.autoPassTurn) {
+			  advanceTurnCampaign();
+			}
+			renderPlayersSummary();
 		  }
-		} else {
+} else {
 		  // Ya estaba atribuido: igualmente vuelve al tablero para ritmo
 		  showBoard();
 		  renderPlayersSummary();
@@ -4493,6 +5194,7 @@ function advanceTurnCampaign() {
         multiplayer.publishedPuzzleCode = null;
         multiplayer.roomRef.update({
           currentPuzzleCode: null,
+          currentRoomKey: null,
           hint2Unlocked: false,
           turnTokenUsed: false
         }).catch(()=>{});
@@ -4532,7 +5234,19 @@ function advanceTurnCampaign() {
       playBackgroundMusic();
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
-      setActiveRoomButton(null);
+      
+      // Campaña (host): en tablero NO hay acertijo activo -> bloquea acciones en móviles
+      try {
+        if (multiplayer && multiplayer.roomRef && appMode !== "player") {
+          multiplayer.roomRef.update({
+            currentPuzzleCode: null,
+            currentRoomKey: null,
+            hint2Unlocked: false,
+            turnTokenUsed: false
+          }).catch(()=>{});
+        }
+      } catch (_) {}
+setActiveRoomButton(null);
   });
 }
 
@@ -4707,7 +5421,9 @@ function showRoomSection() {
     // --- Campaña: reset de intentos + bloqueo Pista 2 por símbolo ---
     if (gameMode === "campaign-room" && campaignState) {
       // defaults
-      campaignState.timeLimitSec = 180;
+      campaignState.timeLimitSec = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom.timeLimitSec)
+        ? (multiplayer.latestRoom.timeLimitSec || 180)
+        : (campaignState.timeLimitSec || 180);
       campaignState.attemptsMax = 2;
       campaignState.attemptsRemaining = 2;
       campaignState.hint2Unlocked = false;
@@ -4729,6 +5445,9 @@ function showRoomSection() {
 
       // Reset timer y arrancar
       campaignState.timerRemaining = campaignState.timeLimitSec;
+
+      // Mensaje de inicio de turno (para mostrar tentaciones sin revelar autor)
+      let startMsg = "";
 
       // Aplicar penalizaciones pendientes (pecados) al jugador activo (solo 1 vez)
       const activeSeat = (campaignState.players && campaignState.players[campaignState.activePlayerIndex])
@@ -4778,10 +5497,14 @@ const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom
         if (pending.wrongExtraAttemptLoss) {
           campaignState.wrongExtraAttemptLoss = true;
         }
+        // Mostrar en host SOLO la tentación recibida (sin indicar quién la lanzó)
+        const msgParts = [];
+        if (pending.sinKey) msgParts.push(`☠️ Tentación recibida: ${pending.sinKey}.`);
         if (pending.physical) {
           campaignState.activePhysicalPenaltyText = pending.physical;
-          setCampaignStatus(`⚠️ Restricción (próximo turno): ${pending.physical}`);
+          msgParts.push(`⚠️ Restricción: ${pending.physical}`);
         }
+        if (msgParts.length) startMsg = msgParts.join(" ");
 
         // limpiar penalización en Firestore (host)
         if (multiplayer.roomRef && appMode !== "player") {
@@ -4793,7 +5516,10 @@ const pending = (multiplayer && multiplayer.latestRoom && multiplayer.latestRoom
       
       // Aplicar bonus/malus de inicio de turno (por roles)
       const _roomDoc = (multiplayer && multiplayer.latestRoom) ? multiplayer.latestRoom : {};
-      const _ap = (multiplayer && multiplayer.playerList) ? (multiplayer.playerList.find(p => p.seatNumber === activeSeat) || null) : null;
+      const _listRoles = (multiplayer && Array.isArray(multiplayer.hostPlayers) && multiplayer.hostPlayers.length)
+        ? multiplayer.hostPlayers
+        : (multiplayer.playerList || []);
+      const _ap = (_listRoles && _listRoles.length) ? (_listRoles.find(p => Number(p.seatNumber) === Number(activeSeat)) || null) : null;
       const activeCmdKey = _ap ? (_ap.commandmentKey || _ap.commandment || _ap.mandamiento) : null;
       const activeSinKey = _ap ? (_ap.sinKey || _ap.sin || _ap.pecado) : null;
 
@@ -4817,7 +5543,7 @@ updateTimerUI();
       updateAttemptsUI();
       startCampaignTimer();
       refreshHintButtonsUI(puzzle);
-      setCampaignStatus("");
+      setCampaignStatus(startMsg);
     } else {
       refreshHintButtonsUI(puzzle);
     }
@@ -5284,6 +6010,9 @@ if (sinCarousel) {
 		const card = ev.target.closest(".sin-card");
 		if (!card || !sinSelectionPlayerId) return;
 		if (card.classList.contains("sin-card--taken")) return;
+		// Evita errores si este bloque se dispara fuera del modo host
+		if (!campaignState || !campaignState.players) return;
+		if (appMode === "player") return;
 
 		const chosenSin = card.dataset.sin;
 		const player = campaignState.players.find(p => p.id === sinSelectionPlayerId);
@@ -5373,9 +6102,9 @@ if (sinCarousel) {
 
 		autoPassTurn: true,     // ✅ coma
 
-		timeLimitSec: 180,
+			timeLimitSec: (room.timeLimitSec || 180),
 		timerEnabled: true,
-		timerRemaining: 180,
+		timerRemaining: (room.timeLimitSec || 180),
 		timerIntervalId: null
 	  };
 
@@ -5391,3 +6120,15 @@ if (sinCarousel) {
 
 });
 </script>
+
+<!-- Overlay recompensa: fragmento del códice -->
+<div id="codexRewardOverlay" aria-hidden="true">
+  <div id="codexRewardCard" role="dialog" aria-modal="true">
+    <img id="codexRewardImg" alt="Fragmento del Códice" src="" />
+    <div id="codexRewardHint">Fragmento del Códice obtenido</div>
+    <button id="codexRewardBtn" type="button">Continuar</button>
+  </div>
+</div>
+
+</body>
+</html>
