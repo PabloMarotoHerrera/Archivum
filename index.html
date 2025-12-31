@@ -2980,7 +2980,7 @@ function openPuzzleFromMenu(code) {
 }
 
 // --- Menú de acertijos disponibles (host) ---
-(function setupPuzzleMenuDelegation(){
+function setupPuzzleMenuDelegation(){
     if (window.__puzzleMenuDelegationInstalled) return;
     window.__puzzleMenuDelegationInstalled = true;
 
@@ -3031,7 +3031,7 @@ function openPuzzleFromMenu(code) {
 
     // Primer render (host)
     setTimeout(renderAvailablePuzzleMenu, 0);
-  })();
+  };
 
   
 
@@ -3077,7 +3077,8 @@ function openPuzzleFromMenu(code) {
   } else {
     loadRoom(result.roomKey, result.index);
   }
-}
+
+
 
 function normalizeDifficultyTag(s) {
   if (!s) return "";
@@ -5261,7 +5262,6 @@ function advanceTurnCampaign() {
       playBackgroundMusic();
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
-      \1
 
       // ✅ (Host) En el tablero NO hay acertijo activo: bloquea acciones en móviles.
       if (multiplayer.roomRef && appMode !== "player") {
