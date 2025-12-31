@@ -3384,7 +3384,8 @@ function hideView(el) {
   }
 
   // Firestore schema:
-  // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[] }
+  // rooms/{code}: { phase: "joining"|"sin-picking"|"playing", playersMax, seatsTaken, pickQueue: [1..N], pickCursor, assignedPickNumbers:[], assignedCommandments:[], assignedSins:[] }
+
   // rooms/{code}/players/{playerId}: { name, seatNumber, pickNumber, commandmentKey, sinKey, solved }
   async function hostCreateRoom(db, { playersMax, puzzlesPerRoom, timeLimitSec, difficulty, allowBibleRequired }) {
     const code = genRoomCode(4);
@@ -3401,6 +3402,7 @@ function hideView(el) {
       pickCursor: 0,
       assignedPickNumbers: [],
       assignedCommandments: [],
+      assignedSins: [],
       // --- estado de partida (reseteado siempre al crear partida) ---
       difficulty: difficulty || "auto",
       timeLimitSec: (typeof timeLimitSec === "number" ? timeLimitSec : 180),
@@ -3664,7 +3666,7 @@ function hideView(el) {
 
   async function hostStartSinRitual(db) {
     if (!multiplayer.roomRef) return;
-    await multiplayer.roomRef.update({ phase: "sin-picking", pickCursor: 0 });
+    await multiplayer.roomRef.update({ phase: "sin-picking", pickCursor: 0, assignedSins: [] });
   }
 
   function playerListenRoom(db, roomCode, playerRef) {
@@ -3943,8 +3945,54 @@ async function playerChooseSin(db, roomCode, sinKey) {
     const tokenKey = `archivum_player_${roomCode}`;
     const playerId = localStorage.getItem(tokenKey);
     if (!playerId) throw new Error("No estás unido a la partida.");
-    const playerRef = db.collection("rooms").doc(roomCode).collection("players").doc(playerId);
-    await playerRef.update({ sinKey });
+    if (!sinKey || !SIN_META || !SIN_META[sinKey]) throw new Error("Pecado inválido.");
+
+    const roomRef = db.collection("rooms").doc(roomCode);
+    const playerRef = roomRef.collection("players").doc(playerId);
+
+    await db.runTransaction(async (tx) => {
+      const roomSnap = await tx.get(roomRef);
+      const playerSnap = await tx.get(playerRef);
+
+      if (!roomSnap.exists) throw new Error("No existe esa partida.");
+      if (!playerSnap.exists) throw new Error("No estás unido a la partida.");
+
+      const room = roomSnap.data() || {};
+      const player = playerSnap.data() || {};
+
+      if (room.phase !== "sin-picking") {
+        throw new Error("Ahora no se están eligiendo pecados.");
+      }
+      if (player.sinKey) {
+        throw new Error("Ya has elegido tu pecado. Está sellado.");
+      }
+
+      // Control de orden secreto (pickQueue + pickCursor)
+      const q = Array.isArray(room.pickQueue) ? room.pickQueue : [];
+      const cursor = Number(room.pickCursor || 0);
+      const expectedPickNumber = q[cursor];
+
+      if (expectedPickNumber) {
+        if (!player.pickNumber) throw new Error("No tienes número de elección asignado.");
+        if (Number(expectedPickNumber) !== Number(player.pickNumber)) {
+          throw new Error("Aún no es tu turno para escoger el pecado.");
+        }
+      }
+
+      // Pecados únicos: se valida contra room.assignedSins dentro de la transacción
+      const assigned = Array.isArray(room.assignedSins) ? room.assignedSins.slice() : [];
+      if (assigned.includes(sinKey)) {
+        throw new Error("Ese pecado ya ha sido reclamado.");
+      }
+
+      assigned.push(sinKey);
+
+      tx.update(roomRef, { assignedSins: assigned });
+      tx.update(playerRef, {
+        sinKey: sinKey,
+        sinChosenAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    });
   }
 
   // Host panel público (sin secretos)
