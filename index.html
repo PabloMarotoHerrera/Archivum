@@ -2553,21 +2553,17 @@ const playersNamesInput = document.getElementById("playersNamesInput");
   const toggleAdvancedCodeBtn = document.getElementById("toggleAdvancedCodeBtn");
   const advancedCodeBox = document.getElementById("advancedCodeBox");
 
-// --- Menú de acertijos disponibles (host) ---
-  // Usamos delegación de eventos porque algunas vistas se re-renderizan y los nodos pueden recrearse.
+  // --- Menú de acertijos disponibles (host) ---
+  // Delegación de eventos: los botones pueden recrearse cuando se re-renderiza el tablero.
   (function setupPuzzleMenuDelegation(){
     if (window.__puzzleMenuDelegationInstalled) return;
     window.__puzzleMenuDelegationInstalled = true;
 
     document.addEventListener("click", (ev) => {
-      const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+      const btn = (ev.target && ev.target.closest) ? ev.target.closest("button") : null;
       if (!btn) return;
+
       const id = btn.id;
-      if (!id) return;
-      if (btn.disabled) return;
-      // Evita comportamientos raros si el click viene de dentro de un overlay
-      // (no afecta a otros handlers)
-      
 
       if (id === "toggleAdvancedCodeBtn") {
         const box = document.getElementById("advancedCodeBox");
@@ -2579,7 +2575,7 @@ const playersNamesInput = document.getElementById("playersNamesInput");
 
       if (id === "openSelectedPuzzleBtn") {
         const sel = document.getElementById("availablePuzzlesSelect");
-        if (!sel) return;
+        if (!sel || sel.disabled) return;
         openPuzzleFromMenu(sel.value);
         return;
       }
@@ -2588,20 +2584,29 @@ const playersNamesInput = document.getElementById("playersNamesInput");
         const items = getAvailablePuzzlesByFilters();
         if (!items.length) return;
         const pick = items[Math.floor(Math.random() * items.length)];
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (sel) sel.value = pick.id;
         openPuzzleFromMenu(pick.id);
         return;
       }
     });
 
-    // Refrescar menú cuando cambian filtros
-    if (puzzleDifficultyInput) puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-    if (bibleRequiredInput) bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    // Refrescar menú cuando cambian filtros (host)
+    if (typeof puzzleDifficultyInput !== "undefined" && puzzleDifficultyInput) {
+      puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    }
+    if (typeof bibleRequiredInput !== "undefined" && bibleRequiredInput) {
+      bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    }
 
-    // Primer render
+    // Exponer helper para refrescar el menú desde otros puntos
+    window.__refreshAvailablePuzzleMenu = () => {
+      try { renderAvailablePuzzleMenu(); } catch(_) {}
+    };
+
+    // Primer render (host)
     setTimeout(renderAvailablePuzzleMenu, 0);
   })();
-
-
 
   const endCampaignBtn = document.getElementById("endCampaignBtn");
   const roomButtons = document.querySelectorAll(".room-btn");
@@ -2657,8 +2662,6 @@ const playersNamesInput = document.getElementById("playersNamesInput");
         alert("No se ha encontrado ese código.");
         return;
       }
-
-  
 
 
       // ✅ Dificultad: en campaña, bloquea códigos fuera del filtro elegido
@@ -3011,29 +3014,8 @@ function openPuzzleFromMenu(code) {
     return;
   }
 
-  // Abrir usando el mismo flujo que el buscador manual
-  // (loadRoom espera índice, no un objeto)
-  if (gameMode === "campaign-room" || gameMode === "campaign-board") {
-    gameMode = "campaign-room";
-  }
-  // Campaña (host): publica acertijo activo para sincronizar móviles
-  if (gameMode === "campaign-room" && multiplayer && multiplayer.roomRef && appMode !== "player") {
-    try {
-      multiplayer.roomRef.update({
-        currentPuzzleCode: result.code,
-        currentRoomKey: result.roomKey,
-        hint2Unlocked: false,
-        turnTokenUsed: false
-      }).catch(()=>{});
-    } catch(_){}
-  }
-
-  if (result.roomKey === currentRoomKey) {
-    currentPuzzleIndex = result.index;
-    loadPuzzle();
-    updateRoomSolvedSummary();
-    updateSidebarRoomCounters();
-    updateGlobalSolvedSummary();
+  if (typeof goToPuzzleFromCode === "function") {
+    goToPuzzleFromCode(result.code);
   } else {
     loadRoom(result.roomKey, result.index);
   }
@@ -4212,7 +4194,9 @@ sinCarousel.innerHTML = "";
 	  campaignState.currentRoomKey = parsed.roomKey;
 	  campaignState.stage = "puzzle";
 
-	  loadRoom(parsed.roomKey, { forcePuzzleCode: code, fromCampaign: true });
+	  currentPuzzleIndex = parsed.puzzleIndex;
+
+	  loadRoom(parsed.roomKey, parsed.puzzleIndex);
 	}
 
 	function markCurrentPuzzleSolved() {
@@ -4262,6 +4246,7 @@ sinCarousel.innerHTML = "";
 	  campaignState.activePlayerIndex = (campaignState.activePlayerIndex + 1) % n;
 	  renderCampaignSidebarStats();
 	  renderTurnIndicator();
+	  try { if (window.__refreshAvailablePuzzleMenu) window.__refreshAvailablePuzzleMenu(); } catch(_) {}
 	}
 
 	function openSinOverlayForPlayer(playerId) {
@@ -4311,6 +4296,7 @@ sinCarousel.innerHTML = "";
       setRitualOverlay("", false);
       if (sidebar) sidebar.style.display = "none";
   });
+  try { if (window.__refreshAvailablePuzzleMenu) window.__refreshAvailablePuzzleMenu(); } catch(_) {}
 }
 
 	
