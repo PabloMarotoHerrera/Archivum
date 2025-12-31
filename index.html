@@ -3003,19 +3003,45 @@ function openPuzzleFromMenu(code) {
     return;
   }
 
-  const allowBible = getAllowBibleRequired();
-  const diff = getSelectedDifficulty();
-  if (!allowBible && !!(result.puzzle && result.puzzle.requiresBible)) {
-    alert("Este acertijo requiere Biblia y está desactivado en configuración.");
-    return;
-  }
-  if (!puzzleMatchesDifficulty(result.puzzle, diff)) {
-    alert(`Este acertijo no coincide con la dificultad seleccionada (${difficultyLabel(diff)}).`);
+  // Validaciones iguales al buscador manual
+  const selDiff = getSelectedDifficulty();
+  const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
+    ? rooms[result.roomKey].puzzles[result.index]
+    : null;
+
+  if (!puzzleMatchesDifficulty(puzzle, selDiff)) {
+    const pDiff = (puzzle && puzzle.difficulty) ? puzzle.difficulty : "desconocida";
+    alert(`⛔ Este código es de dificultad ${pDiff} y la campaña está en ${difficultyLabel(selDiff)}. Elige otro código.`);
     return;
   }
 
-  if (typeof goToPuzzleFromCode === "function") {
-    goToPuzzleFromCode(result.code);
+  const allowBible = getAllowBibleRequired();
+  if (!allowBible && puzzle && puzzle.requiresBible) {
+    alert("⛔ Este acertijo requiere una Biblia física y la campaña está configurada como SIN BIBLIA.");
+    return;
+  }
+
+  // Publicar acertijo activo para móviles (host)
+  try {
+    if ((gameMode === "campaign-room" || gameMode === "campaign-board") && multiplayer.roomRef && appMode !== "player") {
+      multiplayer.roomRef.update({
+        currentPuzzleCode: result.code,
+        currentRoomKey: result.roomKey,
+        hint2Unlocked: false,
+        turnTokenUsed: false
+      }).catch(()=>{});
+    }
+  } catch(_){}
+
+  // Abrir igual que el buscador manual
+  gameMode = "campaign-room";
+
+  if (result.roomKey === currentRoomKey) {
+    currentPuzzleIndex = result.index;
+    loadPuzzle();
+    try { updateRoomSolvedSummary(); } catch(_){}
+    try { updateSidebarRoomCounters(); } catch(_){}
+    try { updateGlobalSolvedSummary(); } catch(_){}
   } else {
     loadRoom(result.roomKey, result.index);
   }
