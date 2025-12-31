@@ -2555,60 +2555,9 @@ const playersNamesInput = document.getElementById("playersNamesInput");
 
   // --- Menú de acertijos disponibles (host) ---
   // Delegación de eventos: los botones pueden recrearse cuando se re-renderiza el tablero.
-  (function setupPuzzleMenuDelegation(){
-    if (window.__puzzleMenuDelegationInstalled) return;
-    window.__puzzleMenuDelegationInstalled = true;
+  
 
-    document.addEventListener("click", (ev) => {
-      const btn = (ev.target && ev.target.closest) ? ev.target.closest("button") : null;
-      if (!btn) return;
-
-      const id = btn.id;
-
-      if (id === "toggleAdvancedCodeBtn") {
-        const box = document.getElementById("advancedCodeBox");
-        if (!box) return;
-        const isOpen = box.style.display !== "none";
-        box.style.display = isOpen ? "none" : "block";
-        return;
-      }
-
-      if (id === "openSelectedPuzzleBtn") {
-        const sel = document.getElementById("availablePuzzlesSelect");
-        if (!sel || sel.disabled) return;
-        openPuzzleFromMenu(sel.value);
-        return;
-      }
-
-      if (id === "randomPuzzleBtn") {
-        const items = getAvailablePuzzlesByFilters();
-        if (!items.length) return;
-        const pick = items[Math.floor(Math.random() * items.length)];
-        const sel = document.getElementById("availablePuzzlesSelect");
-        if (sel) sel.value = pick.id;
-        openPuzzleFromMenu(pick.id);
-        return;
-      }
-    });
-
-    // Refrescar menú cuando cambian filtros (host)
-    if (typeof puzzleDifficultyInput !== "undefined" && puzzleDifficultyInput) {
-      puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-    }
-    if (typeof bibleRequiredInput !== "undefined" && bibleRequiredInput) {
-      bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
-    }
-
-    // Exponer helper para refrescar el menú desde otros puntos
-    window.__refreshAvailablePuzzleMenu = () => {
-      try { renderAvailablePuzzleMenu(); } catch(_) {}
-    };
-
-    // Primer render (host)
-    setTimeout(renderAvailablePuzzleMenu, 0);
-  })();
-
-  const endCampaignBtn = document.getElementById("endCampaignBtn");
+const endCampaignBtn = document.getElementById("endCampaignBtn");
   const roomButtons = document.querySelectorAll(".room-btn");
   const roomTitleEl = document.getElementById("roomTitle");
   const roomSubtitleEl = document.getElementById("roomSubtitle");
@@ -3003,7 +2952,90 @@ function openPuzzleFromMenu(code) {
     return;
   }
 
-  // Validaciones iguales al buscador manual
+  // Reaplica filtros (evita abrir algo que el menú no debería mostrar)
+  const allowBible = getAllowBibleRequired();
+  const diff = getSelectedDifficulty();
+  if (!allowBible && !!(result.puzzle && result.puzzle.requiresBible)) {
+    alert("Este acertijo requiere Biblia y está desactivado en configuración.");
+    return;
+  }
+  if (!puzzleMatchesDifficulty(result.puzzle, diff)) {
+    alert(`Este acertijo no coincide con la dificultad seleccionada (${difficultyLabel(diff)}).`);
+    return;
+  }
+
+  // Fuente de verdad: misma navegación que el botón "Ir al acertijo" (código manual)
+  if (campaignState) {
+    campaignState.lastLoadedCode = result.code;
+    campaignState.lastLoadedRoomKey = result.roomKey;
+  }
+  gameMode = "campaign-room";
+  loadRoom(result.roomKey, result.index);
+
+  // Actualiza el input del código (modo avanzado) para que refleje qué se abrió
+  try {
+    const ci = document.getElementById("codeInput");
+    if (ci) ci.value = result.code;
+  } catch(_){}
+}
+
+// --- Menú de acertijos disponibles (host) ---
+(function setupPuzzleMenuDelegation(){
+    if (window.__puzzleMenuDelegationInstalled) return;
+    window.__puzzleMenuDelegationInstalled = true;
+
+    document.addEventListener("click", (ev) => {
+      const btn = (ev.target && ev.target.closest) ? ev.target.closest("button") : null;
+      if (!btn) return;
+
+      const id = btn.id;
+
+      if (id === "toggleAdvancedCodeBtn") {
+        const box = document.getElementById("advancedCodeBox");
+        if (!box) return;
+        const isOpen = box.style.display !== "none";
+        box.style.display = isOpen ? "none" : "block";
+        return;
+      }
+
+      if (id === "openSelectedPuzzleBtn") {
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (!sel || sel.disabled) return;
+        openPuzzleFromMenu(sel.value);
+        return;
+      }
+
+      if (id === "randomPuzzleBtn") {
+        const items = getAvailablePuzzlesByFilters();
+        if (!items.length) return;
+        const pick = items[Math.floor(Math.random() * items.length)];
+        const sel = document.getElementById("availablePuzzlesSelect");
+        if (sel) sel.value = pick.id;
+        openPuzzleFromMenu(pick.id);
+        return;
+      }
+    });
+
+    // Refrescar menú cuando cambian filtros (host)
+    if (typeof puzzleDifficultyInput !== "undefined" && puzzleDifficultyInput) {
+      puzzleDifficultyInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    }
+    if (typeof bibleRequiredInput !== "undefined" && bibleRequiredInput) {
+      bibleRequiredInput.addEventListener("change", () => setTimeout(renderAvailablePuzzleMenu, 50));
+    }
+
+    // Exponer helper para refrescar el menú desde otros puntos
+    window.__refreshAvailablePuzzleMenu = () => {
+      try { renderAvailablePuzzleMenu(); } catch(_) {}
+    };
+
+    // Primer render (host)
+    setTimeout(renderAvailablePuzzleMenu, 0);
+  })();
+
+  
+
+// Validaciones iguales al buscador manual
   const selDiff = getSelectedDifficulty();
   const puzzle = (rooms[result.roomKey] && rooms[result.roomKey].puzzles)
     ? rooms[result.roomKey].puzzles[result.index]
@@ -5218,6 +5250,7 @@ function advanceTurnCampaign() {
 
 	function showBoard() {
   transitionTo(() => {
+
       gameMode = "campaign-board";
       stopCampaignTimer();
       showView(boardSection);
@@ -5228,12 +5261,22 @@ function advanceTurnCampaign() {
       playBackgroundMusic();
       if (globalMusicToggleContainer) globalMusicToggleContainer.style.display = "flex";
       if (roomMusicToggleContainer) roomMusicToggleContainer.style.display = "none";
-      setActiveRoomButton(null);
+      \1
+
+      // ✅ (Host) En el tablero NO hay acertijo activo: bloquea acciones en móviles.
+      if (multiplayer.roomRef && appMode !== "player") {
+        multiplayer.publishedPuzzleCode = null;
+        multiplayer.roomRef.update({
+          currentPuzzleCode: null,
+          currentRoomKey: null,
+          hint2Unlocked: false,
+          turnTokenUsed: false
+        }).catch(()=>{});
+      }
+
   });
 }
-
-
-  function showRules() {
+function showRules() {
   transitionTo(() => {
       gameMode = "rules";
       showView(rulesSection);
